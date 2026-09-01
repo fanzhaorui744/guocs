@@ -6,6 +6,6 @@
     </linearGradient>
   </defs>
   <rect x="0" y="2" width="36" height="36" rx="9" fill="url(#logoGrad)"/>
-  <text x="18" y="26" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="white">餐</text>
-  <text x="46" y="25" font-family="sans-serif" font-size="15" font-weight="700" fill="#152536">餐量智估</text>
+  <text x="18" y="26" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="white">营</text>
+  <text x="46" y="25" font-family="sans-serif" font-size="15" font-weight="700" fill="#152536">营养智链</text>
 </svg>
