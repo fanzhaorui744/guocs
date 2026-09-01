@@ -49,7 +49,7 @@ const PageGoals = (() => {
       <!-- 百度 OCR 配置 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="scan-text"></i>图片文字识别服务（百度智能云 OCR）</div>
+          <div class="card-title"><i data-lucide="scan-text"></i>百度智能云服务（OCR + 菜品识别）</div>
           <span id="ocrStatusTag" class="tag ${(localStorage.getItem('baidu_ocr_api_key') && localStorage.getItem('baidu_ocr_secret_key')) ? 'tag-success' : 'tag-not-connected'}">${(localStorage.getItem('baidu_ocr_api_key') && localStorage.getItem('baidu_ocr_secret_key')) ? '已配置' : '未配置'}</span>
         </div>
         <div class="card-body">
@@ -69,7 +69,7 @@ const PageGoals = (() => {
           <div class="form-group">
             <label class="form-label">CORS 代理地址</label>
             <input type="text" class="form-input" id="baiduOcrProxy" placeholder="https://api.allorigins.win/raw?url=" value="${localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url='}">
-            <p class="form-hint">用于订单截图文字识别。请填入您在百度智能云创建的 OCR 应用密钥。公共代理仅用于演示，生产环境建议使用自有后端。</p>
+            <p class="form-hint">API Key 和 Secret Key 同时用于订单截图文字识别（OCR）和餐食拍照菜品识别。请在百度智能云开通「通用文字识别」和「菜品识别」接口。公共代理仅用于演示，生产环境建议使用自有后端。</p>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="PageGoals.saveOcrConfig()"><i data-lucide="save"></i>保存配置</button>
