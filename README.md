@@ -1,4 +1,4 @@
-# 餐量智估 - AI 外卖营养健康管理 Web 原型
+# 营养智链 —— 外卖个性化营养管理平台 Web 原型
 
 > 版本：2026-09-01 · 本地流程原型 · 纯静态架构（无后端依赖）
 > 项目主线：AI 赋能外卖场景个性化营养健康管理
@@ -52,7 +52,7 @@ cd /d G:\guocs_deploy
 # 2. git 提交
 git init
 git add -A
-git commit -m "feat: canliangzhigu web prototype v2.0"
+git commit -m "feat: yingyangzhilian web prototype v2.0"
 git branch -M main
 git remote add origin https://github.com/fanzhaorui744/guocs.git
 git push -u origin main
@@ -124,7 +124,7 @@ web_prototype_v2/
 - 图标：Lucide（ISC License）
 - 饮品/餐食/商家数据：虚构演示数据，不代表真实品牌
 - 营养参考：中国食物成分表、USDA FoodData Central（仅作参考区间）
-- 项目Logo：餐量智估官方Logo，不暗示已注册商标
+- 项目Logo：营养智链官方Logo，不暗示已注册商标
 
 ---
 
