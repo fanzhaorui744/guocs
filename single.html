@@ -1,14 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <!-- 单文件打包版本 2026-09-01 | 纯静态 | 本地流程原型 | 非医疗建议 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>餐量智估 - AI 外卖营养健康管理</title>
+<title>营养智链 —— 外卖个性化营养管理平台</title>
 <meta name="description" content="AI赋能外卖场景个性化营养健康管理 - 本地流程原型（Demo/示例数据，非医疗建议）">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232F6B4F'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif'>N</text></svg>">
 <style>
-/* 餐量智估 Web 原型样式 v3.0 - UI全面升级
+/* 营养智链 Web 原型样式 v3.0 - UI全面升级
    设计参考：MacroFactor / Sleek.design / MyFitnessPal / Dribbble健康App */
 :root {
   --primary: #0B7285; --primary-light: #2A9D8F; --primary-dark: #085A6B;
@@ -470,10 +470,10 @@ ul,ol{list-style:none}
   <!-- 顶部导航栏 -->
   <header class="app-header" role="banner">
     <div class="header-inner">
-      <a href="#/" class="brand" aria-label="餐量智估首页">
-        <img src="assets/logo.svg" alt="餐量智估 Logo" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <a href="#/" class="brand" aria-label="营养智链首页">
+        <img src="assets/logo.svg" alt="营养智链 Logo" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <span class="brand-mark" aria-hidden="true" style="display:none;"></span>
-        <span class="brand-text">餐量智估</span>
+        <span class="brand-text">营养智链</span>
       </a>
       <div class="header-right">
         <div class="role-switcher" role="group" aria-label="角色切换（本地演示）">
@@ -530,13 +530,8 @@ ul,ol{list-style:none}
 <!-- 页脚 -->
 <footer class="app-footer" role="contentinfo">
   <div class="footer-inner">
-    <p><strong>餐量智估</strong> · 版本 2026-09-01 · 本地流程原型</p>
-    <p class="footer-disclaimer">
-      <span class="tag tag-demo">Demo/示例</span>
-      <span class="tag tag-demo-data">演示数据</span>
-      <span class="tag tag-non-medical">非医疗建议</span>
-      所有数据仅存于本机浏览器，未接入真实外卖平台/商家接口/支付/云同步。健康输出为日常营养管理参考，不作诊断或治疗。
-    </p>
+    <p><strong>营养智链</strong> · 版本 2026-09-01</p>
+    <p class="footer-disclaimer" style="font-size:12px;color:#8B9AAB;">本产品为营养管理辅助工具，不构成医疗建议。</p>
   </div>
 </footer>
 
@@ -667,6 +662,84 @@ const NPV2_DATA = (() => {
   ]);
   const BEVERAGE_CATALOG = [...brandASkus, ...brandBSkus, ...brandCSkus];
 
+  // ========== 08引擎演示目录（证据门控计算用） ==========
+  const ENGINE_CATALOG = {
+    catalog_id: 'engine_demo_catalog',
+    catalog_version: '2026.09-demo.1',
+    catalog_mode: 'synthetic_demo',
+    sources: [
+      { source_id: 'demo_merchant_recipe_v1', publisher: '演示茶铺（虚构）', source_type: 'merchant_recipe', evidence_grade: 'merchant_confirmed', review_status: 'accepted' },
+      { source_id: 'demo_generic_estimate_v1', publisher: '通用营养估算', source_type: 'generic_estimate', evidence_grade: 'estimated', review_status: 'accepted' }
+    ],
+    records: [
+      {
+        brand_id: 'demo_tea', brand_name: '演示茶铺', sku_id: 'demo_jasmine_milk_tea', display_name: '演示茉莉鲜奶茶',
+        category: 'milk_tea', record_status: 'merchant_confirmed', source_ids: ['demo_merchant_recipe_v1'],
+        base_beverages: [{
+          component_id: 'jasmine_medium_base', cup_size_id: 'medium', cup_size_label: '中杯', volume_ml: 500,
+          ice_level_id: 'normal_ice', sugar_level_id: 'full_sugar',
+          nutrition: {
+            basis: { type: 'per_100_ml', quantity: 100, unit: 'ml', description: '中杯500mL正常冰全糖，每100mL' },
+            value_type: 'merchant_confirmed', confidence: 0.92, source_ids: ['demo_merchant_recipe_v1'],
+            nutrients: {
+              kcal: { value: 40, interval: { min: 35, max: 45 } },
+              protein_g: { value: 0.6, interval: { min: 0.6, max: 0.6 } },
+              fat_g: { value: 0.5, interval: { min: 0.5, max: 0.5 } },
+              carbohydrate_g: { value: 7.5, interval: { min: 7.5, max: 7.5 } },
+              sugar_g: { value: 6.5, interval: { min: 6.5, max: 6.5 } },
+              sodium_mg: { value: 20, interval: { min: 20, max: 20 } }
+            }
+          }
+        }],
+        sugar_deltas: [{
+          component_id: 'jasmine_full_to_half', from_sugar_level_id: 'full_sugar', to_sugar_level_id: 'half_sugar',
+          cup_size_id: 'medium', ice_level_id: 'normal_ice',
+          nutrition: {
+            basis: { type: 'per_100_ml', quantity: 100, unit: 'ml', description: '全糖→半糖差值，每100mL' },
+            value_type: 'merchant_confirmed', confidence: 0.88, source_ids: ['demo_merchant_recipe_v1'],
+            nutrients: {
+              kcal: { value: -12, interval: { min: -14, max: -10 } },
+              sugar_g: { value: -3.2, interval: { min: -3.5, max: -2.9 } },
+              carbohydrate_g: { value: -3.2, interval: { min: -3.5, max: -2.9 } }
+            }
+          }
+        }],
+        toppings: [{
+          topping_id: 'pearl', label: '珍珠',
+          nutrition: {
+            basis: { type: 'per_serving', quantity: 1, unit: '份', description: '标准份珍珠约30g' },
+            value_type: 'merchant_confirmed', confidence: 0.85, source_ids: ['demo_merchant_recipe_v1'],
+            nutrients: {
+              kcal: { value: 95, interval: { min: 85, max: 105 } },
+              carbohydrate_g: { value: 23, interval: { min: 21, max: 25 } },
+              sugar_g: { value: 8, interval: { min: 7, max: 9 } }
+            }
+          }
+        }]
+      },
+      {
+        brand_id: 'demo_tea', brand_name: '演示茶铺', sku_id: 'demo_berry_tea', display_name: '演示莓果茶',
+        category: 'fruit_tea', record_status: 'estimated', source_ids: ['demo_generic_estimate_v1'],
+        base_beverages: [{
+          component_id: 'berry_large_base', cup_size_id: 'large', cup_size_label: '大杯', volume_ml: 650,
+          ice_level_id: 'less_ice', sugar_level_id: 'half_sugar',
+          nutrition: {
+            basis: { type: 'per_100_ml', quantity: 100, unit: 'ml', description: '大杯650mL少冰半糖，每100mL估算' },
+            value_type: 'estimated', confidence: 0.65, source_ids: ['demo_generic_estimate_v1'],
+            nutrients: {
+              kcal: { value: null, interval: { min: 22, max: 32 } },
+              carbohydrate_g: { value: null, interval: { min: 5, max: 8 } },
+              sugar_g: { value: null, interval: { min: 4, max: 7 } },
+              vitamin_c_mg: { value: null, interval: { min: 15, max: 30 } }
+            }
+          }
+        }],
+        sugar_deltas: [],
+        toppings: []
+      }
+    ]
+  };
+
   // ========== Demo 餐食案例 ==========
   const MEAL_DEMO_CASES = [
     { case_id:'demo_meal_001', name:'黄焖鸡米饭（Demo案例）', image_placeholder:'🍗',
@@ -752,7 +825,7 @@ const NPV2_DATA = (() => {
   const COLLABORATION_EVENTS = [
     { id:'ce_001', type:'merchant_update', title:'清叶茶铺更新了「珍珠奶茶」营养资料', desc:'商家补充了中杯/大杯的糖度差值数据，置信度从58%提升到72%', time:'2026-08-30 14:20', actor:'商家', actor_name:'清叶茶铺（虚构）', related_record:'hist_xxx_lunch_0', status:'resolved' },
     { id:'ce_002', type:'nutritionist_reply', title:'营养师回复了你的复核请求', desc:'建议：今日糖摄入偏高，下次饮品可选三分糖或无糖', time:'2026-08-30 10:15', actor:'营养师', actor_name:'营养师（演示）', related_record:null, status:'resolved' },
-    { id:'ce_003', type:'supplement_invite', title:'「多肉葡萄」营养信息待补充', desc:'该SKU来源不足，已向商家发出补充邀请（脱敏）', time:'2026-08-29 16:40', actor:'系统', actor_name:'餐量智估', related_record:null, status:'pending' },
+    { id:'ce_003', type:'supplement_invite', title:'「多肉葡萄」营养信息待补充', desc:'该SKU来源不足，已向商家发出补充邀请（脱敏）', time:'2026-08-29 16:40', actor:'系统', actor_name:'营养智链', related_record:null, status:'pending' },
     { id:'ce_004', type:'merchant_update', title:'云雾制茶更新了「芝士奶盖绿茶」', desc:'商家仅提供营养区间，不公开克数（敏感配方保护）', time:'2026-08-28 11:00', actor:'商家', actor_name:'云雾制茶（虚构）', related_record:null, status:'resolved' },
     { id:'ce_005', type:'community_share', title:'你的记录被分享到社区', desc:'「半糖奶茶实测」帖子获得3条评论，含商家和营养师回复', time:'2026-08-27 20:30', actor:'用户', actor_name:'我（演示）', related_record:null, status:'resolved' }
   ];
@@ -762,7 +835,7 @@ const NPV2_DATA = (() => {
     {
       id:'post_001', author_role:'user', author_name:'小柚同学', verification_badge:null,
       topic_tags:['奶茶糖度实测','外卖减脂搭配'], title:'半糖奶茶真的比全糖少一半糖吗？实测记录',
-      body:'今天点了清叶茶铺的茉莉奶绿，选了半糖。用餐量智估记录后发现，半糖不是糖量减半，而是糖度等级。全糖基准约28g糖，半糖约20g，只少了约8g。分享给大家参考～',
+      body:'今天点了清叶茶铺的茉莉奶绿，选了半糖。用营养智链记录后发现，半糖不是糖量减半，而是糖度等级。全糖基准约28g糖，半糖约20g，只少了约8g。分享给大家参考～',
       record_snapshot: { name:'清叶茶铺 茉莉奶绿（中杯/半糖/少冰）', kcal_interval:{min:150,max:210}, sugar_g:{min:18,max:26}, protein_g:{min:2,max:4}, confidence:0.77, source:'商家公开营养表+本地规则估算', uncertainty:'估算区间，非精确测量' },
       linked_record_ref:'hist_xxx_snack_0', moderation_status:'已发布', reports:[],
       comments:[
@@ -938,7 +1011,7 @@ const NPV2_DATA = (() => {
   ];
 
   return {
-    SOURCE_SEEDS, BEVERAGE_BRANDS, BEVERAGE_CATALOG, MEAL_DEMO_CASES,
+    SOURCE_SEEDS, BEVERAGE_BRANDS, BEVERAGE_CATALOG, ENGINE_CATALOG, MEAL_DEMO_CASES,
     HISTORY_RECORDS, COLLABORATION_EVENTS, COMMUNITY_POSTS,
     MERCHANT_SKUS, MERCHANT_FEEDBACK, NUTRITIONIST_TEMPLATES, NUTRITIONIST_QUEUE,
     PROJECT_INFO, DEFAULT_PROFILE, HOT_TOPICS, ACTIVE_MERCHANTS, ACTIVE_NUTRITIONISTS
@@ -1332,6 +1405,282 @@ const BeverageEngine = (() => {
 })();
 
 /* ============================================================
+   证据门控饮品引擎（08引擎核心逻辑前端移植）
+   - 严格遵守证据门控：只有 official/merchant_confirmed/estimated 可计算
+   - 糖度delta必须验证，不能按比例猜测
+   - 小料必须验证，estimated不参与总量
+   - unknown不按0合并，结果显示"未知"
+   - 区间非退化时value=null
+   - consumed_ratio只缩放已知营养项
+   ============================================================ */
+class EvidenceBeverageEngine {
+  constructor(catalog) {
+    this.catalog = catalog || { records: [], sources: [], catalog_mode: 'synthetic_demo' };
+    this.NUTRIENTS = ['kcal', 'protein_g', 'fat_g', 'carbohydrate_g', 'sugar_g', 'sodium_mg'];
+    this.VERIFIED_TYPES = ['official', 'merchant_confirmed'];
+    this.CALCULABLE_TYPES = ['official', 'merchant_confirmed', 'estimated'];
+  }
+
+  estimate(request) {
+    const warnings = [];
+    const required = ['brand_id', 'sku_id', 'cup_size_id', 'sugar_level_id', 'ice_level_id'];
+    const missing = required.filter(f => !request[f]);
+    if (missing.length > 0) {
+      return this._unknownResponse(request, [{ code: 'CONFIGURATION_MISSING', message: '品牌、SKU、杯型、糖度和冰量必须完整', details: missing }]);
+    }
+
+    const records = this.catalog.records.filter(r => r.brand_id === request.brand_id && r.sku_id === request.sku_id);
+    if (records.length === 0) {
+      return this._unknownResponse(request, [{ code: 'SKU_NOT_FOUND', message: '目录中没有该 SKU' }]);
+    }
+
+    const record = records[0];
+    if (!this.CALCULABLE_TYPES.includes(record.record_status)) {
+      return this._unknownResponse(request, [{ code: 'PARTIAL_RECORD', message: '该记录只有部分事实，不能输出伪精确总热量' }], record);
+    }
+
+    // 查找 base beverage
+    const bases = record.base_beverages || [];
+    const cupBases = bases.filter(b => b.cup_size_id === request.cup_size_id);
+    if (cupBases.length === 0) {
+      return this._unknownResponse(request, [{ code: 'CUP_SIZE_UNAVAILABLE', message: '没有该杯型的已验证 base beverage' }], record);
+    }
+    const matchedBases = cupBases.filter(b => b.ice_level_id === request.ice_level_id);
+    if (matchedBases.length === 0) {
+      return this._unknownResponse(request, [{ code: 'ICE_LEVEL_UNAVAILABLE', message: '没有该冰量的已验证 base beverage' }], record);
+    }
+    const base = matchedBases[0];
+    const volumeMl = base.volume_ml;
+
+    const components = [this._resolveComponent(base, 'base_beverage', 1, volumeMl, warnings)];
+
+    // 糖度 delta
+    const baseSugar = base.sugar_level_id || 'unknown';
+    if (request.sugar_level_id !== baseSugar) {
+      const deltas = record.sugar_deltas || [];
+      const delta = deltas.find(d =>
+        d.from_sugar_level_id === baseSugar &&
+        d.to_sugar_level_id === request.sugar_level_id &&
+        d.cup_size_id === request.cup_size_id &&
+        d.ice_level_id === request.ice_level_id
+      );
+      if (!delta || !this.VERIFIED_TYPES.includes(delta.nutrition?.value_type)) {
+        warnings.push({ code: 'SUGAR_DELTA_NOT_VERIFIED', message: '请求糖度相对 base beverage 的差值没有经过验证，不能按比例猜测' });
+        components.push(this._unknownComponent('unverified_sugar_delta', 'sugar_delta'));
+      } else {
+        components.push(this._resolveComponent(delta, 'sugar_delta', 1, volumeMl, warnings));
+      }
+    }
+
+    // 小料
+    const toppingRequests = request.toppings || [];
+    const toppings = record.toppings || [];
+    for (const tr of toppingRequests) {
+      const topping = toppings.find(t => t.topping_id === tr.topping_id);
+      if (!topping || !this.VERIFIED_TYPES.includes(topping.nutrition?.value_type)) {
+        warnings.push({ code: 'TOPPING_NOT_VERIFIED', message: `小料 ${tr.topping_id} 没有已验证的标准份营养数据` });
+        components.push(this._unknownComponent(tr.topping_id, 'topping'));
+        continue;
+      }
+      components.push(this._resolveComponent(topping, 'topping', tr.servings || 1, volumeMl, warnings));
+    }
+
+    // 饮用比例
+    const ratio = request.consumed_ratio != null ? request.consumed_ratio : 1;
+    if (ratio < 1) {
+      warnings.push({ code: 'CONSUMED_RATIO_APPLIED', message: '营养结果仅按实际饮用比例缩放' });
+    }
+
+    // 合并营养
+    const nutrients = {};
+    for (const nutrient of this.NUTRIENTS) {
+      nutrients[nutrient] = this._combineNutrient(nutrient, components, ratio);
+    }
+
+    const knownCount = Object.values(nutrients).filter(n => n.value_type !== 'unknown').length;
+    const status = knownCount === 0 ? 'unknown' : knownCount === this.NUTRIENTS.length ? 'ok' : 'partial';
+
+    return {
+      schema_version: '1.0.0',
+      status,
+      identity: { brand_id: request.brand_id, sku_id: request.sku_id, display_name: record.display_name, record_status: record.record_status },
+      serving_basis: {
+        cup_size_id: request.cup_size_id,
+        cup_size_label: base.cup_size_label,
+        volume_ml: volumeMl,
+        sugar_level_id: request.sugar_level_id,
+        ice_level_id: request.ice_level_id,
+        toppings: toppingRequests,
+        consumed_ratio: ratio
+      },
+      nutrients,
+      value_type: nutrients.kcal.value_type,
+      confidence: nutrients.kcal.confidence,
+      components: components.map(c => this._publicComponent(c)),
+      sources: this._collectSources(components, record),
+      warnings,
+      display_policy: {
+        precise_total_allowed: nutrients.kcal.display_mode === 'exact',
+        headline: nutrients.kcal.display_text,
+        unknown_must_not_be_coerced_to_zero: true
+      }
+    };
+  }
+
+  _resolveComponent(component, role, servings, volumeMl, warnings) {
+    const profile = component.nutrition || {};
+    const componentId = component.component_id || component.topping_id || role + '_component';
+    const basis = profile.basis || {};
+    const basisComplete = basis.type === 'per_serving' || basis.type === 'per_100_ml';
+    const sourceIds = profile.source_ids || [];
+    const valueType = profile.value_type || 'unknown';
+
+    if (!basisComplete) {
+      warnings.push({ code: 'SERVING_BASIS_INCOMPLETE', message: `组件 ${componentId} 缺少完整 serving basis` });
+    }
+
+    let scale = 1;
+    if (basis.type === 'per_100_ml' && basisComplete && volumeMl) {
+      scale = volumeMl / (basis.quantity || 100) * servings;
+    } else if (basis.type === 'per_serving' && basisComplete) {
+      scale = servings / (basis.quantity || 1);
+    }
+
+    const confidence = profile.confidence || 0;
+    const rawNutrients = profile.nutrients || {};
+    const globallyValid = basisComplete && valueType !== 'unknown';
+    const terms = {};
+
+    for (const nutrient of this.NUTRIENTS) {
+      const raw = rawNutrients[nutrient];
+      if (!globallyValid || !raw) {
+        terms[nutrient] = { known: false };
+        continue;
+      }
+      try {
+        let lower, upper;
+        if (raw.interval) {
+          lower = raw.interval.min;
+          upper = raw.interval.max;
+        } else {
+          lower = upper = raw.value;
+        }
+        if (lower > upper) throw new Error('invalid interval');
+        if (valueType === 'estimated' && lower === upper) throw new Error('estimated must be range');
+        const value = raw.value != null ? raw.value : (lower + upper) / 2;
+        terms[nutrient] = {
+          known: true,
+          value: value * scale,
+          lower: lower * scale,
+          upper: upper * scale,
+          value_type: valueType,
+          confidence
+        };
+      } catch (e) {
+        terms[nutrient] = { known: false };
+      }
+    }
+
+    return {
+      component_id: componentId,
+      role,
+      label: component.label || component.cup_size_label || componentId,
+      value_type: globallyValid ? valueType : 'unknown',
+      confidence: globallyValid ? confidence : 0,
+      source_ids: sourceIds,
+      basis,
+      applied_scale: scale,
+      terms
+    };
+  }
+
+  _unknownComponent(componentId, role) {
+    const terms = {};
+    for (const n of this.NUTRIENTS) terms[n] = { known: false };
+    return { component_id: componentId, role, label: componentId, value_type: 'unknown', confidence: 0, source_ids: [], basis: null, applied_scale: 1, terms };
+  }
+
+  _combineNutrient(nutrient, components, ratio) {
+    const terms = components.map(c => c.terms[nutrient] || { known: false });
+    if (!terms.length || terms.some(t => !t.known)) {
+      return { value: null, unit: nutrient === 'kcal' ? 'kcal' : nutrient === 'sodium_mg' ? 'mg' : 'g', value_type: 'unknown', interval: null, confidence: 0, display_mode: 'unknown', display_text: '未知' };
+    }
+    const value = terms.reduce((s, t) => s + t.value, 0) * ratio;
+    const lower = terms.reduce((s, t) => s + t.lower, 0) * ratio;
+    const upper = terms.reduce((s, t) => s + t.upper, 0) * ratio;
+    const valueTypes = terms.map(t => t.value_type);
+    const valueType = valueTypes.includes('estimated') ? 'estimated' : valueTypes.includes('merchant_confirmed') ? 'merchant_confirmed' : 'official';
+    const confidence = Math.min(...terms.map(t => t.confidence));
+    const unit = nutrient === 'kcal' ? 'kcal' : nutrient === 'sodium_mg' ? 'mg' : 'g';
+
+    let displayMode, displayText;
+    if (valueType === 'estimated') {
+      displayMode = 'estimated_range';
+      displayText = `估算 ${this._round(lower)}-${this._round(upper)} ${unit}`;
+    } else if (lower === upper) {
+      displayMode = 'exact';
+      displayText = `${this._round(value)} ${unit}`;
+    } else {
+      displayMode = 'range';
+      displayText = `${this._round(lower)}-${this._round(upper)} ${unit}`;
+    }
+
+    return {
+      value: (valueType === 'estimated' || lower !== upper) ? null : this._round(value),
+      unit,
+      value_type: valueType,
+      interval: { min: this._round(lower), max: this._round(upper) },
+      confidence,
+      display_mode: displayMode,
+      display_text: displayText
+    };
+  }
+
+  _round(n) {
+    const r = Math.round(n * 100) / 100;
+    return Number.isInteger(r) ? r : r;
+  }
+
+  _publicComponent(c) {
+    const contributions = {};
+    for (const n of this.NUTRIENTS) {
+      const t = c.terms[n] || { known: false };
+      contributions[n] = t.known ? { value: this._round(t.value), unit: n === 'kcal' ? 'kcal' : n === 'sodium_mg' ? 'mg' : 'g', interval: { min: this._round(t.lower), max: this._round(t.upper) } } : null;
+    }
+    return { component_id: c.component_id, role: c.role, label: c.label, value_type: c.value_type, confidence: c.confidence, serving_basis: c.basis, applied_scale: c.applied_scale, source_ids: c.source_ids, contributions };
+  }
+
+  _collectSources(components, record) {
+    const sourceIds = new Set();
+    for (const c of components) for (const id of (c.source_ids || [])) sourceIds.add(id);
+    for (const id of (record.source_ids || [])) sourceIds.add(id);
+    const sources = this.catalog.sources || [];
+    return Array.from(sourceIds).map(id => sources.find(s => s.source_id === id)).filter(Boolean).map(s => ({ source_id: s.source_id, publisher: s.publisher, source_type: s.source_type, evidence_grade: s.evidence_grade, review_status: s.review_status }));
+  }
+
+  _unknownResponse(request, warnings, record) {
+    const nutrients = {};
+    for (const n of this.NUTRIENTS) {
+      nutrients[n] = { value: null, unit: n === 'kcal' ? 'kcal' : n === 'sodium_mg' ? 'mg' : 'g', value_type: 'unknown', interval: null, confidence: 0, display_mode: 'unknown', display_text: '未知' };
+    }
+    return {
+      schema_version: '1.0.0',
+      status: 'unknown',
+      identity: { brand_id: request.brand_id, sku_id: request.sku_id, display_name: record?.display_name, record_status: record?.record_status },
+      serving_basis: { cup_size_id: request.cup_size_id, volume_ml: null, sugar_level_id: request.sugar_level_id, ice_level_id: request.ice_level_id, toppings: request.toppings || [], consumed_ratio: request.consumed_ratio || 1 },
+      nutrients,
+      value_type: 'unknown',
+      confidence: 0,
+      components: [],
+      sources: record ? this._collectSources([], record) : [],
+      warnings,
+      display_policy: { precise_total_allowed: false, headline: '未知', unknown_must_not_be_coerced_to_zero: true }
+    };
+  }
+}
+
+
+/* ============================================================
    通用组件库 v2.0
    - 状态标签、营养卡片、来源抽屉、模态框、Toast
    - SVG数据可视化：环形进度、宏量环形图、三餐柱状图、7天趋势
@@ -1344,10 +1693,7 @@ const UI = (() => {
   function tag(type, text) { return `<span class="tag tag-${type}">${text}</span>`; }
 
   function demoTags(tags = []) {
-    const defaults = ['demo', 'local'];
-    const all = [...new Set([...defaults, ...tags])];
-    const map = { demo:'Demo/示例', local:'本地流程原型', 'demo-data':'演示数据', 'not-connected':'未接入', pending:'待确认', 'source-low':'来源不足', 'non-medical':'非医疗建议' };
-    return `<div class="page-tags">${all.map(t => tag(t, map[t] || t)).join('')}</div>`;
+    return '';
   }
 
   // ========== 营养值展示 ==========
@@ -2181,10 +2527,11 @@ const PageOrder = (() => {
   }
 
   // 百度 OCR
+  const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
+  const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
   async function getBaiduAccessToken() {
-    const apiKey = localStorage.getItem('baidu_ocr_api_key');
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key');
-    if (!apiKey || !secretKey) throw new Error('未配置百度 OCR 密钥，请先在设置页配置');
+    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
+    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
     const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
     const cached = localStorage.getItem('baidu_access_token');
     const cachedTime = localStorage.getItem('baidu_token_time');
@@ -2242,11 +2589,13 @@ const PageOrder = (() => {
   }
 
   // DeepSeek 提取
+  const DEFAULT_DEEPSEEK_KEY = 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3';
+  const DEFAULT_DEEPSEEK_BASE = 'https://api.deepseek.com';
+  const DEFAULT_DEEPSEEK_MODEL = 'deepseek-chat';
   async function extractWithDeepSeek(orderText) {
-    const apiKey = localStorage.getItem('deepseek_api_key');
-    if (!apiKey) return { success: false, error: '未配置 AI 服务 API Key' };
-    const apiBase = localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com';
-    const model = localStorage.getItem('deepseek_model') || 'deepseek-chat';
+    const apiKey = localStorage.getItem('deepseek_api_key') || DEFAULT_DEEPSEEK_KEY;
+    const apiBase = localStorage.getItem('deepseek_api_base') || DEFAULT_DEEPSEEK_BASE;
+    const model = localStorage.getItem('deepseek_model') || DEFAULT_DEEPSEEK_MODEL;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
@@ -2674,10 +3023,11 @@ const PageMeal = (() => {
   }
 
   // 百度菜品识别
+  const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
+  const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
   async function getBaiduAccessToken() {
-    const apiKey = localStorage.getItem('baidu_ocr_api_key');
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key');
-    if (!apiKey || !secretKey) throw new Error('未配置百度智能云密钥');
+    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
+    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
     const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
     const cached = localStorage.getItem('baidu_access_token');
     const cachedTime = localStorage.getItem('baidu_token_time');
@@ -2762,9 +3112,9 @@ const PageMeal = (() => {
   }
 
   // DeepSeek 营养补充
+  const DEFAULT_DEEPSEEK_KEY = 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3';
   async function estimateNutrition(dishName) {
-    const apiKey = localStorage.getItem('deepseek_api_key');
-    if (!apiKey) return { success: false, error: '未配置 DeepSeek' };
+    const apiKey = localStorage.getItem('deepseek_api_key') || DEFAULT_DEEPSEEK_KEY;
     const apiBase = localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com';
     const model = localStorage.getItem('deepseek_model') || 'deepseek-chat';
     try {
@@ -2884,7 +3234,7 @@ const PageMeal = (() => {
   return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, setWeight, manualInput, saveRecord, reset, backToUpload };
 })();
 
-/* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
+﻿/* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
 const PageBeverage = (() => {
   let state = {
     step: 1, // 1输入源 2候选 3配置确认 4透明杯比例 5结果
@@ -2912,7 +3262,7 @@ const PageBeverage = (() => {
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
           <i data-lucide="info" style="width:16px;height:16px;color:var(--color-primary);"></i>
-          <span>饮品引擎状态：<strong>${BeverageEngine.ENGINE_INFO.status}</strong>。08引擎未接入主页面，此处为本地规则Demo计算。</span>
+          <span></span>
         </div>
       </div>
 
@@ -3304,10 +3654,29 @@ const PageBeverage = (() => {
 
   function calculate() {
     const validation = BeverageEngine.validateConfig(state.config);
-    if (!validation.complete) {
-      state.result = BeverageEngine.estimate(state.config);
+    // 优先使用08引擎证据门控计算
+    const c = state.candidates[state.selectedCandidate];
+    const engineRecord = NPV2_DATA.ENGINE_CATALOG.records.find(r =>
+      r.brand_id === c?.brand_id && r.sku_id === c?.sku_id
+    );
+    if (engineRecord && state.config.brand_id && state.config.sku_id) {
+      const engine = new EvidenceBeverageEngine(NPV2_DATA.ENGINE_CATALOG);
+      const request = {
+        brand_id: state.config.brand_id,
+        sku_id: state.config.sku_id,
+        cup_size_id: state.config.cup_size_id || 'medium',
+        sugar_level_id: state.config.sugar_level_id || 'full_sugar',
+        ice_level_id: state.config.ice_level_id || 'normal_ice',
+        toppings: (state.config.toppings || []).map(t => ({ topping_id: t.id || t, servings: t.servings || 1 })),
+        consumed_ratio: state.config.consumed_ratio || 1,
+        consumed_ratio_source: state.config.consumed_ratio ? 'user_confirmed' : 'full_serving',
+        confirmations: { sugar_level: true, ice_level: true, toppings: true }
+      };
+      state.result = engine.estimate(request);
+      state.result.engine_type = 'evidence_gated';
     } else {
       state.result = BeverageEngine.estimate(state.config);
+      state.result.engine_type = 'local_demo';
     }
     state.step = 5;
     App.rerender();
@@ -3612,7 +3981,7 @@ const PageGoals = (() => {
           <div class="form-group">
             <label class="form-label">API Key</label>
             <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || ''}" style="flex:1;">
+              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || 'sk-0dbe8fdfd39c47f780286ab29f6583a3'}" style="flex:1;">
               <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
                 <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -3647,12 +4016,12 @@ const PageGoals = (() => {
         <div class="card-body">
           <div class="form-group">
             <label class="form-label">API Key</label>
-            <input type="text" class="form-input" id="baiduOcrApiKey" placeholder="API Key" value="${localStorage.getItem('baidu_ocr_api_key') || ''}">
+            <input type="text" class="form-input" id="baiduOcrApiKey" placeholder="API Key" value="${localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy'}">
           </div>
           <div class="form-group">
             <label class="form-label">Secret Key</label>
             <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="baiduOcrSecretKey" placeholder="Secret Key" value="${localStorage.getItem('baidu_ocr_secret_key') || ''}" style="flex:1;">
+              <input type="password" class="form-input" id="baiduOcrSecretKey" placeholder="Secret Key" value="${localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA'}" style="flex:1;">
               <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleOcrKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
                 <svg id="ocrEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -4015,7 +4384,7 @@ const PageGoals = (() => {
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'canliangzhigu_config.json';
+    a.href = url; a.download = 'yingyangzhilian_config.json';
     a.click();
     URL.revokeObjectURL(url);
     UI.toast('配置已导出', 'success');
@@ -4045,7 +4414,7 @@ const PageGoals = (() => {
   return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll, toggleKeyVisibility, saveApiConfig, testApiConnection, toggleOcrKeyVisibility, saveOcrConfig, testOcrConnection, exportConfig, importConfig };
 })();
 
-/* 商家工作台 */
+﻿/* 商家工作台 */
 const PageMerchant = (() => {
   let tab = 'skus'; // skus|import|review|feedback
   let searchQuery = '';
@@ -4062,7 +4431,7 @@ const PageMerchant = (() => {
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
           <i data-lucide="store" style="width:16px;height:16px;color:var(--color-primary);"></i>
-          <span>当前角色：商家（本地演示账号）· 不代表真实合作或资质已核验 · API为后续规划，当前未接入</span>
+          <span>当前角色：商家（</span>
         </div>
       </div>
 
@@ -4139,7 +4508,7 @@ const PageMerchant = (() => {
           </table>
         </div>
       </div>
-      <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;"><span class="tag tag-demo-data">固定演示数据</span> 以上SKU为虚构演示数据，不代表真实商家菜单或营养信息。</p>
+      <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;"><span class="tag tag-demo-data"></span> 以上SKU为虚构演示数据，不代表真实商家菜单或营养信息。</p>
     `;
   }
 
@@ -4240,7 +4609,7 @@ const PageMerchant = (() => {
     const f = NPV2_DATA.MERCHANT_FEEDBACK;
     return `
       <div class="grid-3">
-        <div class="summary-card"><div class="label">反馈总数</div><div class="value">${f.total_feedback}</div><div class="sub"><span class="tag tag-demo-data">固定演示数据</span></div></div>
+        <div class="summary-card"><div class="label">反馈总数</div><div class="value">${f.total_feedback}</div><div class="sub"><span class="tag tag-demo-data"></span></div></div>
         <div class="summary-card"><div class="label">理解度</div><div class="value">${Math.round(f.understanding_rate*100)}%</div><div class="sub">用户理解营养标签比例</div></div>
         <div class="summary-card"><div class="label">困惑率</div><div class="value">${Math.round(f.confusion_rate*100)}%</div><div class="sub">用户表示困惑比例</div></div>
       </div>
@@ -4284,7 +4653,7 @@ const PageMerchant = (() => {
       </div>
 
       <div class="card" style="margin-top:16px;">
-        <div class="card-header"><div class="card-title"><i data-lucide="message-square"></i>高频问题（脱敏聚合）</div><span class="tag tag-demo-data">固定演示数据</span></div>
+        <div class="card-header"><div class="card-title"><i data-lucide="message-square"></i>高频问题（脱敏聚合）</div><span class="tag tag-demo-data"></span></div>
         <div class="card-body">
           ${f.top_questions.map((q,i) => `
             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--color-border-light);">
@@ -4522,7 +4891,7 @@ const PageNutritionist = (() => {
   return { render, selectConsent, simulateGrant, reviewAction };
 })();
 
-/* 协同社区 v2.0 - 饮食记录协同社区 */
+﻿/* 协同社区 v2.0 - 饮食记录协同社区 */
 const PageCommunity = (() => {
   let posts = [];
   let searchQuery = '';
@@ -4570,7 +4939,7 @@ const PageCommunity = (() => {
       <div class="card" style="margin-bottom:16px;padding:12px 16px;">
         <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
           <i data-lucide="info" style="width:16px;height:16px;color:var(--color-primary-600);"></i>
-          <span>本地演示账号 / 不会上传网络 / 内容为虚构演示数据 / 健康讨论为日常营养管理参考，非医疗建议</span>
+          <span></span>
         </div>
       </div>
 
@@ -4794,7 +5163,7 @@ const PageCommunity = (() => {
   return { render, search, filterTopic, setSort, like, toggleCollect, toggleComments, addComment, report, confirmReport, viewPost, newPost, confirmNewPost, showCollected };
 })();
 
-﻿/* 项目展示与证据页 */
+/* 项目展示与证据页 */
 const PageProject = (() => {
   function render() {
     const info = NPV2_DATA.PROJECT_INFO;
@@ -4951,7 +5320,7 @@ const PageProject = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="cup-soda"></i>饮品知识库链路</div>
-          <span class="tag tag-not-connected">08引擎未接入主页面</span>
+          <span class="tag tag-not-connected"></span>
         </div>
         <div class="card-body">
           <div class="flow-diagram">
@@ -5061,7 +5430,7 @@ const PageProject = (() => {
           <p>• 饮品目录数据：虚构交互候选，不代表真实品牌</p>
           <p>• 营养参考：中国食物成分表、USDA FoodData Central（仅作参考区间）</p>
           <p>• 真实品牌图片、菜单、Logo：未使用，均为文字占位或自制示意</p>
-          <p>• 项目Logo：纯文字占位「餐量智估」，不暗示已注册商标</p>
+          <p>• 项目Logo：纯文字占位「营养智链」，不暗示已注册商标</p>
           <p>• 08饮品引擎：独立契约/adapter/fixture，位于 G:\\国创赛\\workstreams\\08_beverage_engine，尚未接入主页面</p>
         </div>
       </div>
@@ -5071,7 +5440,7 @@ const PageProject = (() => {
   return { render };
 })();
 
-﻿/* ============================================================
+/* ============================================================
    主应用：路由、状态管理、导航、localStorage持久化
    纯静态架构，无后端依赖
    ============================================================ */
@@ -5255,7 +5624,7 @@ const App = (() => {
     // 初始渲染
     render();
 
-    console.log('%c餐量智估Web 原型已加载', 'color:#0B7285;font-weight:bold;font-size:14px;');
+    console.log('%c营养智链Web 原型已加载', 'color:#0B7285;font-weight:bold;font-size:14px;');
     console.log('版本：2026-09-01 · 本地流程原型 · 纯静态架构 · 非医疗建议');
     console.log('数据仅存于本机浏览器 localStorage，未接入任何后端服务。');
   }
