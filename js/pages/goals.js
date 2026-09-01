@@ -1,6 +1,19 @@
 /* 目标与设置页 */
 const PageGoals = (() => {
+  function ensureDefaults() {
+    if (!localStorage.getItem('deepseek_api_key')) {
+      localStorage.setItem('deepseek_api_key', 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3');
+      localStorage.setItem('deepseek_api_base', 'https://api.deepseek.com');
+      localStorage.setItem('deepseek_model', 'deepseek-chat');
+    }
+    if (!localStorage.getItem('baidu_ocr_api_key')) {
+      localStorage.setItem('baidu_ocr_api_key', 'bxEEs5XPPC54ucEly0xC9vFy');
+      localStorage.setItem('baidu_ocr_secret_key', '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA');
+      localStorage.setItem('baidu_ocr_proxy', 'https://api.allorigins.win/raw?url=');
+    }
+  }
   function render() {
+    ensureDefaults();
     const p = AppState.getProfile();
     return `
       <div class="page-header">
@@ -20,7 +33,7 @@ const PageGoals = (() => {
           <div class="form-group">
             <label class="form-label">API Key</label>
             <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || 'sk-0dbe8fdfd39c47f780286ab29f6583a3'}" style="flex:1;">
+              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3'}" style="flex:1;">
               <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
                 <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
