@@ -110,6 +110,84 @@ const NPV2_DATA = (() => {
   ]);
   const BEVERAGE_CATALOG = [...brandASkus, ...brandBSkus, ...brandCSkus];
 
+  // ========== 08引擎演示目录（证据门控计算用） ==========
+  const ENGINE_CATALOG = {
+    catalog_id: 'engine_demo_catalog',
+    catalog_version: '2026.09-demo.1',
+    catalog_mode: 'synthetic_demo',
+    sources: [
+      { source_id: 'demo_merchant_recipe_v1', publisher: '演示茶铺（虚构）', source_type: 'merchant_recipe', evidence_grade: 'merchant_confirmed', review_status: 'accepted' },
+      { source_id: 'demo_generic_estimate_v1', publisher: '通用营养估算', source_type: 'generic_estimate', evidence_grade: 'estimated', review_status: 'accepted' }
+    ],
+    records: [
+      {
+        brand_id: 'demo_tea', brand_name: '演示茶铺', sku_id: 'demo_jasmine_milk_tea', display_name: '演示茉莉鲜奶茶',
+        category: 'milk_tea', record_status: 'merchant_confirmed', source_ids: ['demo_merchant_recipe_v1'],
+        base_beverages: [{
+          component_id: 'jasmine_medium_base', cup_size_id: 'medium', cup_size_label: '中杯', volume_ml: 500,
+          ice_level_id: 'normal_ice', sugar_level_id: 'full_sugar',
+          nutrition: {
+            basis: { type: 'per_100_ml', quantity: 100, unit: 'ml', description: '中杯500mL正常冰全糖，每100mL' },
+            value_type: 'merchant_confirmed', confidence: 0.92, source_ids: ['demo_merchant_recipe_v1'],
+            nutrients: {
+              kcal: { value: 40, interval: { min: 35, max: 45 } },
+              protein_g: { value: 0.6, interval: { min: 0.6, max: 0.6 } },
+              fat_g: { value: 0.5, interval: { min: 0.5, max: 0.5 } },
+              carbohydrate_g: { value: 7.5, interval: { min: 7.5, max: 7.5 } },
+              sugar_g: { value: 6.5, interval: { min: 6.5, max: 6.5 } },
+              sodium_mg: { value: 20, interval: { min: 20, max: 20 } }
+            }
+          }
+        }],
+        sugar_deltas: [{
+          component_id: 'jasmine_full_to_half', from_sugar_level_id: 'full_sugar', to_sugar_level_id: 'half_sugar',
+          cup_size_id: 'medium', ice_level_id: 'normal_ice',
+          nutrition: {
+            basis: { type: 'per_100_ml', quantity: 100, unit: 'ml', description: '全糖→半糖差值，每100mL' },
+            value_type: 'merchant_confirmed', confidence: 0.88, source_ids: ['demo_merchant_recipe_v1'],
+            nutrients: {
+              kcal: { value: -12, interval: { min: -14, max: -10 } },
+              sugar_g: { value: -3.2, interval: { min: -3.5, max: -2.9 } },
+              carbohydrate_g: { value: -3.2, interval: { min: -3.5, max: -2.9 } }
+            }
+          }
+        }],
+        toppings: [{
+          topping_id: 'pearl', label: '珍珠',
+          nutrition: {
+            basis: { type: 'per_serving', quantity: 1, unit: '份', description: '标准份珍珠约30g' },
+            value_type: 'merchant_confirmed', confidence: 0.85, source_ids: ['demo_merchant_recipe_v1'],
+            nutrients: {
+              kcal: { value: 95, interval: { min: 85, max: 105 } },
+              carbohydrate_g: { value: 23, interval: { min: 21, max: 25 } },
+              sugar_g: { value: 8, interval: { min: 7, max: 9 } }
+            }
+          }
+        }]
+      },
+      {
+        brand_id: 'demo_tea', brand_name: '演示茶铺', sku_id: 'demo_berry_tea', display_name: '演示莓果茶',
+        category: 'fruit_tea', record_status: 'estimated', source_ids: ['demo_generic_estimate_v1'],
+        base_beverages: [{
+          component_id: 'berry_large_base', cup_size_id: 'large', cup_size_label: '大杯', volume_ml: 650,
+          ice_level_id: 'less_ice', sugar_level_id: 'half_sugar',
+          nutrition: {
+            basis: { type: 'per_100_ml', quantity: 100, unit: 'ml', description: '大杯650mL少冰半糖，每100mL估算' },
+            value_type: 'estimated', confidence: 0.65, source_ids: ['demo_generic_estimate_v1'],
+            nutrients: {
+              kcal: { value: null, interval: { min: 22, max: 32 } },
+              carbohydrate_g: { value: null, interval: { min: 5, max: 8 } },
+              sugar_g: { value: null, interval: { min: 4, max: 7 } },
+              vitamin_c_mg: { value: null, interval: { min: 15, max: 30 } }
+            }
+          }
+        }],
+        sugar_deltas: [],
+        toppings: []
+      }
+    ]
+  };
+
   // ========== Demo 餐食案例 ==========
   const MEAL_DEMO_CASES = [
     { case_id:'demo_meal_001', name:'黄焖鸡米饭（Demo案例）', image_placeholder:'🍗',
@@ -381,7 +459,7 @@ const NPV2_DATA = (() => {
   ];
 
   return {
-    SOURCE_SEEDS, BEVERAGE_BRANDS, BEVERAGE_CATALOG, MEAL_DEMO_CASES,
+    SOURCE_SEEDS, BEVERAGE_BRANDS, BEVERAGE_CATALOG, ENGINE_CATALOG, MEAL_DEMO_CASES,
     HISTORY_RECORDS, COLLABORATION_EVENTS, COMMUNITY_POSTS,
     MERCHANT_SKUS, MERCHANT_FEEDBACK, NUTRITIONIST_TEMPLATES, NUTRITIONIST_QUEUE,
     PROJECT_INFO, DEFAULT_PROFILE, HOT_TOPICS, ACTIVE_MERCHANTS, ACTIVE_NUTRITIONISTS
