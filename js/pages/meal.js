@@ -279,41 +279,58 @@ const PageMeal = (() => {
     App.rerender();
   }
 
-  // 百度菜品识别
+  // 百度菜品识别（菜品识别/OCR接口支持CORS直接调用，token接口不支持CORS，用预取token兜底）
   const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
   const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
+  const DEFAULT_BAIDU_ACCESS_TOKEN = '24.91704538a56fffd63509a17941f797f2.2592000.1790874581.282335-124232407';
+
   async function getBaiduAccessToken() {
-    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
-    const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
     const cached = localStorage.getItem('baidu_access_token');
     const cachedTime = localStorage.getItem('baidu_token_time');
     if (cached && cachedTime && (Date.now() - parseInt(cachedTime) < 25*24*60*60*1000)) return cached;
+    // token接口无CORS头，浏览器直接调用会失败；尝试直接获取，失败则用预取默认token
+    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
+    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
     const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
-    const response = await fetch(proxy + encodeURIComponent(tokenUrl));
-    const data = await response.json();
-    if (data.access_token) {
-      localStorage.setItem('baidu_access_token', data.access_token);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return data.access_token;
+    try {
+      const response = await fetch(tokenUrl);
+      const data = await response.json();
+      if (data.access_token) {
+        localStorage.setItem('baidu_access_token', data.access_token);
+        localStorage.setItem('baidu_token_time', Date.now().toString());
+        return data.access_token;
+      }
+    } catch (e) { /* CORS或网络错误，降级到默认token */ }
+    return DEFAULT_BAIDU_ACCESS_TOKEN;
+  }
+
+  async function fetchWithRetry(url, options, retries = 2) {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const response = await fetch(url, options);
+        return await response.json();
+      } catch (error) {
+        if (i < retries) {
+          await new Promise(r => setTimeout(r, 1000));
+        } else {
+          throw error;
+        }
+      }
     }
-    throw new Error(data.error_description || '获取 access_token 失败');
   }
 
   async function recognizeDish(imageBase64) {
     try {
       const accessToken = await getBaiduAccessToken();
-      const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
       const apiUrl = `https://aip.baidubce.com/rest/2.0/image-classify/v2/dish?access_token=${accessToken}`;
       const formData = new URLSearchParams();
       formData.append('image', imageBase64);
       formData.append('top_num', '5');
-      const response = await fetch(proxy + encodeURIComponent(apiUrl), {
+      const data = await fetchWithRetry(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
       });
-      const data = await response.json();
       if (data.result && data.result.length > 0) {
         return { success: true, results: data.result };
       } else if (data.error_msg) {
@@ -322,7 +339,7 @@ const PageMeal = (() => {
         return { success: false, error: '未识别到菜品' };
       }
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: '识别服务暂时不可用，可使用演示数据体验流程' };
     }
   }
 
