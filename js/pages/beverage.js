@@ -1,4 +1,4 @@
-/* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
+﻿/* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
 const PageBeverage = (() => {
   let state = {
     step: 1, // 1输入源 2候选 3配置确认 4透明杯比例 5结果
@@ -26,7 +26,7 @@ const PageBeverage = (() => {
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
           <i data-lucide="info" style="width:16px;height:16px;color:var(--color-primary);"></i>
-          <span>饮品引擎状态：<strong>${BeverageEngine.ENGINE_INFO.status}</strong>。08引擎未接入主页面，此处为本地规则Demo计算。</span>
+          <span></span>
         </div>
       </div>
 
@@ -418,10 +418,29 @@ const PageBeverage = (() => {
 
   function calculate() {
     const validation = BeverageEngine.validateConfig(state.config);
-    if (!validation.complete) {
-      state.result = BeverageEngine.estimate(state.config);
+    // 优先使用08引擎证据门控计算
+    const c = state.candidates[state.selectedCandidate];
+    const engineRecord = NPV2_DATA.ENGINE_CATALOG.records.find(r =>
+      r.brand_id === c?.brand_id && r.sku_id === c?.sku_id
+    );
+    if (engineRecord && state.config.brand_id && state.config.sku_id) {
+      const engine = new EvidenceBeverageEngine(NPV2_DATA.ENGINE_CATALOG);
+      const request = {
+        brand_id: state.config.brand_id,
+        sku_id: state.config.sku_id,
+        cup_size_id: state.config.cup_size_id || 'medium',
+        sugar_level_id: state.config.sugar_level_id || 'full_sugar',
+        ice_level_id: state.config.ice_level_id || 'normal_ice',
+        toppings: (state.config.toppings || []).map(t => ({ topping_id: t.id || t, servings: t.servings || 1 })),
+        consumed_ratio: state.config.consumed_ratio || 1,
+        consumed_ratio_source: state.config.consumed_ratio ? 'user_confirmed' : 'full_serving',
+        confirmations: { sugar_level: true, ice_level: true, toppings: true }
+      };
+      state.result = engine.estimate(request);
+      state.result.engine_type = 'evidence_gated';
     } else {
       state.result = BeverageEngine.estimate(state.config);
+      state.result.engine_type = 'local_demo';
     }
     state.step = 5;
     App.rerender();
