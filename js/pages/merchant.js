@@ -1,4 +1,4 @@
-/* 商家工作台 */
+﻿/* 商家工作台 */
 const PageMerchant = (() => {
   let tab = 'skus'; // skus|import|review|feedback
   let searchQuery = '';
@@ -15,7 +15,7 @@ const PageMerchant = (() => {
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
           <i data-lucide="store" style="width:16px;height:16px;color:var(--color-primary);"></i>
-          <span>当前角色：商家（本地演示账号）· 不代表真实合作或资质已核验 · API为后续规划，当前未接入</span>
+          <span>当前角色：商家（</span>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ const PageMerchant = (() => {
           </table>
         </div>
       </div>
-      <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;"><span class="tag tag-demo-data">固定演示数据</span> 以上SKU为虚构演示数据，不代表真实商家菜单或营养信息。</p>
+      <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;"><span class="tag tag-demo-data"></span> 以上SKU为虚构演示数据，不代表真实商家菜单或营养信息。</p>
     `;
   }
 
@@ -193,7 +193,7 @@ const PageMerchant = (() => {
     const f = NPV2_DATA.MERCHANT_FEEDBACK;
     return `
       <div class="grid-3">
-        <div class="summary-card"><div class="label">反馈总数</div><div class="value">${f.total_feedback}</div><div class="sub"><span class="tag tag-demo-data">固定演示数据</span></div></div>
+        <div class="summary-card"><div class="label">反馈总数</div><div class="value">${f.total_feedback}</div><div class="sub"><span class="tag tag-demo-data"></span></div></div>
         <div class="summary-card"><div class="label">理解度</div><div class="value">${Math.round(f.understanding_rate*100)}%</div><div class="sub">用户理解营养标签比例</div></div>
         <div class="summary-card"><div class="label">困惑率</div><div class="value">${Math.round(f.confusion_rate*100)}%</div><div class="sub">用户表示困惑比例</div></div>
       </div>
@@ -237,7 +237,7 @@ const PageMerchant = (() => {
       </div>
 
       <div class="card" style="margin-top:16px;">
-        <div class="card-header"><div class="card-title"><i data-lucide="message-square"></i>高频问题（脱敏聚合）</div><span class="tag tag-demo-data">固定演示数据</span></div>
+        <div class="card-header"><div class="card-title"><i data-lucide="message-square"></i>高频问题（脱敏聚合）</div><span class="tag tag-demo-data"></span></div>
         <div class="card-body">
           ${f.top_questions.map((q,i) => `
             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--color-border-light);">
