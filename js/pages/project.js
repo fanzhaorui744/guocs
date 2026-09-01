@@ -155,7 +155,7 @@ const PageProject = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="cup-soda"></i>饮品知识库链路</div>
-          <span class="tag tag-not-connected">08引擎未接入主页面</span>
+          <span class="tag tag-not-connected"></span>
         </div>
         <div class="card-body">
           <div class="flow-diagram">
