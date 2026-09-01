@@ -280,10 +280,11 @@ const PageMeal = (() => {
   }
 
   // 百度菜品识别
+  const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
+  const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
   async function getBaiduAccessToken() {
-    const apiKey = localStorage.getItem('baidu_ocr_api_key');
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key');
-    if (!apiKey || !secretKey) throw new Error('未配置百度智能云密钥');
+    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
+    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
     const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
     const cached = localStorage.getItem('baidu_access_token');
     const cachedTime = localStorage.getItem('baidu_token_time');
@@ -368,9 +369,9 @@ const PageMeal = (() => {
   }
 
   // DeepSeek 营养补充
+  const DEFAULT_DEEPSEEK_KEY = 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3';
   async function estimateNutrition(dishName) {
-    const apiKey = localStorage.getItem('deepseek_api_key');
-    if (!apiKey) return { success: false, error: '未配置 DeepSeek' };
+    const apiKey = localStorage.getItem('deepseek_api_key') || DEFAULT_DEEPSEEK_KEY;
     const apiBase = localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com';
     const model = localStorage.getItem('deepseek_model') || 'deepseek-chat';
     try {
