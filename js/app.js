@@ -156,15 +156,25 @@ const App = (() => {
     const menuToggle = document.getElementById('menuToggle');
     const mainNav = document.getElementById('mainNav');
     if (menuToggle && mainNav) {
+      const iconMenu = menuToggle.querySelector('.icon-menu');
+      const iconClose = menuToggle.querySelector('.icon-close');
+      function toggleMenuIcon(isOpen) {
+        if (iconMenu && iconClose) {
+          iconMenu.style.display = isOpen ? 'none' : 'block';
+          iconClose.style.display = isOpen ? 'block' : 'none';
+        }
+      }
       menuToggle.addEventListener('click', () => {
         const isOpen = mainNav.classList.toggle('open');
         menuToggle.setAttribute('aria-expanded', isOpen);
+        toggleMenuIcon(isOpen);
       });
       // 点击导航项后关闭菜单
       mainNav.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', () => {
           mainNav.classList.remove('open');
           menuToggle.setAttribute('aria-expanded', 'false');
+          toggleMenuIcon(false);
         });
       });
     }
@@ -172,7 +182,7 @@ const App = (() => {
     // 初始渲染
     render();
 
-    console.log('%c餐量智估Web 原型已加载', 'color:#2F6B4F;font-weight:bold;font-size:14px;');
+    console.log('%c餐量智估Web 原型已加载', 'color:#0B7285;font-weight:bold;font-size:14px;');
     console.log('版本：2026-09-01 · 本地流程原型 · 纯静态架构 · 非医疗建议');
     console.log('数据仅存于本机浏览器 localStorage，未接入任何后端服务。');
   }
