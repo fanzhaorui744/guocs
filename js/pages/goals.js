@@ -5,8 +5,72 @@ const PageGoals = (() => {
     return `
       <div class="page-header">
         <h1 class="page-title">目标与设置</h1>
-        <p class="page-subtitle">日常目标 · 隐私授权 · 数据管理 · 估算边界</p>
+        <p class="page-subtitle">日常目标 · AI服务配置 · 隐私授权 · 数据管理 · 估算边界</p>
         ${UI.demoTags(['demo', 'non-medical'])}
+      </div>
+
+      <!-- AI 服务配置 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="cpu"></i>AI 服务配置</div>
+          <span id="apiStatusTag" class="tag tag-demo">未配置</span>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">DeepSeek API Key</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || 'sk-0dbe8fdfd39c47f780286ab29f6583a3'}" style="flex:1;">
+              <button class="btn btn-secondary btn-sm" id="toggleKeyBtn" onclick="PageGoals.toggleKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
+                <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <p class="form-hint">演示用 Key 已自动填入，建议替换为您自己的。API Key 仅保存在本地浏览器，不会上传到任何服务器。</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">API 地址</label>
+            <input type="text" class="form-input" id="deepseekApiBase" placeholder="https://api.deepseek.com" value="${localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com'}">
+            <p class="form-hint">默认 https://api.deepseek.com，如使用代理或兼容服务可修改。</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="PageGoals.saveApiConfig()"><i data-lucide="save"></i>保存配置</button>
+            <button class="btn btn-secondary" onclick="PageGoals.testApiConnection()"><i data-lucide="zap"></i>测试连接</button>
+          </div>
+          <div id="apiTestResult" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <!-- 百度 OCR 配置 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="scan-text"></i>OCR 服务配置（百度智能云）</div>
+          <span id="ocrStatusTag" class="tag tag-demo">未配置</span>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">API Key</label>
+            <input type="text" class="form-input" id="baiduOcrApiKey" placeholder="API Key" value="${localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy'}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Secret Key</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="password" class="form-input" id="baiduOcrSecretKey" placeholder="Secret Key" value="${localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA'}" style="flex:1;">
+              <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleOcrKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
+                <svg id="ocrEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CORS 代理地址</label>
+            <input type="text" class="form-input" id="baiduOcrProxy" placeholder="https://api.allorigins.win/raw?url=" value="${localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url='}">
+            <p class="form-hint">公共代理仅用于演示，生产环境请使用自有后端代理保护 Secret Key。</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="PageGoals.saveOcrConfig()"><i data-lucide="save"></i>保存配置</button>
+            <button class="btn btn-secondary" onclick="PageGoals.testOcrConnection()"><i data-lucide="zap"></i>测试连接</button>
+          </div>
+          <div id="ocrTestResult" style="margin-top:12px;"></div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:10px;">演示用密钥已自动填入。生产环境建议使用后端代理，不要在前端暴露 Secret Key。</p>
+        </div>
       </div>
 
       <div class="card">
@@ -211,5 +275,107 @@ const PageGoals = (() => {
     }, '清空所有数据', true);
   }
 
-  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll };
+  // DeepSeek API 配置
+  function toggleKeyVisibility() {
+    const input = document.getElementById('deepseekApiKey');
+    const icon = document.getElementById('eyeIcon');
+    if (input && icon) {
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      icon.innerHTML = isPassword
+        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
+
+  function saveApiConfig() {
+    const key = document.getElementById('deepseekApiKey')?.value?.trim();
+    const base = document.getElementById('deepseekApiBase')?.value?.trim() || 'https://api.deepseek.com';
+    if (key) {
+      localStorage.setItem('deepseek_api_key', key);
+      localStorage.setItem('deepseek_api_base', base);
+      const tag = document.getElementById('apiStatusTag');
+      if (tag) { tag.textContent = '已配置'; tag.className = 'tag tag-success'; }
+      UI.toast('DeepSeek 配置已保存', 'success');
+    } else {
+      UI.toast('请输入 API Key', 'warning');
+    }
+  }
+
+  async function testApiConnection() {
+    const resultEl = document.getElementById('apiTestResult');
+    if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--bg-alt);border-radius:8px;font-size:0.8125rem;">正在测试连接...</div>';
+    const apiKey = document.getElementById('deepseekApiKey')?.value?.trim() || localStorage.getItem('deepseek_api_key');
+    const apiBase = document.getElementById('deepseekApiBase')?.value?.trim() || 'https://api.deepseek.com';
+    try {
+      const response = await fetch(`${apiBase}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: '你好' }], max_tokens: 10 })
+      });
+      if (response.ok) {
+        if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--success-light);color:var(--success);border-radius:8px;font-size:0.8125rem;font-weight:600;">✓ 连接成功，API Key 有效</div>';
+        UI.toast('DeepSeek 连接成功', 'success');
+      } else {
+        const err = await response.json().catch(() => ({}));
+        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 连接失败：${response.status} ${err.error?.message || ''}</div>`;
+      }
+    } catch (e) {
+      if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 连接失败：${e.message}</div>`;
+    }
+  }
+
+  // 百度 OCR 配置
+  function toggleOcrKeyVisibility() {
+    const input = document.getElementById('baiduOcrSecretKey');
+    const icon = document.getElementById('ocrEyeIcon');
+    if (input && icon) {
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      icon.innerHTML = isPassword
+        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
+
+  function saveOcrConfig() {
+    const apiKey = document.getElementById('baiduOcrApiKey')?.value?.trim();
+    const secretKey = document.getElementById('baiduOcrSecretKey')?.value?.trim();
+    const proxy = document.getElementById('baiduOcrProxy')?.value?.trim() || 'https://api.allorigins.win/raw?url=';
+    if (apiKey && secretKey) {
+      localStorage.setItem('baidu_ocr_api_key', apiKey);
+      localStorage.setItem('baidu_ocr_secret_key', secretKey);
+      localStorage.setItem('baidu_ocr_proxy', proxy);
+      const tag = document.getElementById('ocrStatusTag');
+      if (tag) { tag.textContent = '已配置'; tag.className = 'tag tag-success'; }
+      UI.toast('百度 OCR 配置已保存', 'success');
+    } else {
+      UI.toast('请输入 API Key 和 Secret Key', 'warning');
+    }
+  }
+
+  async function testOcrConnection() {
+    const resultEl = document.getElementById('ocrTestResult');
+    if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--bg-alt);border-radius:8px;font-size:0.8125rem;">正在获取 access_token...</div>';
+    const apiKey = document.getElementById('baiduOcrApiKey')?.value?.trim() || localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy';
+    const secretKey = document.getElementById('baiduOcrSecretKey')?.value?.trim() || localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
+    const proxy = document.getElementById('baiduOcrProxy')?.value?.trim() || 'https://api.allorigins.win/raw?url=';
+    try {
+      const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
+      const response = await fetch(proxy + encodeURIComponent(tokenUrl));
+      const data = await response.json();
+      if (data.access_token) {
+        localStorage.setItem('baidu_access_token', data.access_token);
+        localStorage.setItem('baidu_token_time', Date.now().toString());
+        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--success-light);color:var(--success);border-radius:8px;font-size:0.8125rem;font-weight:600;">✓ 连接成功，access_token 已获取（有效期30天）</div>`;
+        UI.toast('百度 OCR 连接成功', 'success');
+      } else {
+        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 失败：${data.error_description || '密钥无效'}</div>`;
+      }
+    } catch (e) {
+      if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 失败：${e.message}（代理可能不可用）</div>`;
+    }
+  }
+
+  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll, toggleKeyVisibility, saveApiConfig, testApiConnection, toggleOcrKeyVisibility, saveOcrConfig, testOcrConnection };
 })();
