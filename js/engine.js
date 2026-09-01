@@ -383,3 +383,279 @@ const BeverageEngine = (() => {
     iceLabel
   };
 })();
+
+/* ============================================================
+   证据门控饮品引擎（08引擎核心逻辑前端移植）
+   - 严格遵守证据门控：只有 official/merchant_confirmed/estimated 可计算
+   - 糖度delta必须验证，不能按比例猜测
+   - 小料必须验证，estimated不参与总量
+   - unknown不按0合并，结果显示"未知"
+   - 区间非退化时value=null
+   - consumed_ratio只缩放已知营养项
+   ============================================================ */
+class EvidenceBeverageEngine {
+  constructor(catalog) {
+    this.catalog = catalog || { records: [], sources: [], catalog_mode: 'synthetic_demo' };
+    this.NUTRIENTS = ['kcal', 'protein_g', 'fat_g', 'carbohydrate_g', 'sugar_g', 'sodium_mg'];
+    this.VERIFIED_TYPES = ['official', 'merchant_confirmed'];
+    this.CALCULABLE_TYPES = ['official', 'merchant_confirmed', 'estimated'];
+  }
+
+  estimate(request) {
+    const warnings = [];
+    const required = ['brand_id', 'sku_id', 'cup_size_id', 'sugar_level_id', 'ice_level_id'];
+    const missing = required.filter(f => !request[f]);
+    if (missing.length > 0) {
+      return this._unknownResponse(request, [{ code: 'CONFIGURATION_MISSING', message: '品牌、SKU、杯型、糖度和冰量必须完整', details: missing }]);
+    }
+
+    const records = this.catalog.records.filter(r => r.brand_id === request.brand_id && r.sku_id === request.sku_id);
+    if (records.length === 0) {
+      return this._unknownResponse(request, [{ code: 'SKU_NOT_FOUND', message: '目录中没有该 SKU' }]);
+    }
+
+    const record = records[0];
+    if (!this.CALCULABLE_TYPES.includes(record.record_status)) {
+      return this._unknownResponse(request, [{ code: 'PARTIAL_RECORD', message: '该记录只有部分事实，不能输出伪精确总热量' }], record);
+    }
+
+    // 查找 base beverage
+    const bases = record.base_beverages || [];
+    const cupBases = bases.filter(b => b.cup_size_id === request.cup_size_id);
+    if (cupBases.length === 0) {
+      return this._unknownResponse(request, [{ code: 'CUP_SIZE_UNAVAILABLE', message: '没有该杯型的已验证 base beverage' }], record);
+    }
+    const matchedBases = cupBases.filter(b => b.ice_level_id === request.ice_level_id);
+    if (matchedBases.length === 0) {
+      return this._unknownResponse(request, [{ code: 'ICE_LEVEL_UNAVAILABLE', message: '没有该冰量的已验证 base beverage' }], record);
+    }
+    const base = matchedBases[0];
+    const volumeMl = base.volume_ml;
+
+    const components = [this._resolveComponent(base, 'base_beverage', 1, volumeMl, warnings)];
+
+    // 糖度 delta
+    const baseSugar = base.sugar_level_id || 'unknown';
+    if (request.sugar_level_id !== baseSugar) {
+      const deltas = record.sugar_deltas || [];
+      const delta = deltas.find(d =>
+        d.from_sugar_level_id === baseSugar &&
+        d.to_sugar_level_id === request.sugar_level_id &&
+        d.cup_size_id === request.cup_size_id &&
+        d.ice_level_id === request.ice_level_id
+      );
+      if (!delta || !this.VERIFIED_TYPES.includes(delta.nutrition?.value_type)) {
+        warnings.push({ code: 'SUGAR_DELTA_NOT_VERIFIED', message: '请求糖度相对 base beverage 的差值没有经过验证，不能按比例猜测' });
+        components.push(this._unknownComponent('unverified_sugar_delta', 'sugar_delta'));
+      } else {
+        components.push(this._resolveComponent(delta, 'sugar_delta', 1, volumeMl, warnings));
+      }
+    }
+
+    // 小料
+    const toppingRequests = request.toppings || [];
+    const toppings = record.toppings || [];
+    for (const tr of toppingRequests) {
+      const topping = toppings.find(t => t.topping_id === tr.topping_id);
+      if (!topping || !this.VERIFIED_TYPES.includes(topping.nutrition?.value_type)) {
+        warnings.push({ code: 'TOPPING_NOT_VERIFIED', message: `小料 ${tr.topping_id} 没有已验证的标准份营养数据` });
+        components.push(this._unknownComponent(tr.topping_id, 'topping'));
+        continue;
+      }
+      components.push(this._resolveComponent(topping, 'topping', tr.servings || 1, volumeMl, warnings));
+    }
+
+    // 饮用比例
+    const ratio = request.consumed_ratio != null ? request.consumed_ratio : 1;
+    if (ratio < 1) {
+      warnings.push({ code: 'CONSUMED_RATIO_APPLIED', message: '营养结果仅按实际饮用比例缩放' });
+    }
+
+    // 合并营养
+    const nutrients = {};
+    for (const nutrient of this.NUTRIENTS) {
+      nutrients[nutrient] = this._combineNutrient(nutrient, components, ratio);
+    }
+
+    const knownCount = Object.values(nutrients).filter(n => n.value_type !== 'unknown').length;
+    const status = knownCount === 0 ? 'unknown' : knownCount === this.NUTRIENTS.length ? 'ok' : 'partial';
+
+    return {
+      schema_version: '1.0.0',
+      status,
+      identity: { brand_id: request.brand_id, sku_id: request.sku_id, display_name: record.display_name, record_status: record.record_status },
+      serving_basis: {
+        cup_size_id: request.cup_size_id,
+        cup_size_label: base.cup_size_label,
+        volume_ml: volumeMl,
+        sugar_level_id: request.sugar_level_id,
+        ice_level_id: request.ice_level_id,
+        toppings: toppingRequests,
+        consumed_ratio: ratio
+      },
+      nutrients,
+      value_type: nutrients.kcal.value_type,
+      confidence: nutrients.kcal.confidence,
+      components: components.map(c => this._publicComponent(c)),
+      sources: this._collectSources(components, record),
+      warnings,
+      display_policy: {
+        precise_total_allowed: nutrients.kcal.display_mode === 'exact',
+        headline: nutrients.kcal.display_text,
+        unknown_must_not_be_coerced_to_zero: true
+      }
+    };
+  }
+
+  _resolveComponent(component, role, servings, volumeMl, warnings) {
+    const profile = component.nutrition || {};
+    const componentId = component.component_id || component.topping_id || role + '_component';
+    const basis = profile.basis || {};
+    const basisComplete = basis.type === 'per_serving' || basis.type === 'per_100_ml';
+    const sourceIds = profile.source_ids || [];
+    const valueType = profile.value_type || 'unknown';
+
+    if (!basisComplete) {
+      warnings.push({ code: 'SERVING_BASIS_INCOMPLETE', message: `组件 ${componentId} 缺少完整 serving basis` });
+    }
+
+    let scale = 1;
+    if (basis.type === 'per_100_ml' && basisComplete && volumeMl) {
+      scale = volumeMl / (basis.quantity || 100) * servings;
+    } else if (basis.type === 'per_serving' && basisComplete) {
+      scale = servings / (basis.quantity || 1);
+    }
+
+    const confidence = profile.confidence || 0;
+    const rawNutrients = profile.nutrients || {};
+    const globallyValid = basisComplete && valueType !== 'unknown';
+    const terms = {};
+
+    for (const nutrient of this.NUTRIENTS) {
+      const raw = rawNutrients[nutrient];
+      if (!globallyValid || !raw) {
+        terms[nutrient] = { known: false };
+        continue;
+      }
+      try {
+        let lower, upper;
+        if (raw.interval) {
+          lower = raw.interval.min;
+          upper = raw.interval.max;
+        } else {
+          lower = upper = raw.value;
+        }
+        if (lower > upper) throw new Error('invalid interval');
+        if (valueType === 'estimated' && lower === upper) throw new Error('estimated must be range');
+        const value = raw.value != null ? raw.value : (lower + upper) / 2;
+        terms[nutrient] = {
+          known: true,
+          value: value * scale,
+          lower: lower * scale,
+          upper: upper * scale,
+          value_type: valueType,
+          confidence
+        };
+      } catch (e) {
+        terms[nutrient] = { known: false };
+      }
+    }
+
+    return {
+      component_id: componentId,
+      role,
+      label: component.label || component.cup_size_label || componentId,
+      value_type: globallyValid ? valueType : 'unknown',
+      confidence: globallyValid ? confidence : 0,
+      source_ids: sourceIds,
+      basis,
+      applied_scale: scale,
+      terms
+    };
+  }
+
+  _unknownComponent(componentId, role) {
+    const terms = {};
+    for (const n of this.NUTRIENTS) terms[n] = { known: false };
+    return { component_id: componentId, role, label: componentId, value_type: 'unknown', confidence: 0, source_ids: [], basis: null, applied_scale: 1, terms };
+  }
+
+  _combineNutrient(nutrient, components, ratio) {
+    const terms = components.map(c => c.terms[nutrient] || { known: false });
+    if (!terms.length || terms.some(t => !t.known)) {
+      return { value: null, unit: nutrient === 'kcal' ? 'kcal' : nutrient === 'sodium_mg' ? 'mg' : 'g', value_type: 'unknown', interval: null, confidence: 0, display_mode: 'unknown', display_text: '未知' };
+    }
+    const value = terms.reduce((s, t) => s + t.value, 0) * ratio;
+    const lower = terms.reduce((s, t) => s + t.lower, 0) * ratio;
+    const upper = terms.reduce((s, t) => s + t.upper, 0) * ratio;
+    const valueTypes = terms.map(t => t.value_type);
+    const valueType = valueTypes.includes('estimated') ? 'estimated' : valueTypes.includes('merchant_confirmed') ? 'merchant_confirmed' : 'official';
+    const confidence = Math.min(...terms.map(t => t.confidence));
+    const unit = nutrient === 'kcal' ? 'kcal' : nutrient === 'sodium_mg' ? 'mg' : 'g';
+
+    let displayMode, displayText;
+    if (valueType === 'estimated') {
+      displayMode = 'estimated_range';
+      displayText = `估算 ${this._round(lower)}-${this._round(upper)} ${unit}`;
+    } else if (lower === upper) {
+      displayMode = 'exact';
+      displayText = `${this._round(value)} ${unit}`;
+    } else {
+      displayMode = 'range';
+      displayText = `${this._round(lower)}-${this._round(upper)} ${unit}`;
+    }
+
+    return {
+      value: (valueType === 'estimated' || lower !== upper) ? null : this._round(value),
+      unit,
+      value_type: valueType,
+      interval: { min: this._round(lower), max: this._round(upper) },
+      confidence,
+      display_mode: displayMode,
+      display_text: displayText
+    };
+  }
+
+  _round(n) {
+    const r = Math.round(n * 100) / 100;
+    return Number.isInteger(r) ? r : r;
+  }
+
+  _publicComponent(c) {
+    const contributions = {};
+    for (const n of this.NUTRIENTS) {
+      const t = c.terms[n] || { known: false };
+      contributions[n] = t.known ? { value: this._round(t.value), unit: n === 'kcal' ? 'kcal' : n === 'sodium_mg' ? 'mg' : 'g', interval: { min: this._round(t.lower), max: this._round(t.upper) } } : null;
+    }
+    return { component_id: c.component_id, role: c.role, label: c.label, value_type: c.value_type, confidence: c.confidence, serving_basis: c.basis, applied_scale: c.applied_scale, source_ids: c.source_ids, contributions };
+  }
+
+  _collectSources(components, record) {
+    const sourceIds = new Set();
+    for (const c of components) for (const id of (c.source_ids || [])) sourceIds.add(id);
+    for (const id of (record.source_ids || [])) sourceIds.add(id);
+    const sources = this.catalog.sources || [];
+    return Array.from(sourceIds).map(id => sources.find(s => s.source_id === id)).filter(Boolean).map(s => ({ source_id: s.source_id, publisher: s.publisher, source_type: s.source_type, evidence_grade: s.evidence_grade, review_status: s.review_status }));
+  }
+
+  _unknownResponse(request, warnings, record) {
+    const nutrients = {};
+    for (const n of this.NUTRIENTS) {
+      nutrients[n] = { value: null, unit: n === 'kcal' ? 'kcal' : n === 'sodium_mg' ? 'mg' : 'g', value_type: 'unknown', interval: null, confidence: 0, display_mode: 'unknown', display_text: '未知' };
+    }
+    return {
+      schema_version: '1.0.0',
+      status: 'unknown',
+      identity: { brand_id: request.brand_id, sku_id: request.sku_id, display_name: record?.display_name, record_status: record?.record_status },
+      serving_basis: { cup_size_id: request.cup_size_id, volume_ml: null, sugar_level_id: request.sugar_level_id, ice_level_id: request.ice_level_id, toppings: request.toppings || [], consumed_ratio: request.consumed_ratio || 1 },
+      nutrients,
+      value_type: 'unknown',
+      confidence: 0,
+      components: [],
+      sources: record ? this._collectSources([], record) : [],
+      warnings,
+      display_policy: { precise_total_allowed: false, headline: '未知', unknown_must_not_be_coerced_to_zero: true }
+    };
+  }
+}
+
