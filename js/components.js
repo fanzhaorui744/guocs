@@ -11,10 +11,7 @@ const UI = (() => {
   function tag(type, text) { return `<span class="tag tag-${type}">${text}</span>`; }
 
   function demoTags(tags = []) {
-    const defaults = ['demo', 'local'];
-    const all = [...new Set([...defaults, ...tags])];
-    const map = { demo:'Demo/示例', local:'本地流程原型', 'demo-data':'演示数据', 'not-connected':'未接入', pending:'待确认', 'source-low':'来源不足', 'non-medical':'非医疗建议' };
-    return `<div class="page-tags">${all.map(t => tag(t, map[t] || t)).join('')}</div>`;
+    return '';
   }
 
   // ========== 营养值展示 ==========
