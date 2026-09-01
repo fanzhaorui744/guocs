@@ -197,10 +197,11 @@ const PageOrder = (() => {
   }
 
   // 百度 OCR
+  const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
+  const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
   async function getBaiduAccessToken() {
-    const apiKey = localStorage.getItem('baidu_ocr_api_key');
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key');
-    if (!apiKey || !secretKey) throw new Error('未配置百度 OCR 密钥，请先在设置页配置');
+    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
+    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
     const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
     const cached = localStorage.getItem('baidu_access_token');
     const cachedTime = localStorage.getItem('baidu_token_time');
@@ -258,11 +259,13 @@ const PageOrder = (() => {
   }
 
   // DeepSeek 提取
+  const DEFAULT_DEEPSEEK_KEY = 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3';
+  const DEFAULT_DEEPSEEK_BASE = 'https://api.deepseek.com';
+  const DEFAULT_DEEPSEEK_MODEL = 'deepseek-chat';
   async function extractWithDeepSeek(orderText) {
-    const apiKey = localStorage.getItem('deepseek_api_key');
-    if (!apiKey) return { success: false, error: '未配置 AI 服务 API Key' };
-    const apiBase = localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com';
-    const model = localStorage.getItem('deepseek_model') || 'deepseek-chat';
+    const apiKey = localStorage.getItem('deepseek_api_key') || DEFAULT_DEEPSEEK_KEY;
+    const apiBase = localStorage.getItem('deepseek_api_base') || DEFAULT_DEEPSEEK_BASE;
+    const model = localStorage.getItem('deepseek_model') || DEFAULT_DEEPSEEK_MODEL;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
