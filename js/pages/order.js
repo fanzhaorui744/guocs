@@ -67,7 +67,7 @@ const PageOrder = (() => {
               </button>
               <button class="btn btn-secondary" onclick="PageOrder.useLocalMatch()"><i data-lucide="list"></i>本地规则匹配</button>
             </div>
-            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;">AI 提取结果仅供参考，请逐项确认。未配置 AI 时自动降级为本地规则匹配。</p>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;">AI 提取结果仅供参考，请逐项确认。已使用默认 API 配置，可在设置页更换；AI 失败时自动降级为本地规则匹配。</p>
           </div>
         </div>
       ` : ''}
@@ -90,11 +90,11 @@ const PageOrder = (() => {
         <div class="card">
           <div class="card-header">
             <div class="card-title"><i data-lucide="list-checks"></i>提取结果（${state.candidates.length}项）</div>
-            <span class="tag ${state.extractedData?.source==='deepseek'?'tag-demo':'tag-local'}">${state.extractedData?.source==='deepseek'?'AI提取（DeepSeek）':'本地规则匹配（未配置 AI）'}</span>
+            <span class="tag ${state.extractedData?.source==='deepseek'?'tag-demo':'tag-local'}">${state.extractedData?.source==='deepseek'?'AI提取（DeepSeek）':'本地规则匹配'}</span>
           </div>
           ${state.aiNotConfigured ? `
             <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-              <span style="font-size:0.8125rem;color:var(--warning);font-weight:500;">未配置 AI 服务，当前使用本地规则匹配，识别精度有限</span>
+              <span style="font-size:0.8125rem;color:var(--warning);font-weight:500;">当前使用本地规则匹配，识别精度有限</span>
               <a href="#/goals" class="btn btn-primary btn-sm" style="flex-shrink:0;"><i data-lucide="settings"></i>去配置 AI 服务</a>
             </div>
           ` : ''}
@@ -299,13 +299,6 @@ const PageOrder = (() => {
     if (!text) { UI.toast('请先输入或识别订单文字', 'warning'); return; }
     state.orderText = text;
     state.error = null;
-    const hasAI = !!localStorage.getItem('deepseek_api_key');
-    if (!hasAI) {
-      state.aiNotConfigured = true;
-      localMatch(text);
-      App.rerender();
-      return;
-    }
     state.aiNotConfigured = false;
     state.step = 'ai_processing';
     App.rerender();
