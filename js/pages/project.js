@@ -46,45 +46,88 @@ const PageProject = (() => {
           </div>
           <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-top:8px;">所有协同为本地流程演示，不代表真实合作、签约或试点。</p>
           <div class="divider"></div>
-          <h4 style="font-size:0.9375rem;margin-bottom:12px;">🔄 三方协同闭环（SVG流程图）</h4>
-          <svg width="100%" viewBox="0 0 600 280" style="max-width:600px;margin:0 auto;display:block;">
-            <!-- 用户节点 -->
-            <circle cx="300" cy="50" r="42" fill="var(--color-primary-50)" stroke="var(--color-primary-500)" stroke-width="2"/>
-            <text x="300" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="var(--color-primary-700)">👤 用户</text>
-            <text x="300" y="62" text-anchor="middle" font-size="10" fill="var(--color-text-muted)">记录/授权/分享</text>
-            <!-- 商家节点 -->
-            <circle cx="100" cy="200" r="42" fill="var(--color-accent-50)" stroke="var(--color-accent-500)" stroke-width="2"/>
-            <text x="100" y="196" text-anchor="middle" font-size="14" font-weight="700" fill="var(--color-accent-700)">🏪 商家</text>
-            <text x="100" y="212" text-anchor="middle" font-size="10" fill="var(--color-text-muted)">SKU/补充/反馈</text>
-            <!-- 营养师节点 -->
-            <circle cx="500" cy="200" r="42" fill="var(--color-warning-50)" stroke="var(--color-warning-500)" stroke-width="2"/>
-            <text x="500" y="196" text-anchor="middle" font-size="14" font-weight="700" fill="var(--color-warning-700)">🩺 营养师</text>
-            <text x="500" y="212" text-anchor="middle" font-size="10" fill="var(--color-text-muted)">复核/建议/审计</text>
-            <!-- 社区节点 -->
-            <rect x="240" y="210" width="120" height="50" rx="10" fill="var(--color-success-50)" stroke="var(--color-success-500)" stroke-width="2"/>
-            <text x="300" y="232" text-anchor="middle" font-size="14" font-weight="700" fill="var(--color-success-700)">💬 协同社区</text>
-            <text x="300" y="248" text-anchor="middle" font-size="10" fill="var(--color-text-muted)">沉淀/讨论/纠错</text>
-            <!-- 箭头：用户→商家 -->
-            <path d="M 268 75 Q 160 110 130 165" fill="none" stroke="var(--color-primary-400)" stroke-width="2" marker-end="url(#arrowhead)"/>
-            <text x="170" y="115" font-size="10" fill="var(--color-text-muted)">记录触发补充邀请</text>
-            <!-- 箭头：商家→用户 -->
-            <path d="M 130 175 Q 180 130 268 85" fill="none" stroke="var(--color-accent-400)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
-            <text x="175" y="155" font-size="10" fill="var(--color-text-muted)">更新回流</text>
-            <!-- 箭头：用户→营养师 -->
-            <path d="M 332 75 Q 440 110 470 165" fill="none" stroke="var(--color-primary-400)" stroke-width="2" marker-end="url(#arrowhead)"/>
-            <text x="410" y="115" font-size="10" fill="var(--color-text-muted)">授权复核</text>
-            <!-- 箭头：营养师→用户 -->
-            <path d="M 470 175 Q 420 130 332 85" fill="none" stroke="var(--color-warning-400)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
-            <text x="400" y="155" font-size="10" fill="var(--color-text-muted)">建议反馈</text>
-            <!-- 箭头：商家→社区 -->
-            <path d="M 142 210 Q 200 225 240 230" fill="none" stroke="var(--color-accent-400)" stroke-width="2" marker-end="url(#arrowhead)"/>
-            <!-- 箭头：营养师→社区 -->
-            <path d="M 458 210 Q 400 225 360 230" fill="none" stroke="var(--color-warning-400)" stroke-width="2" marker-end="url(#arrowhead)"/>
-            <!-- 箭头：社区→用户 -->
-            <path d="M 300 210 L 300 92" fill="none" stroke="var(--color-success-400)" stroke-width="2" marker-end="url(#arrowhead)"/>
-            <text x="310" y="155" font-size="10" fill="var(--color-text-muted)">社区沉淀反哺</text>
-            <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--color-text-muted)"/></marker></defs>
-          </svg>
+          <h4 style="font-size:0.9375rem;margin-bottom:12px;">🔄 三方协同闭环（流程图）</h4>
+          <!-- 桌面端流程图：菱形布局 -->
+          <div class="flow-chart-desktop" style="max-width:560px;margin:0 auto;">
+            <svg width="100%" viewBox="0 0 560 300" style="display:block;">
+              <defs>
+                <linearGradient id="gradUser" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0B7285"/><stop offset="100%" stop-color="#2A9D8F"/></linearGradient>
+                <linearGradient id="gradMerchant" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D9A441"/><stop offset="100%" stop-color="#E8B84A"/></linearGradient>
+                <linearGradient id="gradNutri" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#818CF8"/></linearGradient>
+                <linearGradient id="gradCommunity" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E76F51"/><stop offset="100%" stop-color="#F08A6E"/></linearGradient>
+                <marker id="arrowFlow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#94A3B8"/></marker>
+              </defs>
+              <!-- 连接线 -->
+              <path d="M 250 65 Q 150 110 115 175" fill="none" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowFlow)"/>
+              <path d="M 310 65 Q 410 110 445 175" fill="none" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowFlow)"/>
+              <path d="M 140 215 Q 200 245 250 250" fill="none" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowFlow)"/>
+              <path d="M 420 215 Q 360 245 310 250" fill="none" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowFlow)"/>
+              <path d="M 280 245 L 280 100" fill="none" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrowFlow)"/>
+              <!-- 用户节点 -->
+              <circle cx="280" cy="50" r="38" fill="url(#gradUser)" filter="drop-shadow(0 4px 10px rgba(11,114,133,0.3))"/>
+              <path d="M268 42a8 8 0 1 0 16 0 8 8 0 0 0-16 0 M260 68v-2a6 6 0 0 1 6-6h28a6 6 0 0 1 6 6v2" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="280" y="108" text-anchor="middle" font-size="14" font-weight="600" fill="#5A6B7D">用户</text>
+              <text x="280" y="124" text-anchor="middle" font-size="11" fill="#8B9AAB">记录/授权/分享</text>
+              <!-- 商家节点 -->
+              <circle cx="95" cy="200" r="38" fill="url(#gradMerchant)" filter="drop-shadow(0 4px 10px rgba(217,164,65,0.3))"/>
+              <path d="M82 192h26 M85 192v16a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-16 M88 186l3-6h12l3 6" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="95" y="258" text-anchor="middle" font-size="14" font-weight="600" fill="#5A6B7D">商家</text>
+              <text x="95" y="274" text-anchor="middle" font-size="11" fill="#8B9AAB">SKU/补充/反馈</text>
+              <!-- 营养师节点 -->
+              <circle cx="465" cy="200" r="38" fill="url(#gradNutri)" filter="drop-shadow(0 4px 10px rgba(99,102,241,0.3))"/>
+              <path d="M453 188v10a8 8 0 0 0 8 8h0a8 8 0 0 0 8-8v-10 M457 188h16 M449 218v6a6 6 0 0 0 6 6h20a6 6 0 0 0 6-6v-6" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="465" y="258" text-anchor="middle" font-size="14" font-weight="600" fill="#5A6B7D">营养师</text>
+              <text x="465" y="274" text-anchor="middle" font-size="11" fill="#8B9AAB">复核/建议/审计</text>
+              <!-- 社区节点 -->
+              <circle cx="280" cy="265" r="38" fill="url(#gradCommunity)" filter="drop-shadow(0 4px 10px rgba(231,111,81,0.3))"/>
+              <path d="M262 258h36a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4h-4l-8 6v-6h-24a4 4 0 0 1-4-4v-14a4 4 0 0 1 4-4z" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="280" y="320" text-anchor="middle" font-size="14" font-weight="600" fill="#5A6B7D">协同社区</text>
+              <text x="280" y="336" text-anchor="middle" font-size="11" fill="#8B9AAB">沉淀/讨论/纠错</text>
+            </svg>
+          </div>
+          <!-- 移动端流程图：垂直布局 -->
+          <div class="flow-chart-mobile" style="max-width:320px;margin:0 auto;">
+            <svg width="100%" viewBox="0 0 320 520" style="display:block;">
+              <defs>
+                <linearGradient id="gradUserM" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0B7285"/><stop offset="100%" stop-color="#2A9D8F"/></linearGradient>
+                <linearGradient id="gradMerchantM" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D9A441"/><stop offset="100%" stop-color="#E8B84A"/></linearGradient>
+                <linearGradient id="gradNutriM" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#818CF8"/></linearGradient>
+                <linearGradient id="gradCommunityM" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E76F51"/><stop offset="100%" stop-color="#F08A6E"/></linearGradient>
+                <marker id="arrowFlowM" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#94A3B8"/></marker>
+              </defs>
+              <!-- 曲线连接线 -->
+              <path d="M 160 90 Q 180 110 160 130" fill="none" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowFlowM)"/>
+              <path d="M 160 210 Q 140 230 160 250" fill="none" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowFlowM)"/>
+              <path d="M 160 330 Q 180 350 160 370" fill="none" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrowFlowM)"/>
+              <!-- 用户节点 -->
+              <circle cx="160" cy="55" r="32" fill="url(#gradUserM)" filter="drop-shadow(0 4px 10px rgba(11,114,133,0.3))"/>
+              <path d="M150 48a7 7 0 1 0 14 0 7 7 0 0 0-14 0 M143 70v-2a5 5 0 0 1 5-5h24a5 5 0 0 1 5 5v2" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="160" y="105" text-anchor="middle" font-size="13" font-weight="600" fill="#5A6B7D">用户</text>
+              <text x="160" y="120" text-anchor="middle" font-size="10" fill="#8B9AAB">记录/授权/分享</text>
+              <!-- 商家节点 -->
+              <circle cx="160" cy="175" r="32" fill="url(#gradMerchantM)" filter="drop-shadow(0 4px 10px rgba(217,164,65,0.3))"/>
+              <path d="M148 168h24 M151 168v14a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-14 M154 163l2.5-5h11l2.5 5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="160" y="225" text-anchor="middle" font-size="13" font-weight="600" fill="#5A6B7D">商家</text>
+              <text x="160" y="240" text-anchor="middle" font-size="10" fill="#8B9AAB">SKU/补充/反馈</text>
+              <!-- 营养师节点 -->
+              <circle cx="160" cy="295" r="32" fill="url(#gradNutriM)" filter="drop-shadow(0 4px 10px rgba(99,102,241,0.3))"/>
+              <path d="M150 284v9a7 7 0 0 0 7 7h0a7 7 0 0 0 7-7v-9 M153 284h14 M146 310v5a5 5 0 0 0 5 5h18a5 5 0 0 0 5-5v-5" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="160" y="345" text-anchor="middle" font-size="13" font-weight="600" fill="#5A6B7D">营养师</text>
+              <text x="160" y="360" text-anchor="middle" font-size="10" fill="#8B9AAB">复核/建议/审计</text>
+              <!-- 社区节点 -->
+              <circle cx="160" cy="415" r="32" fill="url(#gradCommunityM)" filter="drop-shadow(0 4px 10px rgba(231,111,81,0.3))"/>
+              <path d="M144 409h32a3.5 3.5 0 0 1 3.5 3.5v12a3.5 3.5 0 0 1-3.5 3.5h-3.5l-7 5v-5h-21.5a3.5 3.5 0 0 1-3.5-3.5v-12a3.5 3.5 0 0 1 3.5-3.5z" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="160" y="465" text-anchor="middle" font-size="13" font-weight="600" fill="#5A6B7D">协同社区</text>
+              <text x="160" y="480" text-anchor="middle" font-size="10" fill="#8B9AAB">沉淀/讨论/纠错</text>
+            </svg>
+          </div>
+          <style>
+            .flow-chart-mobile { display: none; }
+            @media (max-width: 600px) {
+              .flow-chart-desktop { display: none; }
+              .flow-chart-mobile { display: block; }
+            }
+          </style>
           <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">实线=正向流程 · 虚线=反馈回流 · 所有数据脱敏聚合，不暴露个人健康信息</p>
         </div>
       </div>
