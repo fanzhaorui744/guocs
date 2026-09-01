@@ -81,7 +81,7 @@ const PageMeal = (() => {
               <button class="btn btn-primary" onclick="PageMeal.startRecognize()"><i data-lucide="scan-search"></i>开始菜品识别</button>
               <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>使用演示数据</button>
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">识别结果由百度智能云菜品识别 API 提供，卡路里为每100g参考值。</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">识别结果由百度智能云菜品识别 API 提供，卡路里为每100g参考值。已使用默认 API 配置，可在设置页更换。</p>
           ` : `
             <div class="upload-zone" id="mealUploadZone" onclick="document.getElementById('mealImageInput').click()" tabindex="0" role="button" aria-label="上传餐食照片">
               <div class="upload-icon"><i data-lucide="camera"></i></div>
@@ -89,7 +89,7 @@ const PageMeal = (() => {
               <div class="upload-hint">支持 JPG/PNG，最大 4MB · 图片仅本地处理后调用 API</div>
               <input type="file" id="mealImageInput" accept="image/*" style="display:none" onchange="PageMeal.handleImage(this.files[0])">
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">未配置百度密钥时可点击"使用演示数据"体验流程</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">已使用默认 API 配置，可在设置页更换；也可点击"使用演示数据"体验流程</p>
           `}
         </div>
       </div>
@@ -328,14 +328,7 @@ const PageMeal = (() => {
 
   async function startRecognize() {
     if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
-    const apiKey = localStorage.getItem('baidu_ocr_api_key');
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key');
-    if (!apiKey || !secretKey) {
-      state.error = { title: '未配置菜品识别服务', detail: '请先在设置页配置百度智能云 API Key 和 Secret Key，或使用演示数据体验流程。' };
-      state.step = 'upload';
-      App.rerender();
-      return;
-    }
+    state.error = null;
     state.step = 'recognizing';
     state.error = null;
     state.isMock = false;
@@ -401,17 +394,15 @@ const PageMeal = (() => {
     state.nutrition = null;
     state.step = 'detail';
     App.rerender();
-    // 自动调用 DeepSeek 营养补充
-    if (localStorage.getItem('deepseek_api_key')) {
-      state.nutritionLoading = true;
-      App.rerender();
-      const result = await estimateNutrition(state.selectedDish.name);
-      if (result.success) {
-        state.nutrition = result.data;
-      }
-      state.nutritionLoading = false;
-      App.rerender();
+    // 自动调用 DeepSeek 营养补充（使用默认或已配置的密钥）
+    state.nutritionLoading = true;
+    App.rerender();
+    const result = await estimateNutrition(state.selectedDish.name);
+    if (result.success) {
+      state.nutrition = result.data;
     }
+    state.nutritionLoading = false;
+    App.rerender();
   }
 
   function setWeight(w) {
@@ -428,15 +419,13 @@ const PageMeal = (() => {
       state.nutrition = null;
       state.step = 'detail';
       App.rerender();
-      if (localStorage.getItem('deepseek_api_key')) {
-        state.nutritionLoading = true;
+      state.nutritionLoading = true;
+      App.rerender();
+      estimateNutrition(name.trim()).then(result => {
+        if (result.success) state.nutrition = result.data;
+        state.nutritionLoading = false;
         App.rerender();
-        estimateNutrition(name.trim()).then(result => {
-          if (result.success) state.nutrition = result.data;
-          state.nutritionLoading = false;
-          App.rerender();
-        });
-      }
+      });
     }
   }
 
