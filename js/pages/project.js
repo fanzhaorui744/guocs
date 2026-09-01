@@ -1,4 +1,4 @@
-﻿/* 项目展示与证据页 */
+/* 项目展示与证据页 */
 const PageProject = (() => {
   function render() {
     const info = NPV2_DATA.PROJECT_INFO;
@@ -265,7 +265,7 @@ const PageProject = (() => {
           <p>• 饮品目录数据：虚构交互候选，不代表真实品牌</p>
           <p>• 营养参考：中国食物成分表、USDA FoodData Central（仅作参考区间）</p>
           <p>• 真实品牌图片、菜单、Logo：未使用，均为文字占位或自制示意</p>
-          <p>• 项目Logo：纯文字占位「餐量智估」，不暗示已注册商标</p>
+          <p>• 项目Logo：纯文字占位「营养智链」，不暗示已注册商标</p>
           <p>• 08饮品引擎：独立契约/adapter/fixture，位于 G:\\国创赛\\workstreams\\08_beverage_engine，尚未接入主页面</p>
         </div>
       </div>
