@@ -90,8 +90,14 @@ const PageOrder = (() => {
         <div class="card">
           <div class="card-header">
             <div class="card-title"><i data-lucide="list-checks"></i>提取结果（${state.candidates.length}项）</div>
-            <span class="tag ${state.extractedData?.source==='deepseek'?'tag-demo':'tag-local'}">${state.extractedData?.source==='deepseek'?'AI提取（DeepSeek）':'本地规则匹配'}</span>
+            <span class="tag ${state.extractedData?.source==='deepseek'?'tag-demo':'tag-local'}">${state.extractedData?.source==='deepseek'?'AI提取（DeepSeek）':'本地规则匹配（未配置 AI）'}</span>
           </div>
+          ${state.aiNotConfigured ? `
+            <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <span style="font-size:0.8125rem;color:var(--warning);font-weight:500;">未配置 AI 服务，当前使用本地规则匹配，识别精度有限</span>
+              <a href="#/goals" class="btn btn-primary btn-sm" style="flex-shrink:0;"><i data-lucide="settings"></i>去配置 AI 服务</a>
+            </div>
+          ` : ''}
           <div class="card-body" style="padding:0;">
             ${state.extractedData ? `
               <div style="display:flex;gap:16px;flex-wrap:wrap;padding:12px 14px;background:var(--color-bg-alt);border-radius:var(--radius-md);margin-bottom:14px;">
@@ -192,8 +198,9 @@ const PageOrder = (() => {
 
   // 百度 OCR
   async function getBaiduAccessToken() {
-    const apiKey = localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy';
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
+    const apiKey = localStorage.getItem('baidu_ocr_api_key');
+    const secretKey = localStorage.getItem('baidu_ocr_secret_key');
+    if (!apiKey || !secretKey) throw new Error('未配置百度 OCR 密钥，请先在设置页配置');
     const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
     const cached = localStorage.getItem('baidu_access_token');
     const cachedTime = localStorage.getItem('baidu_token_time');
@@ -252,8 +259,10 @@ const PageOrder = (() => {
 
   // DeepSeek 提取
   async function extractWithDeepSeek(orderText) {
-    const apiKey = localStorage.getItem('deepseek_api_key') || 'sk-0dbe8fdfd39c47f780286ab29f6583a3';
+    const apiKey = localStorage.getItem('deepseek_api_key');
+    if (!apiKey) return { success: false, error: '未配置 AI 服务 API Key' };
     const apiBase = localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com';
+    const model = localStorage.getItem('deepseek_model') || 'deepseek-chat';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
@@ -261,7 +270,7 @@ const PageOrder = (() => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: 'deepseek-chat',
+          model: model,
           messages: [
             { role: 'system', content: '你是一个外卖订单信息提取助手。从用户提供的订单文本中提取结构化信息，返回严格的 JSON 格式，不要输出任何其他文字。\n\nJSON 格式：\n{\n  "merchant": "商家名称",\n  "order_time": "下单时间",\n  "items": [\n    {\n      "name": "菜品/饮品名称",\n      "specification": "规格/备注",\n      "quantity": 数量,\n      "price": 单价,\n      "category": "固体餐/饮品/小吃/水果/其他"\n    }\n  ],\n  "total_price": 总价,\n  "confidence": 0-1\n}\n\n规则：无法识别的字段填 null；只提取文本中明确存在的信息。' },
             { role: 'user', content: orderText }
@@ -286,8 +295,16 @@ const PageOrder = (() => {
     const text = document.getElementById('orderTextInput')?.value?.trim();
     if (!text) { UI.toast('请先输入或识别订单文字', 'warning'); return; }
     state.orderText = text;
-    state.step = 'ai_processing';
     state.error = null;
+    const hasAI = !!localStorage.getItem('deepseek_api_key');
+    if (!hasAI) {
+      state.aiNotConfigured = true;
+      localMatch(text);
+      App.rerender();
+      return;
+    }
+    state.aiNotConfigured = false;
+    state.step = 'ai_processing';
     App.rerender();
     const result = await extractWithDeepSeek(text);
     if (result.success) {
