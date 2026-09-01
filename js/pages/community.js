@@ -1,4 +1,4 @@
-/* 协同社区 v2.0 - 饮食记录协同社区 */
+﻿/* 协同社区 v2.0 - 饮食记录协同社区 */
 const PageCommunity = (() => {
   let posts = [];
   let searchQuery = '';
@@ -46,7 +46,7 @@ const PageCommunity = (() => {
       <div class="card" style="margin-bottom:16px;padding:12px 16px;">
         <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
           <i data-lucide="info" style="width:16px;height:16px;color:var(--color-primary-600);"></i>
-          <span>本地演示账号 / 不会上传网络 / 内容为虚构演示数据 / 健康讨论为日常营养管理参考，非医疗建议</span>
+          <span></span>
         </div>
       </div>
 
