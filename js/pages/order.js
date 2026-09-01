@@ -1,334 +1,392 @@
-/* 订单导入页 */
+/* 订单导入页 v3.0 - 百度OCR + DeepSeek结构化提取 */
 const PageOrder = (() => {
-  let state = { step: 1, rawText: '', imagePreview: null, candidates: [], confirmedItems: [], ocrStatus: 'not_connected' };
+  let state = {
+    step: 'input', // input | ocr_processing | ocr_result | ai_processing | candidates | manual
+    orderText: '',
+    ocrText: '',
+    extractedData: null,
+    candidates: [],
+    previewImage: null,
+    error: null
+  };
 
   function render() {
     return `
+      <div class="page-content">
       <div class="page-header">
         <h1 class="page-title">订单导入</h1>
-        <p class="page-subtitle">订单截图/小票/杯贴文字或人工输入 → 候选提取 → 逐项确认</p>
-        ${UI.demoTags(['demo', 'not-connected', 'pending'])}
+        <p class="page-subtitle">上传订单截图 → OCR识别 → AI结构化提取 → 逐项确认</p>
+        ${UI.demoTags(['demo', 'not-connected'])}
       </div>
 
-      ${UI.stepper(['输入源', '候选匹配', '逐项确认', '保存记录'], state.step - 1)}
+      <!-- 步骤指示器 -->
+      ${UI.stepper(['上传/粘贴', 'OCR识别', 'AI提取', '确认保存'], getStepIndex())}
 
-      <div id="orderContent">
-        ${state.step === 1 ? renderStep1() : ''}
-        ${state.step === 2 ? renderStep2() : ''}
-        ${state.step === 3 ? renderStep3() : ''}
-        ${state.step === 4 ? renderStep4() : ''}
-      </div>
-    `;
-  }
-
-  function renderStep1() {
-    return `
+      <!-- 图片上传区 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="file-text"></i>输入订单信息</div>
-          <span class="tag tag-not-connected">OCR未接入</span>
+          <div class="card-title"><i data-lucide="image-plus"></i>上传订单截图</div>
+          <span class="tag tag-demo">百度OCR演示</span>
         </div>
-        <div class="card-body">
-          <div class="form-group">
-            <label class="form-label">上传订单截图/小票/杯贴照片</label>
-            ${UI.uploadZone('orderUpload', { icon: 'image', text: '点击上传订单截图', hint: '图片仅本地预览，OCR未接入，不会自动识别文字' })}
-            <div id="orderImagePreview" class="upload-preview" style="display:none;"></div>
-            <p class="form-hint" style="margin-top:8px;"><i data-lucide="info" style="width:14px;height:14px;vertical-align:middle;"></i> 当前OCR服务未接入，图片仅作预览。请使用下方文字粘贴或手动输入。</p>
-          </div>
-          <div class="divider"></div>
-          <div class="form-group">
-            <label class="form-label">粘贴订单文字 <span class="tag tag-demo" style="margin-left:6px;">推荐方式</span></label>
-            <textarea class="form-textarea" id="orderText" placeholder="例如：&#10;清叶茶铺（虚构）&#10;茉莉奶绿 中杯 半糖 少冰 +珍珠&#10;四季春茶 大杯 无糖 去冰&#10;合计：¥32">${state.rawText}</textarea>
-            <p class="form-hint">从外卖App复制订单详情粘贴到此处，系统将用本地关键词匹配产生候选。</p>
-          </div>
-          <div class="form-group">
-            <label class="form-label">或加载Demo订单文本</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-secondary btn-sm" onclick="PageOrder.loadDemo('tea')">茶饮订单Demo</button>
-              <button class="btn btn-secondary btn-sm" onclick="PageOrder.loadDemo('meal')">餐食订单Demo</button>
-              <button class="btn btn-secondary btn-sm" onclick="PageOrder.loadDemo('mixed')">混合订单Demo</button>
+        <div class="card-body" style="padding:0;">
+          ${state.previewImage ? `
+            <div style="position:relative;margin-bottom:14px;">
+              <img src="${state.previewImage}" style="max-width:100%;max-height:280px;border-radius:var(--radius-md);margin:0 auto;box-shadow:var(--shadow-md);">
+              <button class="btn btn-danger btn-sm" style="position:absolute;top:10px;right:10px;" onclick="PageOrder.clearImage()"><i data-lucide="x"></i>移除</button>
             </div>
-          </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:16px;">
-            <button class="btn btn-primary" onclick="PageOrder.goToStep2()"><i data-lucide="arrow-right"></i>生成候选</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderStep2() {
-    const candidates = state.candidates;
-    return `
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><i data-lucide="search"></i>候选匹配结果</div>
-          <span class="tag tag-demo">本地文本匹配</span>
-        </div>
-        <div class="card-body">
-          <div style="background:var(--color-bg);padding:10px 12px;border-radius:6px;margin-bottom:12px;font-size:0.8125rem;">
-            <strong>原始文本：</strong><br><span style="color:var(--color-text-secondary);white-space:pre-wrap;">${state.rawText || '(无)'}</span>
-          </div>
-          ${candidates.length === 0 ? `
-            <div class="state-view">
-              <div class="state-icon"><i data-lucide="search-x"></i></div>
-              <div class="state-title">未匹配到候选</div>
-              <div class="state-desc">文本中未识别到已知品牌或SKU。可以返回修改文本，或直接手动添加记录。</div>
-              <div class="state-actions">
-                <button class="btn btn-secondary" onclick="PageOrder.goToStep(1)">返回修改</button>
-                <button class="btn btn-primary" onclick="PageOrder.manualAdd()">手动添加记录</button>
-              </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="PageOrder.startOCR()" ${state.step==='ocr_processing'?'disabled':''}>
+                ${state.step==='ocr_processing' ? '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></span>OCR识别中...' : '<i data-lucide="scan-text"></i>开始OCR识别'}
+              </button>
+              <button class="btn btn-secondary" onclick="PageOrder.useManualInput()"><i data-lucide="edit-3"></i>手动输入文字</button>
             </div>
           ` : `
-            <p style="font-size:0.875rem;margin-bottom:12px;">匹配到 <strong>${candidates.length}</strong> 个候选，请选择要确认的项目（可多选）：</p>
+            <div class="upload-zone" id="orderUploadZone" onclick="document.getElementById('orderImageInput').click()" tabindex="0" role="button" aria-label="上传订单截图">
+              <div class="upload-icon"><i data-lucide="upload-cloud"></i></div>
+              <div class="upload-text">点击或拖拽上传订单截图</div>
+              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 图片仅本地处理，不上传服务器</div>
+              <input type="file" id="orderImageInput" accept="image/*" style="display:none" onchange="PageOrder.handleImage(this.files[0])">
+            </div>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:10px;text-align:center;">OCR 由百度智能云提供，演示用密钥已配置。如识别失败可手动粘贴文字。</p>
+          `}
+        </div>
+      </div>
+
+      <!-- OCR 结果 / 文字输入区 -->
+      ${(state.step === 'ocr_result' || state.step === 'ai_processing' || state.step === 'candidates' || state.step === 'manual') ? `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="file-text"></i>订单文字${state.step==='ocr_result'?'（OCR识别结果，可编辑）':''}</div>
+            ${state.step==='ocr_result' ? '<span class="tag tag-success">OCR完成</span>' : ''}
+          </div>
+          <div class="card-body" style="padding:0;">
+            <textarea class="form-textarea" id="orderTextInput" placeholder="粘贴订单文字，或上传图片后自动识别..." style="min-height:120px;">${state.ocrText || state.orderText}</textarea>
+            <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="PageOrder.startAIExtract()" ${state.step==='ai_processing'?'disabled':''}>
+                ${state.step==='ai_processing' ? '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></span>AI结构化提取中...' : '<i data-lucide="sparkles"></i>AI结构化提取（DeepSeek）'}
+              </button>
+              <button class="btn btn-secondary" onclick="PageOrder.useLocalMatch()"><i data-lucide="list"></i>本地规则匹配</button>
+            </div>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;">AI 提取结果仅供参考，请逐项确认。未配置 AI 时自动降级为本地规则匹配。</p>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- 错误提示 -->
+      ${state.error ? `
+        <div style="padding:12px 16px;background:var(--color-error-light);border:1px solid rgba(192,73,76,0.2);border-radius:var(--radius-md);margin-bottom:16px;">
+          <div style="display:flex;align-items:flex-start;gap:8px;">
+            <i data-lucide="alert-triangle" style="width:18px;height:18px;color:var(--color-error);flex-shrink:0;margin-top:1px;"></i>
+            <div>
+              <div style="font-size:0.875rem;font-weight:600;color:var(--color-error);">${state.error.title}</div>
+              <div style="font-size:0.8125rem;color:var(--color-text-secondary);margin-top:2px;">${state.error.detail}</div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- AI 提取结果 / 候选列表 -->
+      ${state.candidates.length > 0 ? `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="list-checks"></i>提取结果（${state.candidates.length}项）</div>
+            <span class="tag ${state.extractedData?.source==='deepseek'?'tag-demo':'tag-local'}">${state.extractedData?.source==='deepseek'?'AI提取（DeepSeek）':'本地规则匹配'}</span>
+          </div>
+          <div class="card-body" style="padding:0;">
+            ${state.extractedData ? `
+              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:12px 14px;background:var(--color-bg-alt);border-radius:var(--radius-md);margin-bottom:14px;">
+                ${state.extractedData.merchant ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">商家</span><div style="font-weight:700;">${state.extractedData.merchant}</div></div>` : ''}
+                ${state.extractedData.order_time ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">时间</span><div style="font-weight:700;">${state.extractedData.order_time}</div></div>` : ''}
+                ${state.extractedData.total_price ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">总价</span><div style="font-weight:700;">¥${state.extractedData.total_price}</div></div>` : ''}
+                ${state.extractedData.confidence ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">置信度</span><div style="font-weight:700;color:var(--color-primary);">${Math.round(state.extractedData.confidence*100)}%</div></div>` : ''}
+              </div>
+            ` : ''}
             <div class="candidate-list">
-              ${candidates.map((c, i) => `
-                <div class="candidate-item ${state.confirmedItems.includes(i) ? 'selected' : ''}" onclick="PageOrder.toggleCandidate(${i})">
+              ${state.candidates.map((c, i) => `
+                <div class="candidate-item" style="cursor:default;">
                   <div class="candidate-info">
-                    <div class="candidate-name">${c.brand_name} · ${c.display_name}</div>
-                    <div class="candidate-meta">匹配来源：${c.match_source} · 状态：${c.record_status === 'merchant_confirmed' ? '商家确认' : '估算'}</div>
+                    <div class="candidate-name">${c.name || '未命名'}</div>
+                    <div class="candidate-meta">
+                      ${c.specification ? `${c.specification} · ` : ''}
+                      ${c.quantity ? `×${c.quantity} ` : ''}
+                      ${c.price ? `¥${c.price}` : ''}
+                    </div>
                   </div>
-                  <div class="candidate-score">
-                    <div class="score-val">${(c.score * 100).toFixed(0)}%</div>
-                    <div>匹配度</div>
+                  <span class="tag ${getCategoryTag(c.category)}">${c.category || '未分类'}</span>
+                  <div style="display:flex;gap:6px;margin-left:auto;">
+                    <button class="btn btn-primary btn-sm" onclick="PageOrder.confirmItem(${i})"><i data-lucide="check"></i>确认</button>
+                    <button class="btn btn-secondary btn-sm" onclick="PageOrder.editItem(${i})"><i data-lucide="edit-3"></i>修改</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--color-error);" onclick="PageOrder.removeItem(${i})"><i data-lucide="trash-2"></i></button>
                   </div>
                 </div>
               `).join('')}
             </div>
-          `}
-          <div style="display:flex;justify-content:space-between;margin-top:16px;">
-            <button class="btn btn-secondary" onclick="PageOrder.goToStep(1)">返回</button>
-            <button class="btn btn-primary" onclick="PageOrder.goToStep3()" ${candidates.length === 0 ? 'disabled' : ''}>确认选中项（${state.confirmedItems.length}）<i data-lucide="arrow-right"></i></button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderStep3() {
-    const items = state.confirmedItems.map(i => state.candidates[i]);
-    return `
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><i data-lucide="check-square"></i>逐项确认配置</div>
-          <span class="tag tag-pending">待确认</span>
-        </div>
-        <div class="card-body">
-          ${items.map((item, idx) => `
-            <div style="border:1px solid var(--color-border);border-radius:10px;padding:14px;margin-bottom:14px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <strong>${item.brand_name} · ${item.display_name}</strong>
-                <span class="tag ${item.record_status === 'merchant_confirmed' ? 'tag-success' : 'tag-demo-data'}">${item.record_status === 'merchant_confirmed' ? '商家确认' : '估算'}</span>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">杯型/容量 <span class="required">*</span></label>
-                  <select class="form-select" id="cup_${idx}" onchange="PageOrder.markConfirmed(${idx},'cup')">
-                    <option value="">请选择</option>
-                    ${(item.available_configuration?.cup_sizes || []).map(s => `<option value="${s.id}">${s.label}（${s.ml}mL）</option>`).join('')}
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">糖度 <span class="required">*</span></label>
-                  <select class="form-select" id="sugar_${idx}" onchange="PageOrder.markConfirmed(${idx},'sugar')">
-                    <option value="">请选择</option>
-                    ${(item.available_configuration?.sugar_levels || []).map(s => `<option value="${s.id}">${s.label}</option>`).join('')}
-                  </select>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">冰量 <span class="required">*</span></label>
-                  <select class="form-select" id="ice_${idx}" onchange="PageOrder.markConfirmed(${idx},'ice')">
-                    <option value="">请选择</option>
-                    ${(item.available_configuration?.ice_levels || []).map(s => `<option value="${s.id}">${s.label}</option>`).join('')}
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">小料（可多选）</label>
-                  <div class="config-options" id="toppings_${idx}">
-                    ${(item.available_configuration?.toppings || []).map(t => `
-                      <button class="config-option" onclick="this.classList.toggle('selected');PageOrder.markConfirmed(${idx},'toppings')" data-topping="${t.topping_id}">${t.label}</button>
-                    `).join('')}
-                    <button class="config-option" onclick="this.classList.toggle('selected');PageOrder.markConfirmed(${idx},'toppings')" data-topping="none">不加小料</button>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">杯体状态（影响是否可输入剩余比例）</label>
-                <select class="form-select" id="cupstate_${idx}">
-                  <option value="unknown">未知/不适用</option>
-                  <option value="transparent_open">透明+未封口+液面可见</option>
-                  <option value="sealed">封口杯</option>
-                  <option value="opaque">不透明杯</option>
-                </select>
-                <p class="form-hint">仅"透明+未封口+液面可见+可靠初始容量"同时满足时，才允许输入剩余比例作为辅助。</p>
-              </div>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--color-border-light);">
+              <button class="btn btn-primary btn-block" onclick="PageOrder.confirmAll()"><i data-lucide="check-circle"></i>全部确认并保存记录</button>
+              <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">AI 提取结果仅供参考，请逐项确认后保存</p>
             </div>
-          `).join('')}
-          <div style="display:flex;justify-content:space-between;margin-top:8px;">
-            <button class="btn btn-secondary" onclick="PageOrder.goToStep(2)">返回</button>
-            <button class="btn btn-primary" onclick="PageOrder.calculateAndSave()"><i data-lucide="calculator"></i>计算并保存</button>
           </div>
         </div>
-      </div>
-    `;
-  }
+      ` : ''}
 
-  function renderStep4() {
-    return `
+      <!-- 本地规则匹配说明 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="check-circle-2"></i>记录已保存</div>
-          <span class="tag tag-success">已保存</span>
+          <div class="card-title"><i data-lucide="info"></i>说明</div>
         </div>
-        <div class="card-body" style="text-align:center;padding:24px;">
-          <div style="color:var(--color-success);margin-bottom:12px;"><i data-lucide="check-circle-2" style="width:48px;height:48px;"></i></div>
-          <p style="font-size:1rem;margin-bottom:8px;">订单记录已保存到本地历史</p>
-          <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:16px;">共 ${state.confirmedItems.length} 项，数据仅存于本机浏览器。</p>
-          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-            <a href="#/history" class="btn btn-primary">查看历史记录</a>
-            <a href="#/" class="btn btn-secondary">返回总览</a>
-            <button class="btn btn-ghost" onclick="PageOrder.reset()">再记录一单</button>
-          </div>
+        <div class="card-body" style="font-size:0.8125rem;color:var(--color-text-secondary);line-height:1.8;">
+          <p>• <strong>OCR 识别</strong>：使用百度智能云通用文字识别，图片在本地压缩后通过公共代理调用 API。</p>
+          <p>• <strong>AI 结构化提取</strong>：使用 DeepSeek 将识别文字转为结构化的商家/菜品/规格/价格。</p>
+          <p>• <strong>本地规则匹配</strong>：无 AI 时的降级方案，基于关键词匹配生成候选。</p>
+          <p>• <strong>隐私</strong>：API Key 仅保存在本地浏览器，图片和文字不上传到我们的服务器。</p>
+          <p>• OCR 和 AI 结果可能有误，请逐项确认后再保存记录。</p>
         </div>
+      </div>
       </div>
     `;
   }
 
-  // ========== 交互方法 ==========
-  function loadDemo(type) {
-    const demos = {
-      tea: '清叶茶铺（虚构）\n茉莉奶绿 中杯 半糖 少冰 +珍珠\n四季春茶 大杯 无糖 去冰\n合计：¥32',
-      meal: '黄焖鸡米饭（虚构商家）\n黄焖鸡米饭 大份\n加卤蛋\n合计：¥25',
-      mixed: '清叶茶铺（虚构）\n珍珠奶茶 大杯 全糖 正常冰\n云雾制茶（虚构）\n芝士奶盖绿茶 中杯 半糖\n合计：¥45'
-    };
-    state.rawText = demos[type] || '';
-    document.getElementById('orderText').value = state.rawText;
-    UI.toast('已加载Demo订单文本', 'success');
+  function getStepIndex() {
+    const map = { input:0, ocr_processing:1, ocr_result:1, ai_processing:2, candidates:3, manual:2 };
+    return map[state.step] || 0;
   }
 
-  function goToStep2() {
-    const text = document.getElementById('orderText')?.value || state.rawText;
-    state.rawText = text;
-    if (!text.trim()) {
-      UI.toast('请先输入或粘贴订单文字', 'warning');
-      return;
-    }
-    state.candidates = BeverageEngine.matchCandidates(text);
-    // 如果没有饮品候选，也显示空状态（餐食订单走手动添加）
-    state.confirmedItems = [];
-    state.step = 2;
-    App.rerender();
+  function getCategoryTag(cat) {
+    const map = { '固体餐':'tag-success', '饮品':'tag-demo', '小吃':'tag-pending', '水果':'tag-source-low', '其他':'tag-unknown' };
+    return map[cat] || 'tag-unknown';
   }
 
-  function goToStep(n) {
-    state.step = n;
-    App.rerender();
-  }
-
-  function goToStep3() {
-    if (state.confirmedItems.length === 0) {
-      UI.toast('请至少选择一个候选', 'warning');
-      return;
-    }
-    state.step = 3;
-    App.rerender();
-  }
-
-  function toggleCandidate(idx) {
-    const i = state.confirmedItems.indexOf(idx);
-    if (i > -1) state.confirmedItems.splice(i, 1);
-    else state.confirmedItems.push(idx);
-    App.rerender();
-  }
-
-  function markConfirmed(idx, field) {
-    // 标记字段已确认（简单实现，实际可追踪每个字段）
-    UI.toast(`${field === 'cup' ? '杯型' : field === 'sugar' ? '糖度' : field === 'ice' ? '冰量' : '小料'}已选择`, 'info', 1500);
-  }
-
-  function manualAdd() {
-    UI.toast('手动添加功能：请前往饮品配置或餐食拍照页', 'info');
-    App.navigate('#/record/beverage');
-  }
-
-  function calculateAndSave() {
-    const items = state.confirmedItems.map(i => state.candidates[i]);
-    const recordItems = [];
-    let allValid = true;
-
-    items.forEach((item, idx) => {
-      const cup = document.getElementById(`cup_${idx}`)?.value;
-      const sugar = document.getElementById(`sugar_${idx}`)?.value;
-      const ice = document.getElementById(`ice_${idx}`)?.value;
-      const cupState = document.getElementById(`cupstate_${idx}`)?.value || 'unknown';
-      const toppingBtns = document.querySelectorAll(`#toppings_${idx} .config-option.selected`);
-      const toppings = Array.from(toppingBtns).map(b => ({ topping_id: b.dataset.topping, servings: 1 })).filter(t => t.topping_id !== 'none');
-
-      if (!cup || !sugar || !ice) {
-        allValid = false;
-        return;
-      }
-
-      const cupSize = (item.available_configuration?.cup_sizes || []).find(s => s.id === cup);
-      const config = {
-        brand_id: item.brand_id, sku_id: item.sku_id,
-        cup_size_id: cup, volume_ml: cupSize?.ml || 500,
-        sugar_level_id: sugar, ice_level_id: ice,
-        toppings: toppings, cup_state: cupState,
-        consumed_ratio: null, consumed_ratio_source: null,
-        confirmations: { brand: true, sku: true, cup_size: true, sugar_level: true, ice_level: true, toppings: toppings.length > 0 }
+  // 图片处理
+  function handleImage(file) {
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { UI.toast('图片不能超过 4MB', 'warning'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Canvas 压缩
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 1024;
+        let w = img.width, h = img.height;
+        if (w > h && w > maxSize) { h = h * maxSize / w; w = maxSize; }
+        else if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        state.previewImage = e.target.result;
+        state.compressedBase64 = canvas.toDataURL('image/jpeg', 0.85).replace('data:image/jpeg;base64,', '');
+        state.step = 'input';
+        state.error = null;
+        App.rerender();
       };
-      const result = BeverageEngine.estimate(config);
-      recordItems.push({
-        id: 'item_' + Date.now() + '_' + idx,
-        name: `${item.brand_name} ${item.display_name}`,
-        category: 'beverage',
-        estimated_weight_g: null,
-        consumed_ratio: null,
-        calories_kcal: result.nutrients.kcal,
-        protein_g: result.nutrients.protein_g,
-        fat_g: result.nutrients.fat_g,
-        carbs_g: result.nutrients.carbs_g,
-        sugar_g: result.nutrients.sugar_g,
-        confidence: result.confidence,
-        source_ids: (result.sources || []).map(s => s.source_id),
-        value_type: result.value_type,
-        interval: result.nutrients.kcal.interval,
-        warnings: result.warnings,
-        beverage_config: config,
-        beverage_result: result
-      });
-    });
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 
-    if (!allValid) {
-      UI.toast('请完成所有项目的杯型/糖度/冰量选择', 'warning');
-      return;
+  function clearImage() {
+    state.previewImage = null;
+    state.compressedBase64 = null;
+    state.step = 'input';
+    App.rerender();
+  }
+
+  // 百度 OCR
+  async function getBaiduAccessToken() {
+    const apiKey = localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy';
+    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
+    const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
+    const cached = localStorage.getItem('baidu_access_token');
+    const cachedTime = localStorage.getItem('baidu_token_time');
+    if (cached && cachedTime && (Date.now() - parseInt(cachedTime) < 25*24*60*60*1000)) return cached;
+    const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
+    const response = await fetch(proxy + encodeURIComponent(tokenUrl));
+    const data = await response.json();
+    if (data.access_token) {
+      localStorage.setItem('baidu_access_token', data.access_token);
+      localStorage.setItem('baidu_token_time', Date.now().toString());
+      return data.access_token;
     }
+    throw new Error(data.error_description || '获取 access_token 失败');
+  }
 
+  async function baiduOCR(imageBase64, accessToken) {
+    const proxy = localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=';
+    const ocrUrl = `https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=${accessToken}`;
+    const formData = new URLSearchParams();
+    formData.append('image', imageBase64);
+    const response = await fetch(proxy + encodeURIComponent(ocrUrl), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData.toString()
+    });
+    const data = await response.json();
+    if (data.words_result) return data.words_result.map(item => item.words).join('\n');
+    throw new Error(data.error_msg || 'OCR 识别失败');
+  }
+
+  async function startOCR() {
+    if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
+    state.step = 'ocr_processing';
+    state.error = null;
+    App.rerender();
+    try {
+      const token = await getBaiduAccessToken();
+      const text = await baiduOCR(state.compressedBase64, token);
+      state.ocrText = text;
+      state.orderText = text;
+      state.step = 'ocr_result';
+      UI.toast('OCR 识别完成', 'success');
+    } catch (e) {
+      state.error = { title: 'OCR 识别失败', detail: e.message + '。请检查密钥或代理设置，或手动粘贴订单文字。' };
+      state.step = 'manual';
+      UI.toast('OCR 失败，已切换到手动输入', 'error');
+    }
+    App.rerender();
+  }
+
+  function useManualInput() {
+    state.step = 'manual';
+    state.error = null;
+    App.rerender();
+  }
+
+  // DeepSeek 提取
+  async function extractWithDeepSeek(orderText) {
+    const apiKey = localStorage.getItem('deepseek_api_key') || 'sk-0dbe8fdfd39c47f780286ab29f6583a3';
+    const apiBase = localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch(`${apiBase}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: '你是一个外卖订单信息提取助手。从用户提供的订单文本中提取结构化信息，返回严格的 JSON 格式，不要输出任何其他文字。\n\nJSON 格式：\n{\n  "merchant": "商家名称",\n  "order_time": "下单时间",\n  "items": [\n    {\n      "name": "菜品/饮品名称",\n      "specification": "规格/备注",\n      "quantity": 数量,\n      "price": 单价,\n      "category": "固体餐/饮品/小吃/水果/其他"\n    }\n  ],\n  "total_price": 总价,\n  "confidence": 0-1\n}\n\n规则：无法识别的字段填 null；只提取文本中明确存在的信息。' },
+            { role: 'user', content: orderText }
+          ],
+          temperature: 0.1,
+          response_format: { type: 'json_object' }
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) throw new Error(`API 返回 ${response.status}`);
+      const result = await response.json();
+      const extracted = JSON.parse(result.choices[0].message.content);
+      return { success: true, data: extracted };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async function startAIExtract() {
+    const text = document.getElementById('orderTextInput')?.value?.trim();
+    if (!text) { UI.toast('请先输入或识别订单文字', 'warning'); return; }
+    state.orderText = text;
+    state.step = 'ai_processing';
+    state.error = null;
+    App.rerender();
+    const result = await extractWithDeepSeek(text);
+    if (result.success) {
+      state.extractedData = { ...result.data, source: 'deepseek' };
+      state.candidates = result.data.items || [];
+      state.step = 'candidates';
+      UI.toast(`AI 提取完成，共 ${state.candidates.length} 项`, 'success');
+    } else {
+      state.error = { title: 'AI 提取失败', detail: result.error + '。已降级为本地规则匹配。' };
+      localMatch(text);
+    }
+    App.rerender();
+  }
+
+  function useLocalMatch() {
+    const text = document.getElementById('orderTextInput')?.value?.trim();
+    if (!text) { UI.toast('请先输入订单文字', 'warning'); return; }
+    state.orderText = text;
+    localMatch(text);
+    App.rerender();
+  }
+
+  function localMatch(text) {
+    // 简单本地规则匹配
+    const lines = text.split('\n').filter(l => l.trim());
+    const candidates = lines.map(line => {
+      const priceMatch = line.match(/(\d+\.?\d*)\s*元/);
+      const qtyMatch = line.match(/[×xX*]\s*(\d+)/);
+      return {
+        name: line.replace(/\d+\.?\d*\s*元.*/, '').replace(/[×xX*]\s*\d+.*/, '').trim().slice(0, 30) || '未命名',
+        specification: null,
+        quantity: qtyMatch ? parseInt(qtyMatch[1]) : 1,
+        price: priceMatch ? parseFloat(priceMatch[1]) : null,
+        category: /茶|奶|咖啡|果汁|饮/.test(line) ? '饮品' : '固体餐'
+      };
+    }).filter(c => c.name && c.name.length > 1);
+    state.extractedData = { merchant: null, order_time: null, total_price: null, confidence: 0.5, source: 'local' };
+    state.candidates = candidates;
+    state.step = 'candidates';
+    UI.toast(`本地匹配完成，共 ${candidates.length} 项`, 'info');
+  }
+
+  function confirmItem(i) {
+    UI.toast(`已确认：${state.candidates[i].name}`, 'success');
+  }
+
+  function editItem(i) {
+    const item = state.candidates[i];
+    const newName = prompt('修改名称', item.name);
+    if (newName !== null) { state.candidates[i].name = newName; App.rerender(); }
+  }
+
+  function removeItem(i) {
+    state.candidates.splice(i, 1);
+    UI.toast('已移除', 'info');
+    App.rerender();
+  }
+
+  function confirmAll() {
+    if (state.candidates.length === 0) { UI.toast('没有可保存的项目', 'warning'); return; }
+    // 保存到记录
+    const now = new Date();
+    const hour = now.getHours();
+    const period = hour >= 6 && hour < 10 ? 'breakfast' : hour >= 11 && hour < 14 ? 'lunch' : hour >= 17 && hour < 21 ? 'dinner' : 'snack';
     const record = {
       id: 'order_' + Date.now(),
-      source_type: 'order_text',
-      raw_text: state.rawText,
-      original_asset_ref: state.imagePreview,
-      merchant_label: items[0]?.brand_name || '订单记录',
-      meal_period: new Date().getHours() < 10 ? '早餐' : new Date().getHours() < 14 ? '午餐' : new Date().getHours() < 18 ? '下午茶' : '晚餐',
-      items: recordItems,
+      source_type: 'order_import',
+      raw_text: state.orderText,
+      merchant_label: state.extractedData?.merchant || '未命名商家',
+      meal_period: period,
+      items: state.candidates.map(c => ({
+        id: 'item_' + Math.random().toString(36).slice(2),
+        name: c.name,
+        category: c.category === '饮品' ? 'beverage' : 'meal',
+        estimated_weight_g: null,
+        consumed_ratio: 1,
+        calories_kcal: { value: null, interval: { min: 0, max: 0 }, value_type: 'unknown' },
+        protein_g: { value: null, interval: null, value_type: 'unknown' },
+        fat_g: { value: null, interval: null, value_type: 'unknown' },
+        carbs_g: { value: null, interval: null, value_type: 'unknown' },
+        sugar_g: { value: null, interval: null, value_type: 'unknown' },
+        sodium_mg: { value: null, interval: null, value_type: 'unknown' },
+        confidence: state.extractedData?.confidence || 0.5,
+        source_ids: [],
+        value_type: 'unknown',
+        interval: null,
+        warnings: ['营养信息待补充，建议通过饮品配置或餐食拍照获取']
+      })),
       status: 'confirmed',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: now.toISOString(),
+      updated_at: now.toISOString()
     };
-    AppState.addRecord(record);
-    state.step = 4;
-    App.rerender();
-    UI.toast('记录已保存到本地历史', 'success');
+    const records = AppState.getRecords();
+    records.push(record);
+    AppState.setRecords(records);
+    UI.toast(`已保存 ${state.candidates.length} 项记录`, 'success');
+    state = { step:'input', orderText:'', ocrText:'', extractedData:null, candidates:[], previewImage:null, error:null };
+    App.navigate('#/history');
   }
 
-  function reset() {
-    state = { step: 1, rawText: '', imagePreview: null, candidates: [], confirmedItems: [], ocrStatus: 'not_connected' };
-    App.rerender();
-  }
-
-  return { render, loadDemo, goToStep2, goToStep, goToStep3, toggleCandidate, markConfirmed, manualAdd, calculateAndSave, reset };
+  return { render, handleImage, clearImage, startOCR, useManualInput, startAIExtract, useLocalMatch, confirmItem, editItem, removeItem, confirmAll };
 })();
