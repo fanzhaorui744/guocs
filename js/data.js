@@ -273,7 +273,7 @@ const NPV2_DATA = (() => {
   const COLLABORATION_EVENTS = [
     { id:'ce_001', type:'merchant_update', title:'清叶茶铺更新了「珍珠奶茶」营养资料', desc:'商家补充了中杯/大杯的糖度差值数据，置信度从58%提升到72%', time:'2026-08-30 14:20', actor:'商家', actor_name:'清叶茶铺（虚构）', related_record:'hist_xxx_lunch_0', status:'resolved' },
     { id:'ce_002', type:'nutritionist_reply', title:'营养师回复了你的复核请求', desc:'建议：今日糖摄入偏高，下次饮品可选三分糖或无糖', time:'2026-08-30 10:15', actor:'营养师', actor_name:'营养师（演示）', related_record:null, status:'resolved' },
-    { id:'ce_003', type:'supplement_invite', title:'「多肉葡萄」营养信息待补充', desc:'该SKU来源不足，已向商家发出补充邀请（脱敏）', time:'2026-08-29 16:40', actor:'系统', actor_name:'餐量智估', related_record:null, status:'pending' },
+    { id:'ce_003', type:'supplement_invite', title:'「多肉葡萄」营养信息待补充', desc:'该SKU来源不足，已向商家发出补充邀请（脱敏）', time:'2026-08-29 16:40', actor:'系统', actor_name:'营养智链', related_record:null, status:'pending' },
     { id:'ce_004', type:'merchant_update', title:'云雾制茶更新了「芝士奶盖绿茶」', desc:'商家仅提供营养区间，不公开克数（敏感配方保护）', time:'2026-08-28 11:00', actor:'商家', actor_name:'云雾制茶（虚构）', related_record:null, status:'resolved' },
     { id:'ce_005', type:'community_share', title:'你的记录被分享到社区', desc:'「半糖奶茶实测」帖子获得3条评论，含商家和营养师回复', time:'2026-08-27 20:30', actor:'用户', actor_name:'我（演示）', related_record:null, status:'resolved' }
   ];
@@ -283,7 +283,7 @@ const NPV2_DATA = (() => {
     {
       id:'post_001', author_role:'user', author_name:'小柚同学', verification_badge:null,
       topic_tags:['奶茶糖度实测','外卖减脂搭配'], title:'半糖奶茶真的比全糖少一半糖吗？实测记录',
-      body:'今天点了清叶茶铺的茉莉奶绿，选了半糖。用餐量智估记录后发现，半糖不是糖量减半，而是糖度等级。全糖基准约28g糖，半糖约20g，只少了约8g。分享给大家参考～',
+      body:'今天点了清叶茶铺的茉莉奶绿，选了半糖。用营养智链记录后发现，半糖不是糖量减半，而是糖度等级。全糖基准约28g糖，半糖约20g，只少了约8g。分享给大家参考～',
       record_snapshot: { name:'清叶茶铺 茉莉奶绿（中杯/半糖/少冰）', kcal_interval:{min:150,max:210}, sugar_g:{min:18,max:26}, protein_g:{min:2,max:4}, confidence:0.77, source:'商家公开营养表+本地规则估算', uncertainty:'估算区间，非精确测量' },
       linked_record_ref:'hist_xxx_snack_0', moderation_status:'已发布', reports:[],
       comments:[
