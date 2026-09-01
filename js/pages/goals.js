@@ -10,28 +10,35 @@ const PageGoals = (() => {
       </div>
 
       <!-- AI 服务配置 -->
+      <!-- AI 文本提取配置 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="cpu"></i>AI 服务配置</div>
-          <span id="apiStatusTag" class="tag tag-demo">未配置</span>
+          <div class="card-title"><i data-lucide="cpu"></i>AI 文本提取服务（DeepSeek 兼容）</div>
+          <span id="apiStatusTag" class="tag ${localStorage.getItem('deepseek_api_key') ? 'tag-success' : 'tag-not-connected'}">${localStorage.getItem('deepseek_api_key') ? '已配置' : '未配置'}</span>
         </div>
         <div class="card-body">
           <div class="form-group">
-            <label class="form-label">DeepSeek API Key</label>
+            <label class="form-label">API Key</label>
             <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || 'sk-0dbe8fdfd39c47f780286ab29f6583a3'}" style="flex:1;">
-              <button class="btn btn-secondary btn-sm" id="toggleKeyBtn" onclick="PageGoals.toggleKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
+              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || ''}" style="flex:1;">
+              <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
                 <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
             </div>
-            <p class="form-hint">演示用 Key 已自动填入，建议替换为您自己的。API Key 仅保存在本地浏览器，不会上传到任何服务器。</p>
+            ${localStorage.getItem('deepseek_api_key') ? `<p class="form-hint" style="color:var(--color-success);">已保存：${localStorage.getItem('deepseek_api_key').slice(0,4)}****${localStorage.getItem('deepseek_api_key').slice(-4)}</p>` : ''}
           </div>
-          <div class="form-group">
-            <label class="form-label">API 地址</label>
-            <input type="text" class="form-input" id="deepseekApiBase" placeholder="https://api.deepseek.com" value="${localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com'}">
-            <p class="form-hint">默认 https://api.deepseek.com，如使用代理或兼容服务可修改。</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">API 地址</label>
+              <input type="text" class="form-input" id="deepseekApiBase" placeholder="https://api.deepseek.com" value="${localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com'}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">模型名称</label>
+              <input type="text" class="form-input" id="deepseekModel" placeholder="deepseek-chat" value="${localStorage.getItem('deepseek_model') || 'deepseek-chat'}">
+            </div>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <p class="form-hint">支持任何 OpenAI 兼容格式的 API 服务。请填入您自己的 API Key，密钥仅保存在本地浏览器，不会上传到任何服务器。</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
             <button class="btn btn-primary" onclick="PageGoals.saveApiConfig()"><i data-lucide="save"></i>保存配置</button>
             <button class="btn btn-secondary" onclick="PageGoals.testApiConnection()"><i data-lucide="zap"></i>测试连接</button>
           </div>
@@ -42,18 +49,18 @@ const PageGoals = (() => {
       <!-- 百度 OCR 配置 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="scan-text"></i>OCR 服务配置（百度智能云）</div>
-          <span id="ocrStatusTag" class="tag tag-demo">未配置</span>
+          <div class="card-title"><i data-lucide="scan-text"></i>图片文字识别服务（百度智能云 OCR）</div>
+          <span id="ocrStatusTag" class="tag ${(localStorage.getItem('baidu_ocr_api_key') && localStorage.getItem('baidu_ocr_secret_key')) ? 'tag-success' : 'tag-not-connected'}">${(localStorage.getItem('baidu_ocr_api_key') && localStorage.getItem('baidu_ocr_secret_key')) ? '已配置' : '未配置'}</span>
         </div>
         <div class="card-body">
           <div class="form-group">
             <label class="form-label">API Key</label>
-            <input type="text" class="form-input" id="baiduOcrApiKey" placeholder="API Key" value="${localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy'}">
+            <input type="text" class="form-input" id="baiduOcrApiKey" placeholder="API Key" value="${localStorage.getItem('baidu_ocr_api_key') || ''}">
           </div>
           <div class="form-group">
             <label class="form-label">Secret Key</label>
             <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="baiduOcrSecretKey" placeholder="Secret Key" value="${localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA'}" style="flex:1;">
+              <input type="password" class="form-input" id="baiduOcrSecretKey" placeholder="Secret Key" value="${localStorage.getItem('baidu_ocr_secret_key') || ''}" style="flex:1;">
               <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleOcrKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
                 <svg id="ocrEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -62,14 +69,28 @@ const PageGoals = (() => {
           <div class="form-group">
             <label class="form-label">CORS 代理地址</label>
             <input type="text" class="form-input" id="baiduOcrProxy" placeholder="https://api.allorigins.win/raw?url=" value="${localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url='}">
-            <p class="form-hint">公共代理仅用于演示，生产环境请使用自有后端代理保护 Secret Key。</p>
+            <p class="form-hint">用于订单截图文字识别。请填入您在百度智能云创建的 OCR 应用密钥。公共代理仅用于演示，生产环境建议使用自有后端。</p>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="PageGoals.saveOcrConfig()"><i data-lucide="save"></i>保存配置</button>
             <button class="btn btn-secondary" onclick="PageGoals.testOcrConnection()"><i data-lucide="zap"></i>测试连接</button>
           </div>
           <div id="ocrTestResult" style="margin-top:12px;"></div>
-          <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:10px;">演示用密钥已自动填入。生产环境建议使用后端代理，不要在前端暴露 Secret Key。</p>
+        </div>
+      </div>
+
+      <!-- 配置导入导出 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i data-lucide="file-json"></i>配置导入/导出</div>
+        </div>
+        <div class="card-body">
+          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">可将所有 API 配置导出为 JSON 文件，在其他设备导入使用。配置文件包含密钥，请妥善保管。</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="PageGoals.exportConfig()"><i data-lucide="download"></i>导出配置</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('configImportInput').click()"><i data-lucide="upload"></i>导入配置</button>
+            <input type="file" id="configImportInput" accept=".json" style="display:none" onchange="PageGoals.importConfig(this.files[0])">
+          </div>
         </div>
       </div>
 
@@ -291,12 +312,14 @@ const PageGoals = (() => {
   function saveApiConfig() {
     const key = document.getElementById('deepseekApiKey')?.value?.trim();
     const base = document.getElementById('deepseekApiBase')?.value?.trim() || 'https://api.deepseek.com';
+    const model = document.getElementById('deepseekModel')?.value?.trim() || 'deepseek-chat';
     if (key) {
       localStorage.setItem('deepseek_api_key', key);
       localStorage.setItem('deepseek_api_base', base);
+      localStorage.setItem('deepseek_model', model);
       const tag = document.getElementById('apiStatusTag');
       if (tag) { tag.textContent = '已配置'; tag.className = 'tag tag-success'; }
-      UI.toast('DeepSeek 配置已保存', 'success');
+      UI.toast('AI 服务配置已保存', 'success');
     } else {
       UI.toast('请输入 API Key', 'warning');
     }
@@ -307,15 +330,20 @@ const PageGoals = (() => {
     if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--bg-alt);border-radius:8px;font-size:0.8125rem;">正在测试连接...</div>';
     const apiKey = document.getElementById('deepseekApiKey')?.value?.trim() || localStorage.getItem('deepseek_api_key');
     const apiBase = document.getElementById('deepseekApiBase')?.value?.trim() || 'https://api.deepseek.com';
+    const model = document.getElementById('deepseekModel')?.value?.trim() || 'deepseek-chat';
+    if (!apiKey) {
+      if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--warning-light);color:var(--warning);border-radius:8px;font-size:0.8125rem;">请先输入并保存 API Key</div>';
+      return;
+    }
     try {
       const response = await fetch(`${apiBase}/chat/completions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: '你好' }], max_tokens: 10 })
+        body: JSON.stringify({ model: model, messages: [{ role: 'user', content: '你好' }], max_tokens: 10 })
       });
       if (response.ok) {
         if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--success-light);color:var(--success);border-radius:8px;font-size:0.8125rem;font-weight:600;">✓ 连接成功，API Key 有效</div>';
-        UI.toast('DeepSeek 连接成功', 'success');
+        UI.toast('连接成功', 'success');
       } else {
         const err = await response.json().catch(() => ({}));
         if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 连接失败：${response.status} ${err.error?.message || ''}</div>`;
@@ -357,9 +385,13 @@ const PageGoals = (() => {
   async function testOcrConnection() {
     const resultEl = document.getElementById('ocrTestResult');
     if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--bg-alt);border-radius:8px;font-size:0.8125rem;">正在获取 access_token...</div>';
-    const apiKey = document.getElementById('baiduOcrApiKey')?.value?.trim() || localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy';
-    const secretKey = document.getElementById('baiduOcrSecretKey')?.value?.trim() || localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
+    const apiKey = document.getElementById('baiduOcrApiKey')?.value?.trim() || localStorage.getItem('baidu_ocr_api_key');
+    const secretKey = document.getElementById('baiduOcrSecretKey')?.value?.trim() || localStorage.getItem('baidu_ocr_secret_key');
     const proxy = document.getElementById('baiduOcrProxy')?.value?.trim() || 'https://api.allorigins.win/raw?url=';
+    if (!apiKey || !secretKey) {
+      if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--warning-light);color:var(--warning);border-radius:8px;font-size:0.8125rem;">请先输入并保存 API Key 和 Secret Key</div>';
+      return;
+    }
     try {
       const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
       const response = await fetch(proxy + encodeURIComponent(tokenUrl));
@@ -377,5 +409,46 @@ const PageGoals = (() => {
     }
   }
 
-  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll, toggleKeyVisibility, saveApiConfig, testApiConnection, toggleOcrKeyVisibility, saveOcrConfig, testOcrConnection };
+  // 配置导入导出
+  function exportConfig() {
+    const config = {
+      deepseek_api_key: localStorage.getItem('deepseek_api_key') || '',
+      deepseek_api_base: localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com',
+      deepseek_model: localStorage.getItem('deepseek_model') || 'deepseek-chat',
+      baidu_ocr_api_key: localStorage.getItem('baidu_ocr_api_key') || '',
+      baidu_ocr_secret_key: localStorage.getItem('baidu_ocr_secret_key') || '',
+      baidu_ocr_proxy: localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=',
+      export_time: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'canliangzhigu_config.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    UI.toast('配置已导出', 'success');
+  }
+
+  function importConfig(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const config = JSON.parse(e.target.result);
+        if (config.deepseek_api_key) localStorage.setItem('deepseek_api_key', config.deepseek_api_key);
+        if (config.deepseek_api_base) localStorage.setItem('deepseek_api_base', config.deepseek_api_base);
+        if (config.deepseek_model) localStorage.setItem('deepseek_model', config.deepseek_model);
+        if (config.baidu_ocr_api_key) localStorage.setItem('baidu_ocr_api_key', config.baidu_ocr_api_key);
+        if (config.baidu_ocr_secret_key) localStorage.setItem('baidu_ocr_secret_key', config.baidu_ocr_secret_key);
+        if (config.baidu_ocr_proxy) localStorage.setItem('baidu_ocr_proxy', config.baidu_ocr_proxy);
+        UI.toast('配置已导入，页面刷新后生效', 'success');
+        setTimeout(() => App.rerender(), 500);
+      } catch (err) {
+        UI.toast('导入失败：文件格式错误', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll, toggleKeyVisibility, saveApiConfig, testApiConnection, toggleOcrKeyVisibility, saveOcrConfig, testOcrConnection, exportConfig, importConfig };
 })();
