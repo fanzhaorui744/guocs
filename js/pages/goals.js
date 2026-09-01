@@ -423,7 +423,7 @@ const PageGoals = (() => {
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'canliangzhigu_config.json';
+    a.href = url; a.download = 'yingyangzhilian_config.json';
     a.click();
     URL.revokeObjectURL(url);
     UI.toast('配置已导出', 'success');
