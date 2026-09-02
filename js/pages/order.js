@@ -196,29 +196,21 @@ const PageOrder = (() => {
     App.rerender();
   }
 
-  // 百度 OCR（多CORS代理轮询 + 硬编码token兜底）
+  // 百度 OCR（百度API原生支持CORS，直接调用；硬编码token兜底）
   const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
   const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
   const DEFAULT_BAIDU_ACCESS_TOKEN = '24.91704538a56fffd63509a17941f797f2.2592000.1790874581.282335-124232407';
-  const CORS_PROXIES = [
-    'https://api.codetabs.com/v1/proxy/?quest=',
-    'https://corsproxy.io/?url=',
-    'https://api.allorigins.win/raw?url='
-  ];
-  let currentProxyIndex = 0;
 
-  async function fetchWithProxy(url, options = {}) {
-    for (let i = 0; i < CORS_PROXIES.length; i++) {
+  async function fetchWithRetry(url, options, retries = 2) {
+    for (let i = 0; i <= retries; i++) {
       try {
-        const proxyUrl = CORS_PROXIES[currentProxyIndex] + encodeURIComponent(url);
-        const response = await fetch(proxyUrl, options);
-        if (response.ok) return response;
-      } catch (e) {
-        console.warn('Proxy failed, trying next:', CORS_PROXIES[currentProxyIndex]);
+        const response = await fetch(url, options);
+        return await response.json();
+      } catch (error) {
+        if (i < retries) await new Promise(r => setTimeout(r, 1000));
+        else throw error;
       }
-      currentProxyIndex = (currentProxyIndex + 1) % CORS_PROXIES.length;
     }
-    throw new Error('All CORS proxies failed');
   }
 
   async function getBaiduAccessToken() {
@@ -235,8 +227,7 @@ const PageOrder = (() => {
     const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
     const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
     const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
-    const response = await fetchWithProxy(tokenUrl);
-    const data = await response.json();
+    const data = await fetchWithRetry(tokenUrl);
     if (data.access_token) {
       localStorage.setItem('baidu_access_token', data.access_token);
       localStorage.setItem('baidu_token_time', Date.now().toString());
@@ -249,12 +240,11 @@ const PageOrder = (() => {
     const ocrUrl = `https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=${accessToken}`;
     const formData = new URLSearchParams();
     formData.append('image', imageBase64);
-    const response = await fetchWithProxy(ocrUrl, {
+    const data = await fetchWithRetry(ocrUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: formData.toString()
     });
-    const data = await response.json();
     if (data.words_result) return data.words_result.map(item => item.words).join('\n');
     throw new Error(data.error_msg || 'OCR 识别失败');
   }
