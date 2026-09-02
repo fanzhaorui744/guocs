@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>营养智链 —— 外卖个性化营养管理平台</title>
 <meta name="description" content="AI赋能外卖场景个性化营养健康管理 - 本地流程原型（Demo/示例数据，非医疗建议）">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232F6B4F'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif'>N</text></svg>">
+<link rel="icon" type="image/svg+xml" href="assets/logo-mark.svg">
 <style>
 /* 营养智链 Web 原型样式 v3.0 - UI全面升级
    设计参考：MacroFactor / Sleek.design / MyFitnessPal / Dribbble健康App */
@@ -60,7 +60,7 @@ ul,ol{list-style:none}
 .app-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);border-bottom:1px solid rgba(11,114,133,.08)}
 .header-inner{max-width:var(--max-width);margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:var(--header-height);padding:0 20px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text-primary)}
-.brand-logo{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.brand-logo{height:38px;width:auto;object-fit:contain;flex-shrink:0}
 .brand-mark{width:34px;height:34px;border-radius:var(--radius-sm);background:var(--primary-gradient);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;box-shadow:var(--shadow-primary)}
 .brand-mark::after{content:'';width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.95);position:absolute}
 .brand-text{font-weight:700;font-size:1.0625rem;letter-spacing:-.01em;white-space:nowrap;background:var(--primary-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -445,7 +445,7 @@ ul,ol{list-style:none}
   .mini-ring-group{gap:8px}
   .mini-ring{width:58px;height:58px}
   .mini-ring svg{width:58px;height:58px}
-  .brand-logo{height:28px}.brand-text{font-size:.9375rem}
+  .brand-logo{height:32px}.brand-text{font-size:.9375rem}
   .filter-bar{gap:8px}
   .filter-bar .form-input{min-width:140px}
   .post-footer{gap:12px}
@@ -471,7 +471,7 @@ ul,ol{list-style:none}
   <header class="app-header" role="banner">
     <div class="header-inner">
       <a href="#/" class="brand" aria-label="营养智链首页">
-        <img src="assets/logo.svg" alt="营养智链 Logo" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <img src="assets/logo-mark.svg" alt="营养智链图标：餐食、饮品、营养数据与可信协同" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <span class="brand-mark" aria-hidden="true" style="display:none;"></span>
         <span class="brand-text">营养智链</span>
       </a>
@@ -491,19 +491,31 @@ ul,ol{list-style:none}
     <!-- 主导航 -->
     <nav class="main-nav" id="mainNav" role="navigation" aria-label="主导航">
       <div class="nav-inner">
-        <a href="#/" class="nav-link" data-route="/"><i data-lucide="home"></i><span>总览</span></a>
-        <div class="nav-group">
-          <a href="#/record/order" class="nav-link" data-route="/record/order"><i data-lucide="receipt"></i><span>订单导入</span></a>
-          <a href="#/record/meal-photo" class="nav-link" data-route="/record/meal-photo"><i data-lucide="camera"></i><span>餐食拍照</span></a>
-          <a href="#/record/beverage" class="nav-link" data-route="/record/beverage"><i data-lucide="cup-soda"></i><span>饮品配置</span></a>
+        <!-- 用户角色菜单 -->
+        <a href="#/" class="nav-link" data-role="user" data-route="/"><i data-lucide="home"></i><span>总览/今日</span></a>
+        <div class="nav-group" data-role="user">
+          <a href="#/record/order" class="nav-link" data-role="user" data-route="/record/order"><i data-lucide="receipt"></i><span>订单导入</span></a>
+          <a href="#/record/meal-photo" class="nav-link" data-role="user" data-route="/record/meal-photo"><i data-lucide="camera"></i><span>餐食拍照</span></a>
+          <a href="#/record/beverage" class="nav-link" data-role="user" data-route="/record/beverage"><i data-lucide="cup-soda"></i><span>饮品配置</span></a>
         </div>
-        <a href="#/history" class="nav-link" data-route="/history"><i data-lucide="history"></i><span>记录与趋势</span></a>
-        <a href="#/goals" class="nav-link" data-route="/goals"><i data-lucide="target"></i><span>目标与设置</span></a>
-        <span class="nav-divider"></span>
-        <a href="#/merchant" class="nav-link nav-merchant" data-route="/merchant"><i data-lucide="store"></i><span>商家工作台</span></a>
-        <a href="#/nutritionist" class="nav-link nav-nutritionist" data-route="/nutritionist"><i data-lucide="stethoscope"></i><span>营养师复核</span></a>
-        <a href="#/community" class="nav-link" data-route="/community"><i data-lucide="users"></i><span>协同社区</span></a>
-        <a href="#/project" class="nav-link" data-route="/project"><i data-lucide="award"></i><span>项目展示</span></a>
+        <a href="#/history" class="nav-link" data-role="user" data-route="/history"><i data-lucide="history"></i><span>记录与趋势</span></a>
+        <a href="#/goals" class="nav-link" data-role="user" data-route="/goals"><i data-lucide="target"></i><span>目标与设置</span></a>
+        <span class="nav-divider" data-role="user"></span>
+        <!-- 商家角色菜单 -->
+        <a href="#/merchant" class="nav-link" data-role="merchant" data-route="/merchant"><i data-lucide="store"></i><span>商家工作台</span></a>
+        <a href="#/merchant/analytics" class="nav-link" data-role="merchant" data-route="/merchant/analytics"><i data-lucide="bar-chart-3"></i><span>数据分析</span></a>
+        <a href="#/merchant/dishes" class="nav-link" data-role="merchant" data-route="/merchant/dishes"><i data-lucide="utensils"></i><span>菜品管理</span></a>
+        <a href="#/merchant/community" class="nav-link" data-role="merchant" data-route="/merchant/community"><i data-lucide="message-square"></i><span>社区运营</span></a>
+        <span class="nav-divider" data-role="merchant"></span>
+        <!-- 营养师角色菜单 -->
+        <a href="#/nutritionist" class="nav-link" data-role="nutritionist" data-route="/nutritionist"><i data-lucide="stethoscope"></i><span>复核工作台</span></a>
+        <a href="#/nutritionist/users" class="nav-link" data-role="nutritionist" data-route="/nutritionist/users"><i data-lucide="users"></i><span>用户管理</span></a>
+        <a href="#/nutritionist/articles" class="nav-link" data-role="nutritionist" data-route="/nutritionist/articles"><i data-lucide="book-open"></i><span>知识发布</span></a>
+        <a href="#/nutritionist/stats" class="nav-link" data-role="nutritionist" data-route="/nutritionist/stats"><i data-lucide="bar-chart-2"></i><span>数据统计</span></a>
+        <span class="nav-divider" data-role="nutritionist"></span>
+        <!-- 共用菜单 -->
+        <a href="#/community" class="nav-link" data-role="all" data-route="/community"><i data-lucide="users"></i><span>协同社区</span></a>
+        <a href="#/project" class="nav-link" data-role="all" data-route="/project"><i data-lucide="award"></i><span>项目展示</span></a>
       </div>
     </nav>
   </header>
@@ -534,6 +546,12 @@ ul,ol{list-style:none}
     <p class="footer-disclaimer" style="font-size:12px;color:#8B9AAB;">本产品为营养管理辅助工具，不构成医疗建议。</p>
   </div>
 </footer>
+
+
+
+
+
+
 
 
 
@@ -4454,14 +4472,13 @@ const PageMerchant = (() => {
       <div class="page-header">
         <h1 class="page-title">商家工作台</h1>
         <p class="page-subtitle">SKU维护 · Excel导入 · 审核流 · 聚合反馈</p>
-        ${UI.demoTags(['demo', 'demo-data', 'not-connected'])}
-      </div>
+              </div>
 
-      <div class="card" style="margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
-          <i data-lucide="store" style="width:16px;height:16px;color:var(--color-primary);"></i>
-          <span>当前角色：商家（</span>
-        </div>
+      <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:20px;">
+        <div class="stat-card"><div class="stat-label">今日订单数</div><div class="stat-value">198</div><div class="stat-trend up">+12.5% 环比</div></div>
+        <div class="stat-card"><div class="stat-label">待处理反馈</div><div class="stat-value">12</div><div class="stat-trend down">-3 环比</div></div>
+        <div class="stat-card"><div class="stat-label">活跃用户数</div><div class="stat-value">1,247</div><div class="stat-trend up">+8.3% 环比</div></div>
+        <div class="stat-card"><div class="stat-label">平均评分</div><div class="stat-value">4.7</div><div class="stat-trend up">+0.2 环比</div></div>
       </div>
 
       <div class="filter-bar">
@@ -4754,6 +4771,426 @@ const PageMerchant = (() => {
   return { render, setTab, search, filterStatus, addSku, editSku, viewSku, simulateImport, confirmImport, reviewAction, viewAudit };
 })();
 
+/* 商家数据分析页 */
+const PageMerchantAnalytics = (() => {
+  const state = { activeTab: 'overview' };
+
+  const dailyOrders = [
+    { date: '08-27', orders: 142, revenue: 3580 },
+    { date: '08-28', orders: 168, revenue: 4210 },
+    { date: '08-29', orders: 155, revenue: 3890 },
+    { date: '08-30', orders: 189, revenue: 4750 },
+    { date: '08-31', orders: 203, revenue: 5120 },
+    { date: '09-01', orders: 176, revenue: 4430 },
+    { date: '09-02', orders: 198, revenue: 4980 }
+  ];
+
+  const dishClicks = [
+    { name: '轻食鸡胸沙拉', clicks: 342, trend: '+12%' },
+    { name: '藜麦三文鱼碗', clicks: 287, trend: '+8%' },
+    { name: '低脂牛肉卷', clicks: 256, trend: '+15%' },
+    { name: '杂粮鸡腿饭', clicks: 198, trend: '-3%' },
+    { name: '豆腐蔬菜汤', clicks: 167, trend: '+22%' }
+  ];
+
+  const communityPosts = [
+    { title: '这家轻食店的沙拉真的绝了！', views: 1280, likes: 89, comments: 23, time: '2小时前' },
+    { title: '减脂期外卖怎么选？亲测有效', views: 2150, likes: 156, comments: 41, time: '5小时前' },
+    { title: '营养师推荐的控糖套餐测评', views: 980, likes: 67, comments: 18, time: '昨天' },
+    { title: '一周外卖减脂餐打卡', views: 3420, likes: 234, comments: 67, time: '2天前' }
+  ];
+
+  const userPreferences = [
+    { label: '高蛋白', value: 35, color: '#0B7285' },
+    { label: '低脂', value: 28, color: '#2A9D8F' },
+    { label: '低糖', value: 22, color: '#E9C46A' },
+    { label: '均衡', value: 15, color: '#F4A261' }
+  ];
+
+  function renderLineChart() {
+    const w = 560, h = 200, pad = 40;
+    const max = Math.max(...dailyOrders.map(d => d.orders)) * 1.15;
+    const points = dailyOrders.map((d, i) => {
+      const x = pad + (i * (w - pad * 2) / (dailyOrders.length - 1));
+      const y = h - pad - (d.orders / max * (h - pad * 2));
+      return { x, y, ...d };
+    });
+    const path = points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+    const area = path + ` L${points[points.length-1].x},${h-pad} L${points[0].x},${h-pad} Z`;
+    let dots = points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#0B7285" stroke="#fff" stroke-width="2"><title>${p.date}: ${p.orders}单</title></circle>`).join('');
+    let labels = points.map(p => `<text x="${p.x}" y="${h-15}" text-anchor="middle" font-size="11" fill="#6B7C8D">${p.date}</text>`).join('');
+    let yLabels = '';
+    for (let i = 0; i <= 4; i++) {
+      const val = Math.round(max * i / 4);
+      const y = h - pad - (val / max * (h - pad * 2));
+      yLabels += `<text x="${pad-8}" y="${y+4}" text-anchor="end" font-size="10" fill="#9AA8B5">${val}</text>`;
+      yLabels += `<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="#E8EDF2" stroke-width="1"/>`;
+    }
+    return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+      <defs><linearGradient id="orderGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0B7285" stop-opacity="0.25"/><stop offset="100%" stop-color="#0B7285" stop-opacity="0.02"/>
+      </linearGradient></defs>
+      ${yLabels}${labels}<path d="${area}" fill="url(#orderGrad)"/>
+      <path d="${path}" fill="none" stroke="#0B7285" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}
+    </svg>`;
+  }
+
+  function renderHBarChart() {
+    const max = Math.max(...dishClicks.map(d => d.clicks));
+    return dishClicks.map((d, i) => {
+      const pct = (d.clicks / max * 100).toFixed(0);
+      const color = i === 0 ? '#0B7285' : i === 1 ? '#2A9D8F' : '#5BA89F';
+      return `<div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:13px;color:#2C3E50;font-weight:500;">${d.name}</span>
+          <span style="font-size:12px;color:#6B7C8D;">${d.clicks}次 <span style="color:#2A9D8F;">${d.trend}</span></span>
+        </div>
+        <div style="height:8px;background:#EEF2F6;border-radius:4px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,${color},${color}dd);border-radius:4px;transition:width .6s;"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderPieChart() {
+    const total = userPreferences.reduce((s, d) => s + d.value, 0);
+    const cx = 90, cy = 90, r = 70, ir = 42;
+    let startAngle = -Math.PI / 2;
+    let paths = '';
+    let legend = '';
+    userPreferences.forEach(d => {
+      const angle = (d.value / total) * Math.PI * 2;
+      const endAngle = startAngle + angle;
+      const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+      const x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
+      const xi1 = cx + ir * Math.cos(endAngle), yi1 = cy + ir * Math.sin(endAngle);
+      const xi2 = cx + ir * Math.cos(startAngle), yi2 = cy + ir * Math.sin(startAngle);
+      const large = angle > Math.PI ? 1 : 0;
+      paths += `<path d="M${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${xi1},${yi1} A${ir},${ir} 0 ${large} 0 ${xi2},${yi2} Z" fill="${d.color}"/>`;
+      legend += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="width:12px;height:12px;border-radius:3px;background:${d.color};display:inline-block;"></span>
+        <span style="font-size:13px;color:#2C3E50;flex:1;">${d.label}</span>
+        <span style="font-size:13px;color:#6B7C8D;font-weight:600;">${d.value}%</span>
+      </div>`;
+      startAngle = endAngle;
+    });
+    return `<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+      <svg viewBox="0 0 180 180" style="width:160px;height:160px;flex-shrink:0;">${paths}
+        <text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="11" fill="#9AA8B5">用户偏好</text>
+        <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="18" font-weight="700" fill="#0B7285">${total}%</text>
+      </svg>
+      <div style="flex:1;min-width:120px;">${legend}</div>
+    </div>`;
+  }
+
+  function render() {
+    return `
+    <div class="page-header">
+      <h1><i data-lucide="bar-chart-3"></i> 数据分析</h1>
+      <p style="color:#6B7C8D;margin-top:4px;">经营数据全景 · 实时更新</p>
+    </div>
+
+    <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:20px;">
+      <div class="stat-card"><div class="stat-label">今日订单量</div><div class="stat-value">198</div><div class="stat-trend up">+12.5% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">菜品识别次数</div><div class="stat-value">1,247</div><div class="stat-trend up">+8.3% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">社区帖子浏览</div><div class="stat-value">8,562</div><div class="stat-trend up">+23.1% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">用户收藏数</div><div class="stat-value">342</div><div class="stat-trend down">-2.1% 环比</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px;" class="responsive-2col">
+      <div class="card">
+        <div class="card-header"><h3>近7天订单趋势</h3><span class="tag tag-success">实时</span></div>
+        <div class="card-body">${renderLineChart()}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>用户营养偏好分布</h3></div>
+        <div class="card-body">${renderPieChart()}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="responsive-2col">
+      <div class="card">
+        <div class="card-header"><h3>菜品点击率排行 Top5</h3></div>
+        <div class="card-body">${renderHBarChart()}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>社区帖子互动排行</h3></div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>标题</th><th>浏览</th><th>点赞</th><th>评论</th><th>时间</th></tr></thead>
+            <tbody>${communityPosts.map(p => `<tr>
+              <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.title}">${p.title}</td>
+              <td>${p.views}</td><td>${p.likes}</td><td>${p.comments}</td><td style="color:#9AA8B5;font-size:12px;">${p.time}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function bindEvents() {}
+  return { render, bindEvents };
+})();
+
+/* 商家菜品管理页 */
+const PageMerchantDishes = (() => {
+  const state = { search: '', category: 'all', status: 'all', editingId: null, showAdd: false };
+
+  const dishes = [
+    { id: 1, name: '轻食鸡胸沙拉', category: '沙拉', price: 32, cal: 285, protein: 32, fat: 8, carb: 18, sodium: 420, status: '上架', weeklySales: 342, rating: 4.8, source: '营养师确认', version: 'v2.3', updated: '2026-08-28' },
+    { id: 2, name: '藜麦三文鱼碗', category: '主食碗', price: 45, cal: 420, protein: 28, fat: 16, carb: 42, sodium: 380, status: '上架', weeklySales: 287, rating: 4.9, source: '实验室检测', version: 'v1.8', updated: '2026-08-25' },
+    { id: 3, name: '低脂牛肉卷', category: '卷饼', price: 28, cal: 310, protein: 26, fat: 10, carb: 28, sodium: 510, status: '上架', weeklySales: 256, rating: 4.6, source: '商家自填', version: 'v3.1', updated: '2026-09-01' },
+    { id: 4, name: '杂粮鸡腿饭', category: '主食碗', price: 26, cal: 480, protein: 24, fat: 14, carb: 58, sodium: 620, status: '上架', weeklySales: 198, rating: 4.5, source: '营养师确认', version: 'v2.0', updated: '2026-08-20' },
+    { id: 5, name: '豆腐蔬菜汤', category: '汤品', price: 18, cal: 120, protein: 12, fat: 4, carb: 14, sodium: 350, status: '上架', weeklySales: 167, rating: 4.7, source: '实验室检测', version: 'v1.5', updated: '2026-08-15' },
+    { id: 6, name: '牛油果鸡蛋吐司', category: '早餐', price: 24, cal: 350, protein: 18, fat: 18, carb: 32, sodium: 290, status: '上架', weeklySales: 145, rating: 4.6, source: '商家自填', version: 'v1.2', updated: '2026-08-10' },
+    { id: 7, name: '香辣鸡腿堡', category: '汉堡', price: 22, cal: 520, protein: 22, fat: 24, carb: 48, sodium: 780, status: '下架', weeklySales: 89, rating: 4.3, source: '商家自填', version: 'v1.0', updated: '2026-07-20' },
+    { id: 8, name: '希腊酸奶水果杯', category: '甜品', price: 20, cal: 180, protein: 10, fat: 5, carb: 28, sodium: 80, status: '上架', weeklySales: 134, rating: 4.8, source: '营养师确认', version: 'v2.1', updated: '2026-08-30' },
+    { id: 9, name: '紫薯燕麦粥', category: '早餐', price: 16, cal: 220, protein: 8, fat: 3, carb: 42, sodium: 120, status: '上架', weeklySales: 112, rating: 4.5, source: '商家自填', version: 'v1.3', updated: '2026-08-18' },
+    { id: 10, name: '照烧鸡腿定食', category: '主食碗', price: 38, cal: 560, protein: 30, fat: 18, carb: 62, sodium: 850, status: '上架', weeklySales: 178, rating: 4.7, source: '实验室检测', version: 'v2.5', updated: '2026-08-22' },
+    { id: 11, name: '蔬菜春卷', category: '小食', price: 15, cal: 160, protein: 6, fat: 6, carb: 22, sodium: 320, status: '上架', weeklySales: 98, rating: 4.4, source: '商家自填', version: 'v1.1', updated: '2026-08-05' },
+    { id: 12, name: '抹茶拿铁', category: '饮品', price: 18, cal: 140, protein: 6, fat: 4, carb: 22, sodium: 60, status: '下架', weeklySales: 76, rating: 4.6, source: '商家自填', version: 'v1.0', updated: '2026-07-15' }
+  ];
+
+  const categories = ['all', '沙拉', '主食碗', '卷饼', '汤品', '早餐', '汉堡', '甜品', '小食', '饮品'];
+
+  function getFiltered() {
+    return dishes.filter(d => {
+      if (state.search && !d.name.includes(state.search)) return false;
+      if (state.category !== 'all' && d.category !== state.category) return false;
+      if (state.status !== 'all' && d.status !== state.status) return false;
+      return true;
+    });
+  }
+
+  function sourceTag(s) {
+    const colors = { '营养师确认': 'tag-success', '实验室检测': 'tag-info', '商家自填': 'tag-warning' };
+    return `<span class="tag ${colors[s] || 'tag-default'}">${s}</span>`;
+  }
+
+  function renderNutritionDetail(d) {
+    return `<div style="background:#F7FAFC;border-radius:10px;padding:16px;margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <strong style="color:#0B7285;">营养信息（每100g）</strong>
+        <div style="display:flex;gap:8px;align-items:center;">${sourceTag(d.source)}<span style="font-size:11px;color:#9AA8B5;">${d.version} · ${d.updated}</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;">
+        <div style="text-align:center;"><div style="font-size:20px;font-weight:700;color:#0B7285;">${d.cal}</div><div style="font-size:11px;color:#9AA8B5;">热量(kcal)</div></div>
+        <div style="text-align:center;"><div style="font-size:20px;font-weight:700;color:#2A9D8F;">${d.protein}</div><div style="font-size:11px;color:#9AA8B5;">蛋白质(g)</div></div>
+        <div style="text-align:center;"><div style="font-size:20px;font-weight:700;color:#E9C46A;">${d.fat}</div><div style="font-size:11px;color:#9AA8B5;">脂肪(g)</div></div>
+        <div style="text-align:center;"><div style="font-size:20px;font-weight:700;color:#F4A261;">${d.carb}</div><div style="font-size:11px;color:#9AA8B5;">碳水(g)</div></div>
+        <div style="text-align:center;"><div style="font-size:20px;font-weight:700;color:#E76F51;">${d.sodium}</div><div style="font-size:11px;color:#9AA8B5;">钠(mg)</div></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn btn-sm" onclick="UI.toast('营养信息编辑功能','info')">编辑营养</button>
+        <button class="btn btn-sm btn-outline" onclick="UI.toast('已提交营养师复核','success')">提交复核</button>
+      </div>
+    </div>`;
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    return `
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+      <div><h1><i data-lucide="utensils"></i> 菜品管理</h1>
+      <p style="color:#6B7C8D;margin-top:4px;">共 ${dishes.length} 道菜品 · ${dishes.filter(d=>d.status==='上架').length} 道上架中</p></div>
+      <button class="btn btn-primary" onclick="UI.toast('新增菜品表单','info')"><i data-lucide="plus"></i> 新增菜品</button>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <div style="flex:1;min-width:200px;position:relative;">
+          <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;color:#9AA8B5;"></i>
+          <input type="text" class="form-input" id="dishSearch" placeholder="搜索菜品名称..." value="${state.search}" style="padding-left:34px;">
+        </div>
+        <select class="form-input" id="dishCategory" style="width:auto;min-width:120px;">
+          ${categories.map(c => `<option value="${c}" ${state.category===c?'selected':''}>${c==='all'?'全部分类':c}</option>`).join('')}
+        </select>
+        <select class="form-input" id="dishStatus" style="width:auto;min-width:100px;">
+          <option value="all" ${state.status==='all'?'selected':''}>全部状态</option>
+          <option value="上架" ${state.status==='上架'?'selected':''}>上架</option>
+          <option value="下架" ${state.status==='下架'?'selected':''}>下架</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body" style="overflow-x:auto;padding:0;">
+        <table class="data-table" style="margin:0;">
+          <thead><tr>
+            <th>菜品名称</th><th>分类</th><th>价格</th><th>热量/100g</th><th>状态</th><th>本周销量</th><th>评分</th><th>数据来源</th><th>操作</th>
+          </tr></thead>
+          <tbody>${filtered.map(d => `
+            <tr>
+              <td style="font-weight:500;color:#2C3E50;">${d.name}</td>
+              <td><span class="tag tag-default">${d.category}</span></td>
+              <td>¥${d.price}</td>
+              <td>${d.cal} kcal</td>
+              <td><span class="tag ${d.status==='上架'?'tag-success':'tag-not-connected'}">${d.status}</span></td>
+              <td>${d.weeklySales}</td>
+              <td style="color:#E9C46A;">★ ${d.rating}</td>
+              <td>${sourceTag(d.source)}</td>
+              <td style="white-space:nowrap;">
+                <button class="btn btn-sm btn-outline" onclick="PageMerchantDishes.toggleDetail(${d.id})">详情</button>
+                <button class="btn btn-sm" onclick="UI.toast('编辑 ${d.name}','info')">编辑</button>
+                <button class="btn btn-sm ${d.status==='上架'?'btn-warning':'btn-success'}" onclick="UI.toast('已${d.status==='上架'?'下架':'上架'} ${d.name}','success')">${d.status==='上架'?'下架':'上架'}</button>
+              </td>
+            </tr>
+            ${state.editingId === d.id ? `<tr><td colspan="9" style="padding:0 16px 16px;">${renderNutritionDetail(d)}</td></tr>` : ''}
+          `).join('')}</tbody>
+        </table>
+        ${filtered.length === 0 ? '<div style="padding:40px;text-align:center;color:#9AA8B5;">未找到匹配的菜品</div>' : ''}
+      </div>
+    </div>`;
+  }
+
+  function toggleDetail(id) {
+    state.editingId = state.editingId === id ? null : id;
+    App.rerender();
+  }
+
+  function bindEvents() {
+    const s = document.getElementById('dishSearch');
+    const c = document.getElementById('dishCategory');
+    const st = document.getElementById('dishStatus');
+    if (s) s.addEventListener('input', e => { state.search = e.target.value; App.rerender(); });
+    if (c) c.addEventListener('change', e => { state.category = e.target.value; App.rerender(); });
+    if (st) st.addEventListener('change', e => { state.status = e.target.value; App.rerender(); });
+  }
+
+  return { render, bindEvents, toggleDetail };
+})();
+
+/* 商家社区运营页 */
+const PageMerchantCommunity = (() => {
+  const state = { tab: 'posts', announcement: '' };
+
+  const posts = [
+    { id: 1, user: '小鹿减脂中', avatar: '🦌', dish: '轻食鸡胸沙拉', title: '这家轻食店的沙拉真的绝了！鸡胸肉嫩到爆汁', content: '连续吃了一周，热量控制得很好，蛋白质也够。酱料是低卡的，吃起来完全没有负担...', views: 1280, likes: 89, comments: 23, time: '2小时前', pinned: true, quality: true },
+    { id: 2, user: '控糖日记', avatar: '🍵', dish: '藜麦三文鱼碗', title: '减脂期外卖怎么选？亲测有效的搭配公式', content: '主食选藜麦/杂粮，蛋白质选三文鱼/鸡胸，蔬菜占一半。这家店的搭配完全符合...', views: 2150, likes: 156, comments: 41, time: '5小时前', pinned: false, quality: true },
+    { id: 3, user: '健身教练阿杰', avatar: '💪', dish: '低脂牛肉卷', title: '练后餐首选！蛋白质含量拉满', content: '训练后30分钟内补充蛋白质，这个牛肉卷刚好26g蛋白，脂肪只有10g...', views: 980, likes: 67, comments: 18, time: '昨天', pinned: false, quality: false },
+    { id: 4, user: '美食探店喵', avatar: '🐱', dish: '照烧鸡腿定食', title: '一周外卖减脂餐打卡Day3', content: '今天吃的照烧鸡腿定食，去皮后热量降低不少，搭配杂粮饭很满足...', views: 3420, likes: 234, comments: 67, time: '2天前', pinned: false, quality: true },
+    { id: 5, user: '营养师小林', avatar: '🥗', dish: '豆腐蔬菜汤', title: '低卡高纤的晚餐选择，暖胃又饱腹', content: '豆腐提供优质植物蛋白，蔬菜纤维丰富，一碗只有120大卡...', views: 756, likes: 45, comments: 12, time: '3天前', pinned: false, quality: false }
+  ];
+
+  const announcements = [
+    { id: 1, title: '秋季新品上市：南瓜藜麦暖碗', content: '限时优惠，首单立减8元', status: '已发布', time: '2026-09-01', views: 1234 },
+    { id: 2, title: '会员日特惠：每周三全场88折', content: '会员专享，叠加优惠券更划算', status: '已发布', time: '2026-08-25', views: 3456 },
+    { id: 3, title: '夏季冰饮系列下架通知', content: '感谢支持，秋季暖饮即将上线', status: '已过期', time: '2026-08-15', views: 890 }
+  ];
+
+  const hotTags = [
+    { tag: '#减脂餐', count: 234 },
+    { tag: '#低卡外卖', count: 189 },
+    { tag: '#高蛋白', count: 156 },
+    { tag: '#控糖饮食', count: 134 },
+    { tag: '#轻食探店', count: 98 }
+  ];
+
+  function renderPostCard(p) {
+    return `<div class="card" style="margin-bottom:14px;">
+      <div class="card-body" style="padding:16px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0B7285,#2A9D8F);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${p.avatar}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+              <strong style="color:#2C3E50;">${p.user}</strong>
+              ${p.pinned ? '<span class="tag tag-warning" style="font-size:10px;">置顶</span>' : ''}
+              ${p.quality ? '<span class="tag tag-success" style="font-size:10px;">优质</span>' : ''}
+              <span style="font-size:12px;color:#9AA8B5;margin-left:auto;">${p.time}</span>
+            </div>
+            <div style="font-size:13px;color:#6B7C8D;margin-bottom:6px;">提到：<span class="tag tag-info" style="font-size:11px;">${p.dish}</span></div>
+            <h4 style="margin:0 0 6px;color:#2C3E50;font-size:15px;">${p.title}</h4>
+            <p style="margin:0 0 10px;color:#6B7C8D;font-size:13px;line-height:1.6;">${p.content}</p>
+            <div style="display:flex;gap:20px;color:#9AA8B5;font-size:12px;">
+              <span><i data-lucide="eye" style="width:14px;vertical-align:middle;"></i> ${p.views}</span>
+              <span><i data-lucide="heart" style="width:14px;vertical-align:middle;"></i> ${p.likes}</span>
+              <span><i data-lucide="message-circle" style="width:14px;vertical-align:middle;"></i> ${p.comments}</span>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-sm" onclick="UI.toast('回复 @${p.user}','info')"><i data-lucide="message-square"></i> 回复</button>
+              <button class="btn btn-sm btn-outline" onclick="UI.toast('${p.pinned?'已取消置顶':'已置顶'}','success')">${p.pinned?'取消置顶':'置顶'}</button>
+              <button class="btn btn-sm btn-outline" onclick="UI.toast('${p.quality?'已取消优质标记':'已标记为优质内容'}','success')">${p.quality?'取消优质':'标记优质'}</button>
+              <button class="btn btn-sm btn-warning" onclick="UI.toast('已隐藏该帖子','warning')">隐藏</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function render() {
+    return `
+    <div class="page-header">
+      <h1><i data-lucide="users"></i> 社区运营</h1>
+      <p style="color:#6B7C8D;margin-top:4px;">本店相关内容管理与互动</p>
+    </div>
+
+    <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:20px;">
+      <div class="stat-card"><div class="stat-label">本月新增帖子</div><div class="stat-value">47</div><div class="stat-trend up">+18% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">总浏览量</div><div class="stat-value">12.4K</div><div class="stat-trend up">+32% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">总互动量</div><div class="stat-value">1,856</div><div class="stat-trend up">+24% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">优质内容占比</div><div class="stat-value">34%</div><div class="stat-trend up">+6% 环比</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;" class="responsive-2col">
+      <div>
+        <div class="tabs" style="margin-bottom:16px;">
+          <button class="tab-btn ${state.tab==='posts'?'active':''}" onclick="PageMerchantCommunity.setTab('posts')">相关帖子 (${posts.length})</button>
+          <button class="tab-btn ${state.tab==='announce'?'active':''}" onclick="PageMerchantCommunity.setTab('announce')">商家公告</button>
+        </div>
+        ${state.tab === 'posts' ? posts.map(renderPostCard).join('') : `
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-body">
+              <h4 style="margin:0 0 12px;color:#0B7285;">发布新公告</h4>
+              <input type="text" class="form-input" id="annTitle" placeholder="公告标题..." style="margin-bottom:8px;">
+              <textarea class="form-input" id="annContent" placeholder="公告内容..." rows="2" style="margin-bottom:8px;"></textarea>
+              <button class="btn btn-primary" onclick="UI.toast('公告已发布','success')">发布公告</button>
+            </div>
+          </div>
+          ${announcements.map(a => `<div class="card" style="margin-bottom:12px;">
+            <div class="card-body" style="padding:14px 16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <strong style="color:#2C3E50;">${a.title}</strong>
+                <span class="tag ${a.status==='已发布'?'tag-success':'tag-not-connected'}">${a.status}</span>
+              </div>
+              <p style="margin:0 0 8px;color:#6B7C8D;font-size:13px;">${a.content}</p>
+              <div style="display:flex;gap:16px;font-size:12px;color:#9AA8B5;">
+                <span>${a.time}</span><span>浏览 ${a.views}</span>
+              </div>
+            </div>
+          </div>`).join('')}
+        `}
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header"><h3>热门话题 Top5</h3></div>
+          <div class="card-body">
+            ${hotTags.map((t, i) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <span style="width:24px;height:24px;border-radius:6px;background:${i<3?'linear-gradient(135deg,#0B7285,#2A9D8F)':'#EEF2F6'};color:${i<3?'#fff':'#9AA8B5'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">${i+1}</span>
+              <span style="flex:1;font-size:13px;color:#2C3E50;">${t.tag}</span>
+              <span style="font-size:12px;color:#9AA8B5;">${t.count}帖</span>
+            </div>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>运营提示</h3></div>
+          <div class="card-body" style="font-size:13px;color:#6B7C8D;line-height:1.8;">
+            <p>• 优质内容可获得平台流量扶持</p>
+            <p>• 建议每周发布2-3条公告</p>
+            <p>• 及时回复用户评论可提升好感度</p>
+            <p>• 置顶帖子可增加50%曝光</p>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function setTab(tab) { state.tab = tab; App.rerender(); }
+  function bindEvents() {}
+  return { render, bindEvents, setTab };
+})();
+
 /* 营养师复核页 */
 const PageNutritionist = (() => {
   let selectedConsent = null;
@@ -4766,14 +5203,13 @@ const PageNutritionist = (() => {
       <div class="page-header">
         <h1 class="page-title">营养师复核</h1>
         <p class="page-subtitle">授权摘要 · 核对清单 · 建议备注 · 审计记录</p>
-        ${UI.demoTags(['demo', 'non-medical', 'pending'])}
-      </div>
+              </div>
 
-      <div class="card" style="margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
-          <i data-lucide="stethoscope" style="width:16px;height:16px;color:var(--color-primary);"></i>
-          <span>当前角色：营养师（本地演示）· 身份/资质：<strong>待配置</strong> · 不代表真实合作营养师或专业团队已入驻</span>
-        </div>
+      <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:20px;">
+        <div class="stat-card"><div class="stat-label">待复核记录</div><div class="stat-value">8</div><div class="stat-trend up">+2 今日新增</div></div>
+        <div class="stat-card"><div class="stat-label">今日已复核</div><div class="stat-value">15</div><div class="stat-trend up">+5 环比</div></div>
+        <div class="stat-card"><div class="stat-label">平均复核时长</div><div class="stat-value">4.2分</div><div class="stat-trend down">-0.8分 环比</div></div>
+        <div class="stat-card"><div class="stat-label">用户采纳率</div><div class="stat-value">92%</div><div class="stat-trend up">+3% 环比</div></div>
       </div>
 
       ${profile.consent_status !== 'granted' ? `
@@ -4796,7 +5232,7 @@ const PageNutritionist = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="clipboard-list"></i>复核队列</div>
-          <span class="tag tag-demo">${queue.length}条（演示数据）</span>
+          <span class="tag tag-success">${queue.length}条待处理</span>
         </div>
         <div class="card-body">
           ${queue.map((c, i) => `
@@ -4918,6 +5354,461 @@ const PageNutritionist = (() => {
   }
 
   return { render, selectConsent, simulateGrant, reviewAction };
+})();
+
+/* 营养师用户管理页 */
+const PageNutritionistUsers = (() => {
+  const state = { search: '', target: 'all', expandedId: null };
+
+  const users = [
+    { id: 1, name: '小鹿减脂中', avatar: '🦌', age: 26, gender: '女', bmi: 24.5, target: '减脂', height: 165, weight: 66.8, bmr: 1380, targetWeight: 58, activity: '高', lastRecord: '10分钟前', followed: true,
+      weekIntake: [{ day: '周一', cal: 1450, protein: 82, fat: 45, carb: 168 }, { day: '周二', cal: 1520, protein: 88, fat: 48, carb: 172 }, { day: '周三', cal: 1380, protein: 78, fat: 42, carb: 158 }, { day: '周四', cal: 1620, protein: 92, fat: 52, carb: 185 }, { day: '周五', cal: 1480, protein: 85, fat: 46, carb: 170 }, { day: '周六', cal: 1750, protein: 95, fat: 58, carb: 195 }, { day: '周日', cal: 1420, protein: 80, fat: 44, carb: 162 }],
+      targetCal: 1400, targetProtein: 85, targetFat: 47, targetCarb: 170,
+      alerts: [{ type: 'warning', text: '连续2天热量超标（周六1750/1400）' }, { type: 'info', text: '蛋白质摄入稳定，达标率92%' }],
+      history: [{ date: '2026-09-01', advice: '建议晚餐减少精制碳水，增加蔬菜比例', type: '饮食调整' }, { date: '2026-08-28', advice: '本周减脂进度良好，继续保持当前热量缺口', type: '鼓励' }] },
+    { id: 2, name: '控糖日记', avatar: '🍵', age: 34, gender: '男', bmi: 26.8, target: '控糖', height: 178, weight: 84.5, bmr: 1680, targetWeight: 78, activity: '中', lastRecord: '1小时前', followed: true,
+      weekIntake: [{ day: '周一', cal: 1680, protein: 78, fat: 52, carb: 210 }, { day: '周二', cal: 1720, protein: 82, fat: 55, carb: 218 }, { day: '周三', cal: 1590, protein: 75, fat: 48, carb: 198 }, { day: '周四', cal: 1850, protein: 88, fat: 62, carb: 235 }, { day: '周五', cal: 1650, protein: 80, fat: 50, carb: 205 }, { day: '周六', cal: 1920, protein: 90, fat: 68, carb: 248 }, { day: '周日', cal: 1600, protein: 76, fat: 49, carb: 200 }],
+      targetCal: 1600, targetProtein: 80, targetFat: 53, targetCarb: 200,
+      alerts: [{ type: 'danger', text: '连续3天碳水超标，血糖波动风险增加' }, { type: 'warning', text: '周六晚餐含糖饮料摄入，建议替换' }],
+      history: [{ date: '2026-09-02', advice: '建议用杂粮饭替代白米饭，减少餐后血糖峰值', type: '饮食调整' }, { date: '2026-08-30', advice: '建议增加餐后30分钟散步，有助于血糖控制', type: '运动建议' }] },
+    { id: 3, name: '健身教练阿杰', avatar: '💪', age: 28, gender: '男', bmi: 22.1, target: '增肌', height: 182, weight: 73.2, bmr: 1720, targetWeight: 78, activity: '高', lastRecord: '30分钟前', followed: false,
+      weekIntake: [{ day: '周一', cal: 2450, protein: 168, fat: 68, carb: 285 }, { day: '周二', cal: 2520, protein: 172, fat: 72, carb: 292 }, { day: '周三', cal: 2380, protein: 162, fat: 65, carb: 278 }, { day: '周四', cal: 2600, protein: 178, fat: 75, carb: 300 }, { day: '周五', cal: 2480, protein: 170, fat: 70, carb: 288 }, { day: '周六', cal: 2550, protein: 175, fat: 73, carb: 295 }, { day: '周日', cal: 2400, protein: 165, fat: 67, carb: 280 }],
+      targetCal: 2500, targetProtein: 175, targetFat: 72, targetCarb: 290,
+      alerts: [{ type: 'success', text: '各项营养素达标率均超过95%' }, { type: 'info', text: '增肌进度符合预期，建议维持当前方案' }],
+      history: [{ date: '2026-09-01', advice: '训练日可额外补充20g蛋白质，促进肌肉合成', type: '营养补充' }] },
+    { id: 4, name: '美食探店喵', avatar: '🐱', age: 24, gender: '女', bmi: 23.2, target: '均衡', height: 160, weight: 59.5, bmr: 1280, targetWeight: 58, activity: '低', lastRecord: '昨天', followed: false,
+      weekIntake: [{ day: '周一', cal: 1580, protein: 62, fat: 58, carb: 195 }, { day: '周二', cal: 1650, protein: 65, fat: 62, carb: 205 }, { day: '周三', cal: 1420, protein: 58, fat: 52, carb: 178 }, { day: '周四', cal: 1720, protein: 68, fat: 65, carb: 215 }, { day: '周五', cal: 1550, protein: 60, fat: 56, carb: 192 }, { day: '周六', cal: 1850, protein: 72, fat: 72, carb: 230 }, { day: '周日', cal: 1480, protein: 59, fat: 54, carb: 185 }],
+      targetCal: 1500, targetProtein: 70, targetFat: 50, targetCarb: 190,
+      alerts: [{ type: 'warning', text: '蛋白质摄入偏低，平均仅63g/天（目标70g）' }, { type: 'info', text: '周末外食频率较高，注意油脂摄入' }],
+      history: [{ date: '2026-08-29', advice: '建议每餐增加一拳蛋白质食物，如鸡蛋、豆腐、瘦肉', type: '饮食调整' }] },
+    { id: 5, name: '营养师小林', avatar: '🥗', age: 31, gender: '女', bmi: 21.5, target: '减脂', height: 168, weight: 60.8, bmr: 1350, targetWeight: 56, activity: '中', lastRecord: '2小时前', followed: true,
+      weekIntake: [{ day: '周一', cal: 1380, protein: 78, fat: 42, carb: 158 }, { day: '周二', cal: 1420, protein: 80, fat: 44, carb: 162 }, { day: '周三', cal: 1350, protein: 76, fat: 40, carb: 155 }, { day: '周四', cal: 1450, protein: 82, fat: 45, carb: 168 }, { day: '周五', cal: 1400, protein: 79, fat: 43, carb: 160 }, { day: '周六', cal: 1520, protein: 85, fat: 48, carb: 175 }, { day: '周日', cal: 1380, protein: 77, fat: 42, carb: 158 }],
+      targetCal: 1400, targetProtein: 80, targetFat: 44, targetCarb: 160,
+      alerts: [{ type: 'success', text: '营养达标率98%，执行非常好' }],
+      history: [{ date: '2026-09-01', advice: '继续保持，下周可尝试增加力量训练', type: '运动建议' }] },
+    { id: 6, name: '程序员老王', avatar: '💻', age: 38, gender: '男', bmi: 28.5, target: '控糖', height: 175, weight: 87.5, bmr: 1650, targetWeight: 80, activity: '低', lastRecord: '3天前', followed: true,
+      weekIntake: [{ day: '周一', cal: 1950, protein: 72, fat: 78, carb: 245 }, { day: '周二', cal: 2100, protein: 75, fat: 85, carb: 268 }, { day: '周三', cal: 1880, protein: 68, fat: 72, carb: 238 }, { day: '周四', cal: 2200, protein: 78, fat: 92, carb: 280 }, { day: '周五', cal: 1980, protein: 70, fat: 80, carb: 250 }, { day: '周六', cal: 2350, protein: 82, fat: 98, carb: 295 }, { day: '周日', cal: 1920, protein: 69, fat: 75, carb: 242 }],
+      targetCal: 1700, targetProtein: 85, targetFat: 57, targetCarb: 210,
+      alerts: [{ type: 'danger', text: '连续7天热量超标，平均超标23%' }, { type: 'danger', text: '脂肪摄入严重超标，平均82g/天（目标57g）' }, { type: 'warning', text: '久坐少动，建议增加日常活动量' }],
+      history: [{ date: '2026-08-25', advice: '建议严格控制外卖油脂，选择清炒/蒸煮类菜品', type: '饮食调整' }, { date: '2026-08-20', advice: '建议每工作1小时起身活动5分钟', type: '运动建议' }, { date: '2026-08-15', advice: '建议就医检查血脂和血糖指标', type: '就医提醒' }] }
+  ];
+
+  const targets = ['all', '减脂', '增肌', '控糖', '均衡'];
+
+  function getFiltered() {
+    return users.filter(u => {
+      if (state.search && !u.name.includes(state.search)) return false;
+      if (state.target !== 'all' && u.target !== state.target) return false;
+      return true;
+    });
+  }
+
+  function bmiColor(bmi) {
+    if (bmi < 18.5) return '#2A9D8F';
+    if (bmi < 24) return '#2A9D8F';
+    if (bmi < 28) return '#E9C46A';
+    return '#E76F51';
+  }
+
+  function renderIntakeChart(u) {
+    const days = u.weekIntake;
+    const w = 480, h = 160, pad = 35;
+    const max = Math.max(...days.map(d => d.cal)) * 1.15;
+    const pts = days.map((d, i) => {
+      const x = pad + i * (w - pad * 2) / (days.length - 1);
+      const y = h - pad - (d.cal / max) * (h - pad * 2);
+      return { x, y, ...d };
+    });
+    const path = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+    const targetY = h - pad - (u.targetCal / max) * (h - pad * 2);
+    let dots = pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#0B7285"><title>${p.day}: ${p.cal}kcal</title></circle>`).join('');
+    let labels = pts.map(p => `<text x="${p.x}" y="${h-12}" text-anchor="middle" font-size="10" fill="#9AA8B5">${p.day}</text>`).join('');
+    return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+      <line x1="${pad}" y1="${targetY}" x2="${w-pad}" y2="${targetY}" stroke="#E9C46A" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="${w-pad}" y="${targetY-4}" text-anchor="end" font-size="10" fill="#E9C46A">目标${u.targetCal}</text>
+      ${labels}<path d="${path}" fill="none" stroke="#0B7285" stroke-width="2" stroke-linecap="round"/>${dots}
+    </svg>`;
+  }
+
+  function renderProgress(u) {
+    const avgCal = Math.round(u.weekIntake.reduce((s, d) => s + d.cal, 0) / 7);
+    const avgProtein = Math.round(u.weekIntake.reduce((s, d) => s + d.protein, 0) / 7);
+    const calRate = Math.min(100, Math.round(avgCal / u.targetCal * 100));
+    const proRate = Math.min(100, Math.round(avgProtein / u.targetProtein * 100));
+    return `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>热量达标率</span><span style="color:${calRate>110?'#E76F51':calRate>=90?'#2A9D8F':'#E9C46A'};">${calRate}% (${avgCal}/${u.targetCal})</span></div>
+      <div style="height:6px;background:#EEF2F6;border-radius:3px;overflow:hidden;"><div style="width:${Math.min(100,calRate)}%;height:100%;background:linear-gradient(90deg,#0B7285,#2A9D8F);border-radius:3px;"></div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>蛋白质达标率</span><span style="color:${proRate>=90?'#2A9D8F':'#E9C46A'};">${proRate}% (${avgProtein}g/${u.targetProtein}g)</span></div>
+      <div style="height:6px;background:#EEF2F6;border-radius:3px;overflow:hidden;"><div style="width:${proRate}%;height:100%;background:linear-gradient(90deg,#2A9D8F,#5BA89F);border-radius:3px;"></div></div>
+    </div>`;
+  }
+
+  function renderUserCard(u) {
+    const expanded = state.expandedId === u.id;
+    return `<div class="card" style="margin-bottom:14px;">
+      <div class="card-body" style="padding:16px;">
+        <div style="display:flex;gap:14px;align-items:center;cursor:pointer;" onclick="PageNutritionistUsers.toggle(${u.id})">
+          <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0B7285,#2A9D8F);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">${u.avatar}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <strong style="color:#2C3E50;font-size:15px;">${u.name}</strong>
+              ${u.followed ? '<span class="tag tag-warning" style="font-size:10px;">关注</span>' : ''}
+              <span class="tag tag-info" style="font-size:10px;">${u.target}</span>
+            </div>
+            <div style="font-size:12px;color:#9AA8B5;margin-top:3px;">${u.gender} · ${u.age}岁 · BMI <span style="color:${bmiColor(u.bmi)};font-weight:600;">${u.bmi}</span> · 活跃度${u.activity} · 最近记录 ${u.lastRecord}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:11px;color:#9AA8B5;">体重/目标</div>
+            <div style="font-size:14px;font-weight:600;color:#0B7285;">${u.weight}kg → ${u.targetWeight}kg</div>
+          </div>
+          <i data-lucide="${expanded?'chevron-up':'chevron-down'}" style="color:#9AA8B5;flex-shrink:0;"></i>
+        </div>
+        ${expanded ? `
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid #EEF2F6;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
+            <div style="text-align:center;background:#F7FAFC;border-radius:10px;padding:10px;"><div style="font-size:18px;font-weight:700;color:#0B7285;">${u.height}cm</div><div style="font-size:11px;color:#9AA8B5;">身高</div></div>
+            <div style="text-align:center;background:#F7FAFC;border-radius:10px;padding:10px;"><div style="font-size:18px;font-weight:700;color:#2A9D8F;">${u.bmr}</div><div style="font-size:11px;color:#9AA8B5;">基础代谢(kcal)</div></div>
+            <div style="text-align:center;background:#F7FAFC;border-radius:10px;padding:10px;"><div style="font-size:18px;font-weight:700;color:#E9C46A;">${u.targetCal}</div><div style="font-size:11px;color:#9AA8B5;">目标热量(kcal)</div></div>
+            <div style="text-align:center;background:#F7FAFC;border-radius:10px;padding:10px;"><div style="font-size:18px;font-weight:700;color:#F4A261;">${u.targetProtein}g</div><div style="font-size:11px;color:#9AA8B5;">目标蛋白质</div></div>
+          </div>
+          <h4 style="margin:0 0 8px;font-size:13px;color:#2C3E50;">近7天热量摄入趋势</h4>
+          <div style="margin-bottom:16px;">${renderIntakeChart(u)}</div>
+          <h4 style="margin:0 0 8px;font-size:13px;color:#2C3E50;">营养达标率</h4>
+          <div style="margin-bottom:16px;">${renderProgress(u)}</div>
+          <h4 style="margin:0 0 8px;font-size:13px;color:#2C3E50;">异常提醒</h4>
+          <div style="margin-bottom:16px;">${u.alerts.map(a => `<div style="padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:12px;background:${a.type==='danger'?'#FEF2F2':a.type==='warning'?'#FFFBEB':a.type==='success'?'#ECFDF5':'#F0F9FF'};color:${a.type==='danger'?'#B91C1C':a.type==='warning'?'#92400E':a.type==='success'?'#065F46':'#075985'};">${a.text}</div>`).join('')}</div>
+          <h4 style="margin:0 0 8px;font-size:13px;color:#2C3E50;">历史建议记录</h4>
+          ${u.history.map(h => `<div style="padding:8px 12px;background:#F7FAFC;border-radius:8px;margin-bottom:6px;font-size:12px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span class="tag tag-info" style="font-size:10px;">${h.type}</span><span style="color:#9AA8B5;">${h.date}</span></div><div style="color:#2C3E50;">${h.advice}</div></div>`).join('')}
+          <div style="margin-top:14px;display:flex;gap:8px;">
+            <button class="btn btn-sm btn-primary" onclick="UI.toast('已打开建议编辑器','info')">发送建议</button>
+            <button class="btn btn-sm btn-outline" onclick="UI.toast('查看完整档案','info')">查看档案</button>
+            <button class="btn btn-sm ${u.followed?'btn-warning':'btn-success'}" onclick="UI.toast('${u.followed?'已取消关注':'已标记关注'}','success')">${u.followed?'取消关注':'标记关注'}</button>
+          </div>
+        </div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    return `
+    <div class="page-header">
+      <h1><i data-lucide="users"></i> 用户管理</h1>
+      <p style="color:#6B7C8D;margin-top:4px;">共 ${users.length} 位服务用户 · ${users.filter(u=>u.followed).length} 位重点关注</p>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <div style="flex:1;min-width:200px;position:relative;">
+          <i data-lucide="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;color:#9AA8B5;"></i>
+          <input type="text" class="form-input" id="userSearch" placeholder="搜索用户昵称..." value="${state.search}" style="padding-left:34px;">
+        </div>
+        <select class="form-input" id="userTarget" style="width:auto;min-width:120px;">
+          ${targets.map(t => `<option value="${t}" ${state.target===t?'selected':''}>${t==='all'?'全部目标':t}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    ${filtered.map(renderUserCard).join('')}
+    ${filtered.length === 0 ? '<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:#9AA8B5;">未找到匹配的用户</div></div>' : ''}`;
+  }
+
+  function toggle(id) { state.expandedId = state.expandedId === id ? null : id; App.rerender(); }
+  function bindEvents() {
+    const s = document.getElementById('userSearch');
+    const t = document.getElementById('userTarget');
+    if (s) s.addEventListener('input', e => { state.search = e.target.value; App.rerender(); });
+    if (t) t.addEventListener('change', e => { state.target = e.target.value; App.rerender(); });
+  }
+  return { render, bindEvents, toggle };
+})();
+
+/* 营养师知识发布页 */
+const PageNutritionistArticles = (() => {
+  const state = { tab: 'list', editingId: null, filter: 'all' };
+
+  const articles = [
+    { id: 1, title: '减脂期外卖怎么选？营养师教你3个搭配公式', category: '减脂指南', time: '2026-09-01', views: 2340, likes: 156, collects: 89, status: '已发布', cover: '🥗' },
+    { id: 2, title: '控糖人群必看：低GI食物清单与外卖选择技巧', category: '控糖建议', time: '2026-08-28', views: 1890, likes: 134, collects: 76, status: '已发布', cover: '🍵' },
+    { id: 3, title: '蛋白质摄入全攻略：你每天到底需要多少蛋白质？', category: '营养科普', time: '2026-08-25', views: 3120, likes: 245, collects: 156, status: '已发布', cover: '💪' },
+    { id: 4, title: '常见食材营养速查表（收藏版）', category: '食材百科', time: '2026-08-20', views: 4560, likes: 378, collects: 289, status: '已发布', cover: '📖' },
+    { id: 5, title: '秋季养生：润燥养肺的5道推荐菜品', category: '营养科普', time: '2026-09-02', views: 0, likes: 0, collects: 0, status: '草稿', cover: '🍂' },
+    { id: 6, title: '外卖酱料热量排行榜，第一名居然是它！', category: '减脂指南', time: '2026-09-02', views: 0, likes: 0, collects: 0, status: '草稿', cover: '🥫' }
+  ];
+
+  const categories = ['营养科普', '减脂指南', '控糖建议', '食材百科'];
+
+  function render() {
+    if (state.tab === 'editor') return renderEditor();
+    if (state.tab === 'stats') return renderStats();
+    const filtered = state.filter === 'all' ? articles : articles.filter(a => a.status === state.filter);
+    return `
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+      <div><h1><i data-lucide="book-open"></i> 知识发布</h1>
+      <p style="color:#6B7C8D;margin-top:4px;">共 ${articles.length} 篇 · ${articles.filter(a=>a.status==='已发布').length} 篇已发布</p></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline" onclick="PageNutritionistArticles.setTab('stats')"><i data-lucide="bar-chart-2"></i> 数据看板</button>
+        <button class="btn btn-primary" onclick="PageNutritionistArticles.setTab('editor')"><i data-lucide="plus"></i> 写文章</button>
+      </div>
+    </div>
+
+    <div class="tabs" style="margin-bottom:16px;">
+      <button class="tab-btn ${state.filter==='all'?'active':''}" onclick="PageNutritionistArticles.setFilter('all')">全部 (${articles.length})</button>
+      <button class="tab-btn ${state.filter==='已发布'?'active':''}" onclick="PageNutritionistArticles.setFilter('已发布')">已发布 (${articles.filter(a=>a.status==='已发布').length})</button>
+      <button class="tab-btn ${state.filter==='草稿'?'active':''}" onclick="PageNutritionistArticles.setFilter('草稿')">草稿 (${articles.filter(a=>a.status==='草稿').length})</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
+      ${filtered.map(a => `<div class="card">
+        <div class="card-body" style="padding:0;">
+          <div style="height:120px;background:linear-gradient(135deg,#0B7285,#2A9D8F);display:flex;align-items:center;justify-content:center;font-size:48px;border-radius:12px 12px 0 0;">${a.cover}</div>
+          <div style="padding:14px 16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span class="tag tag-info" style="font-size:11px;">${a.category}</span>
+              <span class="tag ${a.status==='已发布'?'tag-success':'tag-not-connected'}" style="font-size:11px;">${a.status}</span>
+              <span style="font-size:11px;color:#9AA8B5;margin-left:auto;">${a.time}</span>
+            </div>
+            <h4 style="margin:0 0 10px;color:#2C3E50;font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${a.title}</h4>
+            <div style="display:flex;gap:14px;font-size:12px;color:#9AA8B5;margin-bottom:12px;">
+              <span><i data-lucide="eye" style="width:13px;vertical-align:middle;"></i> ${a.views}</span>
+              <span><i data-lucide="heart" style="width:13px;vertical-align:middle;"></i> ${a.likes}</span>
+              <span><i data-lucide="bookmark" style="width:13px;vertical-align:middle;"></i> ${a.collects}</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sm" onclick="UI.toast('编辑文章','info')">编辑</button>
+              <button class="btn btn-sm ${a.status==='已发布'?'btn-warning':'btn-success'}" onclick="UI.toast('已${a.status==='已发布'?'下架':'发布'}','success')">${a.status==='已发布'?'下架':'发布'}</button>
+              <button class="btn btn-sm btn-outline" onclick="UI.toast('查看数据','info')">数据</button>
+            </div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  function renderEditor() {
+    return `
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+      <h1><i data-lucide="edit-3"></i> ${state.editingId ? '编辑文章' : '写新文章'}</h1>
+      <button class="btn btn-outline" onclick="PageNutritionistArticles.setTab('list')"><i data-lucide="arrow-left"></i> 返回列表</button>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:600;color:#2C3E50;margin-bottom:6px;">文章标题</label>
+          <input type="text" class="form-input" placeholder="输入吸引人的标题..." value="${state.editingId ? articles.find(a=>a.id===state.editingId)?.title || '' : ''}">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;" class="responsive-2col">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;color:#2C3E50;margin-bottom:6px;">分类</label>
+            <select class="form-input">${categories.map(c => `<option>${c}</option>`).join('')}</select>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;color:#2C3E50;margin-bottom:6px;">封面图标</label>
+            <input type="text" class="form-input" placeholder="输入emoji如 🥗" value="🥗">
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:600;color:#2C3E50;margin-bottom:6px;">关联菜品/标签</label>
+          <input type="text" class="form-input" placeholder="如：轻食沙拉, 减脂, 高蛋白">
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:600;color:#2C3E50;margin-bottom:6px;">正文内容</label>
+          <textarea class="form-input" rows="12" placeholder="在这里撰写文章内容...支持纯文本格式。&#10;&#10;建议结构：&#10;1. 引入问题&#10;2. 核心观点&#10;3. 实操建议&#10;4. 总结"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="UI.toast('文章已发布','success')"><i data-lucide="send"></i> 发布</button>
+          <button class="btn btn-outline" onclick="UI.toast('已保存为草稿','info')"><i data-lucide="save"></i> 存草稿</button>
+          <button class="btn btn-outline" onclick="UI.toast('预览模式','info')"><i data-lucide="eye"></i> 预览</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderStats() {
+    const totalViews = articles.reduce((s, a) => s + a.views, 0);
+    const totalLikes = articles.reduce((s, a) => s + a.likes, 0);
+    const totalCollects = articles.reduce((s, a) => s + a.collects, 0);
+    const fansData = [120, 135, 148, 162, 178, 195, 210, 228, 245, 262, 280, 298];
+    const w = 500, h = 180, pad = 40;
+    const max = Math.max(...fansData) * 1.1;
+    const pts = fansData.map((v, i) => ({ x: pad + i * (w - pad * 2) / (fansData.length - 1), y: h - pad - (v / max) * (h - pad * 2), v }));
+    const path = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+    return `
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+      <h1><i data-lucide="bar-chart-2"></i> 数据看板</h1>
+      <button class="btn btn-outline" onclick="PageNutritionistArticles.setTab('list')"><i data-lucide="arrow-left"></i> 返回列表</button>
+    </div>
+    <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:20px;">
+      <div class="stat-card"><div class="stat-label">总阅读量</div><div class="stat-value">${totalViews.toLocaleString()}</div><div class="stat-trend up">+18% 本月</div></div>
+      <div class="stat-card"><div class="stat-label">总点赞</div><div class="stat-value">${totalLikes.toLocaleString()}</div><div class="stat-trend up">+24% 本月</div></div>
+      <div class="stat-card"><div class="stat-label">总收藏</div><div class="stat-value">${totalCollects.toLocaleString()}</div><div class="stat-trend up">+15% 本月</div></div>
+      <div class="stat-card"><div class="stat-label">粉丝数</div><div class="stat-value">298</div><div class="stat-trend up">+32 本月</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>近12个月粉丝增长趋势</h3></div>
+      <div class="card-body">
+        <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+          <defs><linearGradient id="fansGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2A9D8F" stop-opacity="0.2"/><stop offset="100%" stop-color="#2A9D8F" stop-opacity="0.02"/></linearGradient></defs>
+          ${[0,1,2,3].map(i => { const y = h-pad-(i*(h-pad*2)/3); return `<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="#EEF2F6"/><text x="${pad-6}" y="${y+4}" text-anchor="end" font-size="10" fill="#9AA8B5">${Math.round(max*(3-i)/3)}</text>`; }).join('')}
+          <path d="${path} L${pts[pts.length-1].x},${h-pad} L${pts[0].x},${h-pad} Z" fill="url(#fansGrad)"/>
+          <path d="${path}" fill="none" stroke="#2A9D8F" stroke-width="2.5" stroke-linecap="round"/>
+          ${pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#2A9D8F"><title>${p.v}粉丝</title></circle>`).join('')}
+        </svg>
+      </div>
+    </div>`;
+  }
+
+  function setTab(tab) { state.tab = tab; App.rerender(); }
+  function setFilter(f) { state.filter = f; App.rerender(); }
+  function bindEvents() {}
+  return { render, bindEvents, setTab, setFilter };
+})();
+
+/* 营养师数据统计页 */
+const PageNutritionistStats = (() => {
+  const monthlyReviews = [42, 38, 55, 48, 62, 58, 70, 65, 78, 72, 85, 80, 75, 82, 88, 79, 92, 86, 95, 89, 98, 93, 102, 97, 105, 100, 108, 103, 110, 106];
+  const adviceTypes = [
+    { label: '饮食调整', value: 45, color: '#0B7285' },
+    { label: '运动建议', value: 25, color: '#2A9D8F' },
+    { label: '营养补充', value: 18, color: '#E9C46A' },
+    { label: '就医提醒', value: 12, color: '#E76F51' }
+  ];
+  const userGrowth = [8, 12, 15, 18, 22, 25, 28, 32, 35, 38, 42, 45];
+  const rankings = [
+    { rank: 1, name: '张营养师', reviews: 320, advice: 185, score: 98 },
+    { rank: 2, name: '李营养师', reviews: 285, advice: 162, score: 96 },
+    { rank: 3, name: '我（当前）', reviews: 268, advice: 156, score: 95, isMe: true },
+    { rank: 4, name: '王营养师', reviews: 245, advice: 140, score: 93 },
+    { rank: 5, name: '陈营养师', reviews: 220, advice: 128, score: 91 }
+  ];
+  const hotTopics = [
+    { topic: '#减脂餐搭配', count: 156 },
+    { topic: '#控糖饮食', count: 134 },
+    { topic: '#高蛋白食谱', count: 118 },
+    { topic: '#外卖健康选择', count: 95 },
+    { topic: '#低卡零食', count: 78 }
+  ];
+
+  function renderBarChart() {
+    const w = 600, h = 200, pad = 35;
+    const max = Math.max(...monthlyReviews) * 1.1;
+    const bw = (w - pad * 2) / monthlyReviews.length * 0.7;
+    let bars = monthlyReviews.map((v, i) => {
+      const x = pad + i * (w - pad * 2) / monthlyReviews.length + ((w - pad * 2) / monthlyReviews.length - bw) / 2;
+      const bh = (v / max) * (h - pad * 2);
+      const y = h - pad - bh;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="url(#barGrad)"><title>第${i+1}天: ${v}条复核</title></rect>`;
+    }).join('');
+    return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+      <defs><linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0B7285"/><stop offset="100%" stop-color="#2A9D8F"/></linearGradient></defs>
+      ${[0,1,2,3].map(i => { const y = h-pad-(i*(h-pad*2)/3); return `<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="#EEF2F6"/><text x="${pad-6}" y="${y+4}" text-anchor="end" font-size="10" fill="#9AA8B5">${Math.round(max*(3-i)/3)}</text>`; }).join('')}
+      ${bars}
+      <text x="${w/2}" y="${h-8}" text-anchor="middle" font-size="11" fill="#9AA8B5">近30天复核量趋势</text>
+    </svg>`;
+  }
+
+  function renderPie() {
+    const total = adviceTypes.reduce((s, d) => s + d.value, 0);
+    const cx = 90, cy = 90, r = 70, ir = 42;
+    let startAngle = -Math.PI / 2;
+    let paths = '';
+    let legend = '';
+    adviceTypes.forEach(d => {
+      const angle = (d.value / total) * Math.PI * 2;
+      const endAngle = startAngle + angle;
+      const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+      const x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
+      const xi1 = cx + ir * Math.cos(endAngle), yi1 = cy + ir * Math.sin(endAngle);
+      const xi2 = cx + ir * Math.cos(startAngle), yi2 = cy + ir * Math.sin(startAngle);
+      const large = angle > Math.PI ? 1 : 0;
+      paths += `<path d="M${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${xi1},${yi1} A${ir},${ir} 0 ${large} 0 ${xi2},${yi2} Z" fill="${d.color}"/>`;
+      legend += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:12px;height:12px;border-radius:3px;background:${d.color};display:inline-block;"></span><span style="font-size:13px;color:#2C3E50;flex:1;">${d.label}</span><span style="font-size:13px;color:#6B7C8D;font-weight:600;">${d.value}%</span></div>`;
+      startAngle = endAngle;
+    });
+    return `<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+      <svg viewBox="0 0 180 180" style="width:150px;height:150px;flex-shrink:0;">${paths}
+        <text x="${cx}" y="${cy-5}" text-anchor="middle" font-size="10" fill="#9AA8B5">建议类型</text>
+        <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="16" font-weight="700" fill="#0B7285">${total}%</text>
+      </svg><div style="flex:1;min-width:120px;">${legend}</div></div>`;
+  }
+
+  function renderLineChart() {
+    const w = 400, h = 160, pad = 35;
+    const max = Math.max(...userGrowth) * 1.15;
+    const pts = userGrowth.map((v, i) => ({ x: pad + i * (w - pad * 2) / (userGrowth.length - 1), y: h - pad - (v / max) * (h - pad * 2), v }));
+    const path = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+    return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+      ${[0,1,2].map(i => { const y = h-pad-(i*(h-pad*2)/2); return `<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="#EEF2F6"/>`; }).join('')}
+      <path d="${path}" fill="none" stroke="#2A9D8F" stroke-width="2.5" stroke-linecap="round"/>
+      ${pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#2A9D8F"><title>${p.v}位用户</title></circle>`).join('')}
+      <text x="${w/2}" y="${h-8}" text-anchor="middle" font-size="10" fill="#9AA8B5">近12月服务用户增长</text>
+    </svg>`;
+  }
+
+  function render() {
+    return `
+    <div class="page-header">
+      <h1><i data-lucide="bar-chart-3"></i> 数据统计</h1>
+      <p style="color:#6B7C8D;margin-top:4px;">个人工作数据与平台排名</p>
+    </div>
+
+    <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:20px;">
+      <div class="stat-card"><div class="stat-label">本月复核记录</div><div class="stat-value">106</div><div class="stat-trend up">+12% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">发送建议数</div><div class="stat-value">156</div><div class="stat-trend up">+8% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">发布文章数</div><div class="stat-value">4</div><div class="stat-trend up">+1 环比</div></div>
+      <div class="stat-card"><div class="stat-label">服务用户数</div><div class="stat-value">45</div><div class="stat-trend up">+7 环比</div></div>
+      <div class="stat-card"><div class="stat-label">复核准确率</div><div class="stat-value">92%</div><div class="stat-trend up">+3% 环比</div></div>
+      <div class="stat-card"><div class="stat-label">用户满意度</div><div class="stat-value">4.7</div><div class="stat-trend up">+0.2 环比</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px;" class="responsive-2col">
+      <div class="card">
+        <div class="card-header"><h3>近30天复核量趋势</h3><span class="tag tag-success">日均89条</span></div>
+        <div class="card-body">${renderBarChart()}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>建议类型分布</h3></div>
+        <div class="card-body">${renderPie()}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="responsive-2col">
+      <div class="card">
+        <div class="card-header"><h3>服务用户增长</h3></div>
+        <div class="card-body">${renderLineChart()}</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>热门营养话题 Top5</h3></div>
+        <div class="card-body">
+          ${hotTopics.map((t, i) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span style="width:24px;height:24px;border-radius:6px;background:${i<3?'linear-gradient(135deg,#0B7285,#2A9D8F)':'#EEF2F6'};color:${i<3?'#fff':'#9AA8B5'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">${i+1}</span>
+            <span style="flex:1;font-size:13px;color:#2C3E50;">${t.topic}</span>
+            <span style="font-size:12px;color:#9AA8B5;">${t.count}次</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <div class="card-header"><h3>营养师活跃度排行</h3><span class="tag tag-info">本月</span></div>
+      <div class="card-body" style="overflow-x:auto;padding:0;">
+        <table class="data-table" style="margin:0;">
+          <thead><tr><th>排名</th><th>营养师</th><th>复核数</th><th>建议数</th><th>综合评分</th></tr></thead>
+          <tbody>${rankings.map(r => `<tr style="${r.isMe?'background:#F0FDF9;font-weight:600;':''}">
+            <td><span style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:${r.rank<=3?'linear-gradient(135deg,#0B7285,#2A9D8F)':'#EEF2F6'};color:${r.rank<=3?'#fff':'#9AA8B5'};align-items:center;justify-content:center;font-size:12px;font-weight:700;">${r.rank}</span></td>
+            <td>${r.name}${r.isMe?' <span class="tag tag-success" style="font-size:10px;">我</span>':''}</td>
+            <td>${r.reviews}</td><td>${r.advice}</td>
+            <td style="color:#E9C46A;">★ ${r.score}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  function bindEvents() {}
+  return { render, bindEvents };
 })();
 
 ﻿/* 协同社区 v2.0 - 饮食记录协同社区 */
@@ -5459,7 +6350,7 @@ const PageProject = (() => {
           <p>• 饮品目录数据：虚构交互候选，不代表真实品牌</p>
           <p>• 营养参考：中国食物成分表、USDA FoodData Central（仅作参考区间）</p>
           <p>• 真实品牌图片、菜单、Logo：未使用，均为文字占位或自制示意</p>
-          <p>• 项目Logo：纯文字占位「营养智链」，不暗示已注册商标</p>
+          <p>• 项目Logo：餐食、饮品、营养数据与可信协同的组合视觉标识；仅作竞赛项目使用，不暗示已注册商标</p>
           <p>• 08饮品引擎：独立契约/adapter/fixture，位于 G:\\国创赛\\workstreams\\08_beverage_engine，尚未接入主页面</p>
         </div>
       </div>
@@ -5540,7 +6431,13 @@ const App = (() => {
     '/history': PageHistory,
     '/goals': PageGoals,
     '/merchant': PageMerchant,
+    '/merchant/analytics': PageMerchantAnalytics,
+    '/merchant/dishes': PageMerchantDishes,
+    '/merchant/community': PageMerchantCommunity,
     '/nutritionist': PageNutritionist,
+    '/nutritionist/users': PageNutritionistUsers,
+    '/nutritionist/articles': PageNutritionistArticles,
+    '/nutritionist/stats': PageNutritionistStats,
     '/community': PageCommunity,
     '/project': PageProject
   };
@@ -5596,10 +6493,42 @@ const App = (() => {
       btn.classList.toggle('active', isActive);
       btn.setAttribute('aria-pressed', isActive);
     });
-    // 根据角色显示/隐藏导航项
-    document.querySelectorAll('.nav-merchant, .nav-nutritionist').forEach(link => {
-      link.style.display = '';
+    // 根据角色显示/隐藏导航项（桌面端侧边栏）
+    document.querySelectorAll('.nav-inner > [data-role], .nav-inner > .nav-group[data-role]').forEach(el => {
+      const r = el.dataset.role;
+      const visible = (r === 'all' || r === role);
+      el.style.display = visible ? '' : 'none';
     });
+    // 移动端底部导航：根据角色显示
+    const bottomNav = document.getElementById('bottomNav');
+    if (bottomNav) {
+      const userLinks = [
+        { route: '/', icon: 'home', label: '总览' },
+        { route: '/record/beverage', icon: 'cup-soda', label: '饮品' },
+        { route: '/record/meal-photo', icon: 'camera', label: '拍照' },
+        { route: '/history', icon: 'history', label: '历史' },
+        { route: '/goals', icon: 'settings', label: '设置' }
+      ];
+      const merchantLinks = [
+        { route: '/merchant', icon: 'store', label: '工作台' },
+        { route: '/merchant/analytics', icon: 'bar-chart-3', label: '数据' },
+        { route: '/merchant/dishes', icon: 'utensils', label: '菜品' },
+        { route: '/merchant/community', icon: 'message-square', label: '社区' },
+        { route: '/project', icon: 'award', label: '项目' }
+      ];
+      const nutritionistLinks = [
+        { route: '/nutritionist', icon: 'stethoscope', label: '复核' },
+        { route: '/nutritionist/users', icon: 'users', label: '用户' },
+        { route: '/nutritionist/articles', icon: 'book-open', label: '知识' },
+        { route: '/nutritionist/stats', icon: 'bar-chart-2', label: '统计' },
+        { route: '/project', icon: 'award', label: '项目' }
+      ];
+      const links = role === 'merchant' ? merchantLinks : role === 'nutritionist' ? nutritionistLinks : userLinks;
+      bottomNav.innerHTML = links.map(l =>
+        `<a href="#${l.route}" class="bottom-link" data-route="${l.route}"><i data-lucide="${l.icon}"></i><span>${l.label}</span></a>`
+      ).join('');
+      if (window.lucide) lucide.createIcons({ root: bottomNav });
+    }
   }
 
   function init() {
@@ -5615,7 +6544,7 @@ const App = (() => {
         AppState.setRole(role);
         updateRoleUI();
         const roleNames = { user: '用户', merchant: '商家', nutritionist: '营养师' };
-        UI.toast(`已切换到${roleNames[role]}角色（本地演示）`, 'info');
+        UI.toast(`已切换到${roleNames[role]}角色`, 'info');
         // 切换角色后导航到对应页面
         if (role === 'merchant') navigate('#/merchant');
         else if (role === 'nutritionist') navigate('#/nutritionist');
