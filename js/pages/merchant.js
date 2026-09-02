@@ -9,14 +9,13 @@ const PageMerchant = (() => {
       <div class="page-header">
         <h1 class="page-title">商家工作台</h1>
         <p class="page-subtitle">SKU维护 · Excel导入 · 审核流 · 聚合反馈</p>
-        ${UI.demoTags(['demo', 'demo-data', 'not-connected'])}
-      </div>
+              </div>
 
-      <div class="card" style="margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:8px;font-size:0.8125rem;color:var(--color-text-secondary);flex-wrap:wrap;">
-          <i data-lucide="store" style="width:16px;height:16px;color:var(--color-primary);"></i>
-          <span>当前角色：商家（</span>
-        </div>
+      <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:20px;">
+        <div class="stat-card"><div class="stat-label">今日订单数</div><div class="stat-value">198</div><div class="stat-trend up">+12.5% 环比</div></div>
+        <div class="stat-card"><div class="stat-label">待处理反馈</div><div class="stat-value">12</div><div class="stat-trend down">-3 环比</div></div>
+        <div class="stat-card"><div class="stat-label">活跃用户数</div><div class="stat-value">1,247</div><div class="stat-trend up">+8.3% 环比</div></div>
+        <div class="stat-card"><div class="stat-label">平均评分</div><div class="stat-value">4.7</div><div class="stat-trend up">+0.2 环比</div></div>
       </div>
 
       <div class="filter-bar">
