@@ -69,7 +69,13 @@ const App = (() => {
     '/history': PageHistory,
     '/goals': PageGoals,
     '/merchant': PageMerchant,
+    '/merchant/analytics': PageMerchantAnalytics,
+    '/merchant/dishes': PageMerchantDishes,
+    '/merchant/community': PageMerchantCommunity,
     '/nutritionist': PageNutritionist,
+    '/nutritionist/users': PageNutritionistUsers,
+    '/nutritionist/articles': PageNutritionistArticles,
+    '/nutritionist/stats': PageNutritionistStats,
     '/community': PageCommunity,
     '/project': PageProject
   };
@@ -125,10 +131,42 @@ const App = (() => {
       btn.classList.toggle('active', isActive);
       btn.setAttribute('aria-pressed', isActive);
     });
-    // 根据角色显示/隐藏导航项
-    document.querySelectorAll('.nav-merchant, .nav-nutritionist').forEach(link => {
-      link.style.display = '';
+    // 根据角色显示/隐藏导航项（桌面端侧边栏）
+    document.querySelectorAll('.nav-inner > [data-role], .nav-inner > .nav-group[data-role]').forEach(el => {
+      const r = el.dataset.role;
+      const visible = (r === 'all' || r === role);
+      el.style.display = visible ? '' : 'none';
     });
+    // 移动端底部导航：根据角色显示
+    const bottomNav = document.getElementById('bottomNav');
+    if (bottomNav) {
+      const userLinks = [
+        { route: '/', icon: 'home', label: '总览' },
+        { route: '/record/beverage', icon: 'cup-soda', label: '饮品' },
+        { route: '/record/meal-photo', icon: 'camera', label: '拍照' },
+        { route: '/history', icon: 'history', label: '历史' },
+        { route: '/goals', icon: 'settings', label: '设置' }
+      ];
+      const merchantLinks = [
+        { route: '/merchant', icon: 'store', label: '工作台' },
+        { route: '/merchant/analytics', icon: 'bar-chart-3', label: '数据' },
+        { route: '/merchant/dishes', icon: 'utensils', label: '菜品' },
+        { route: '/merchant/community', icon: 'message-square', label: '社区' },
+        { route: '/project', icon: 'award', label: '项目' }
+      ];
+      const nutritionistLinks = [
+        { route: '/nutritionist', icon: 'stethoscope', label: '复核' },
+        { route: '/nutritionist/users', icon: 'users', label: '用户' },
+        { route: '/nutritionist/articles', icon: 'book-open', label: '知识' },
+        { route: '/nutritionist/stats', icon: 'bar-chart-2', label: '统计' },
+        { route: '/project', icon: 'award', label: '项目' }
+      ];
+      const links = role === 'merchant' ? merchantLinks : role === 'nutritionist' ? nutritionistLinks : userLinks;
+      bottomNav.innerHTML = links.map(l =>
+        `<a href="#${l.route}" class="bottom-link" data-route="${l.route}"><i data-lucide="${l.icon}"></i><span>${l.label}</span></a>`
+      ).join('');
+      if (window.lucide) lucide.createIcons({ root: bottomNav });
+    }
   }
 
   function init() {
@@ -144,7 +182,7 @@ const App = (() => {
         AppState.setRole(role);
         updateRoleUI();
         const roleNames = { user: '用户', merchant: '商家', nutritionist: '营养师' };
-        UI.toast(`已切换到${roleNames[role]}角色（本地演示）`, 'info');
+        UI.toast(`已切换到${roleNames[role]}角色`, 'info');
         // 切换角色后导航到对应页面
         if (role === 'merchant') navigate('#/merchant');
         else if (role === 'nutritionist') navigate('#/nutritionist');
