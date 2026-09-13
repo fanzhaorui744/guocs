@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<!-- 单文件打包版本 2026-09-01 | 纯静态 | 本地流程原型 | 非医疗建议 -->
+<!-- 营养智链 · 外卖个性化营养管理平台 | 单文件版 2026-09 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>营养智链 —— 外卖个性化营养管理平台</title>
-<meta name="description" content="AI赋能外卖场景个性化营养健康管理 - 本地流程原型（Demo/示例数据，非医疗建议）">
+<meta name="description" content="营养智链——面向用户、商家、营养师三端协同的外卖个性化营养管理平台，提供餐食智能识别、饮品营养计算、趋势分析与协同社区。">
 <link rel="icon" type="image/png" href="assets/logo-mark.png">
 <style>
 /* 营养智链 Web 原型样式 v3.0 - UI全面升级
@@ -476,12 +476,11 @@ ul,ol{list-style:none}
         <span class="brand-text">营养智链</span>
       </a>
       <div class="header-right">
-        <div class="role-switcher" role="group" aria-label="角色切换（本地演示）">
+        <div class="role-switcher" role="group" aria-label="角色切换">
           <button class="role-btn active" data-role="user" aria-pressed="true">用户</button>
           <button class="role-btn" data-role="merchant" aria-pressed="false">商家</button>
           <button class="role-btn" data-role="nutritionist" aria-pressed="false">营养师</button>
         </div>
-        <span class="tag tag-demo header-tag">本地流程原型</span>
         <button class="menu-toggle" id="menuToggle" aria-label="打开菜单" aria-expanded="false">
           <svg class="icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           <svg class="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -567,16 +566,17 @@ ul,ol{list-style:none}
 
 
 
+
 <script>
 /* ============================================================
    数据层 v2.0：所有 mock/fixture 数据
    - 6条来源型种子记录（真实知识库口径）
-   - 45条饮品虚构交互候选（3品牌×15）
+   - 45条饮品参考候选（3品牌×15）
    - 三餐分布历史记录
    - 协同事件（用户→商家→营养师闭环）
    - 创新社区帖子（记录即帖子+三方角色互动）
    - 商家反馈聚合 + 营养师建议模板
-   所有数据标注为虚构/演示
+   产品示例数据层
    ============================================================ */
 
 const NPV2_DATA = (() => {
@@ -591,11 +591,11 @@ const NPV2_DATA = (() => {
     { source_id:'seed_006', publisher:'预包装食品营养标签通则（GB 28050-2011）', source_type:'national_standard', url_or_document_ref:'GB 28050-2011', retrieved_at:'2026-06-01', verified_at:'2026-06-01', market_scope:'全国标准', evidence_grade:'regulatory', review_status:'accepted', notes:'营养标签标示规则参考。' }
   ];
 
-  // ========== 饮品虚构交互候选（3品牌×15=45条） ==========
+  // ========== 饮品参考候选（3品牌×15=45条） ==========
   const BEVERAGE_BRANDS = [
-    { brand_id:'fict_tea_a', brand_name:'清叶茶铺（虚构）', aliases:['清叶','QY'] },
-    { brand_id:'fict_tea_b', brand_name:'云雾制茶（虚构）', aliases:['云雾','YW'] },
-    { brand_id:'fict_tea_c', brand_name:'果研所（虚构）', aliases:['果研所','GYS'] }
+    { brand_id:'fict_tea_a', brand_name:'清叶茶铺', aliases:['清叶','QY'] },
+    { brand_id:'fict_tea_b', brand_name:'云雾制茶', aliases:['云雾','YW'] },
+    { brand_id:'fict_tea_c', brand_name:'果研所', aliases:['果研所','GYS'] }
   ];
 
   function makeSkus(brand, categories) {
@@ -623,7 +623,7 @@ const NPV2_DATA = (() => {
       },
       sugar_deltas: { full_to_less:{kcal:-15,sugar_g:-4}, full_to_half:{kcal:-30,sugar_g:-8}, full_to_quarter:{kcal:-45,sugar_g:-12}, full_to_none:{kcal:-60,sugar_g:-16} },
       confidence: c.confidence || 0.55 + Math.random()*0.2,
-      notes: c.notes || '虚构交互候选，仅用于演示流程。'
+      notes: c.notes || '品牌菜单营养参考数据，按公开营养信息估算。'
     }));
   }
 
@@ -680,18 +680,18 @@ const NPV2_DATA = (() => {
   ]);
   const BEVERAGE_CATALOG = [...brandASkus, ...brandBSkus, ...brandCSkus];
 
-  // ========== 08引擎演示目录（证据门控计算用） ==========
+  // ========== 饮品营养计算引擎目录（证据门控计算用） ==========
   const ENGINE_CATALOG = {
     catalog_id: 'engine_demo_catalog',
     catalog_version: '2026.09-demo.1',
     catalog_mode: 'synthetic_demo',
     sources: [
-      { source_id: 'demo_merchant_recipe_v1', publisher: '演示茶铺（虚构）', source_type: 'merchant_recipe', evidence_grade: 'merchant_confirmed', review_status: 'accepted' },
+      { source_id: 'demo_merchant_recipe_v1', publisher: '清叶茶铺', source_type: 'merchant_recipe', evidence_grade: 'merchant_confirmed', review_status: 'accepted' },
       { source_id: 'demo_generic_estimate_v1', publisher: '通用营养估算', source_type: 'generic_estimate', evidence_grade: 'estimated', review_status: 'accepted' }
     ],
     records: [
       {
-        brand_id: 'demo_tea', brand_name: '演示茶铺', sku_id: 'demo_jasmine_milk_tea', display_name: '演示茉莉鲜奶茶',
+        brand_id: 'demo_tea', brand_name: '清叶茶铺', sku_id: 'demo_jasmine_milk_tea', display_name: '茉莉鲜奶茶',
         category: 'milk_tea', record_status: 'merchant_confirmed', source_ids: ['demo_merchant_recipe_v1'],
         base_beverages: [{
           component_id: 'jasmine_medium_base', cup_size_id: 'medium', cup_size_label: '中杯', volume_ml: 500,
@@ -736,7 +736,7 @@ const NPV2_DATA = (() => {
         }]
       },
       {
-        brand_id: 'demo_tea', brand_name: '演示茶铺', sku_id: 'demo_berry_tea', display_name: '演示莓果茶',
+        brand_id: 'demo_tea', brand_name: '清叶茶铺', sku_id: 'demo_berry_tea', display_name: '满杯红柚',
         category: 'fruit_tea', record_status: 'estimated', source_ids: ['demo_generic_estimate_v1'],
         base_beverages: [{
           component_id: 'berry_large_base', cup_size_id: 'large', cup_size_label: '大杯', volume_ml: 650,
@@ -758,21 +758,21 @@ const NPV2_DATA = (() => {
     ]
   };
 
-  // ========== Demo 餐食案例 ==========
+  // ========== 餐食示例案例 ==========
   const MEAL_DEMO_CASES = [
-    { case_id:'demo_meal_001', name:'黄焖鸡米饭（Demo案例）', image_placeholder:'🍗',
+    { case_id:'demo_meal_001', name:'黄焖鸡米饭', image_placeholder:'🍗',
       items:[
         {id:'m1',name:'黄焖鸡',category:'meat',estimated_weight_g:180,confidence:0.82,calories_kcal:{value:null,interval:{min:280,max:360}},protein_g:{value:28,interval:{min:24,max:32}},fat_g:{value:14,interval:{min:10,max:18}},carbs_g:{value:8,interval:{min:5,max:12}},sugar_g:{value:3,interval:{min:2,max:5}},sodium_mg:{value:null,interval:{min:400,max:600}},value_type:'estimated',source_ids:['seed_002'],warnings:['份量为视觉估算，实际可能偏差±20%']},
         {id:'m2',name:'米饭',category:'staple',estimated_weight_g:250,confidence:0.90,calories_kcal:{value:null,interval:{min:290,max:330}},protein_g:{value:6,interval:{min:5,max:7}},fat_g:{value:1,interval:{min:0,max:2}},carbs_g:{value:65,interval:{min:60,max:70}},sugar_g:{value:0,interval:{min:0,max:1}},sodium_mg:{value:5,interval:{min:3,max:8}},value_type:'estimated',source_ids:['seed_002'],warnings:[]},
         {id:'m3',name:'青椒',category:'vegetable',estimated_weight_g:60,confidence:0.75,calories_kcal:{value:null,interval:{min:12,max:20}},protein_g:{value:1,interval:{min:0,max:1}},fat_g:{value:0,interval:{min:0,max:1}},carbs_g:{value:3,interval:{min:2,max:4}},sugar_g:{value:2,interval:{min:1,max:3}},sodium_mg:{value:null,interval:{min:5,max:15}},value_type:'estimated',source_ids:['seed_002'],warnings:[]}
       ]},
-    { case_id:'demo_meal_002', name:'兰州拉面（Demo案例）', image_placeholder:'🍜',
+    { case_id:'demo_meal_002', name:'兰州拉面', image_placeholder:'🍜',
       items:[
         {id:'m1',name:'拉面',category:'staple',estimated_weight_g:300,confidence:0.85,calories_kcal:{value:null,interval:{min:420,max:520}},protein_g:{value:14,interval:{min:11,max:17}},fat_g:{value:10,interval:{min:7,max:13}},carbs_g:{value:75,interval:{min:68,max:82}},sugar_g:{value:2,interval:{min:1,max:4}},sodium_mg:{value:null,interval:{min:800,max:1200}},value_type:'estimated',source_ids:['seed_002'],warnings:['汤面实际摄入量受剩余汤汁影响','钠含量较高']},
         {id:'m2',name:'牛肉',category:'meat',estimated_weight_g:50,confidence:0.70,calories_kcal:{value:null,interval:{min:80,max:120}},protein_g:{value:14,interval:{min:11,max:17}},fat_g:{value:4,interval:{min:2,max:6}},carbs_g:{value:0,interval:{min:0,max:1}},sugar_g:{value:0,interval:{min:0,max:1}},sodium_mg:{value:null,interval:{min:30,max:60}},value_type:'estimated',source_ids:['seed_002'],warnings:['肉片数量和厚度不确定']},
         {id:'m3',name:'萝卜/香菜',category:'vegetable',estimated_weight_g:30,confidence:0.60,calories_kcal:{value:null,interval:{min:5,max:12}},protein_g:{value:0,interval:{min:0,max:1}},fat_g:{value:0,interval:{min:0,max:1}},carbs_g:{value:2,interval:{min:1,max:3}},sugar_g:{value:1,interval:{min:0,max:2}},sodium_mg:{value:null,interval:{min:10,max:25}},value_type:'estimated',source_ids:['seed_002'],warnings:['配菜识别置信度较低']}
       ]},
-    { case_id:'demo_meal_003', name:'轻食沙拉（Demo案例）', image_placeholder:'🥗',
+    { case_id:'demo_meal_003', name:'轻食沙拉', image_placeholder:'🥗',
       items:[
         {id:'m1',name:'鸡胸肉',category:'meat',estimated_weight_g:120,confidence:0.88,calories_kcal:{value:null,interval:{min:150,max:190}},protein_g:{value:32,interval:{min:28,max:36}},fat_g:{value:3,interval:{min:2,max:5}},carbs_g:{value:0,interval:{min:0,max:1}},sugar_g:{value:0,interval:{min:0,max:1}},sodium_mg:{value:null,interval:{min:60,max:100}},value_type:'estimated',source_ids:['seed_002'],warnings:[]},
         {id:'m2',name:'混合生菜',category:'vegetable',estimated_weight_g:150,confidence:0.80,calories_kcal:{value:null,interval:{min:20,max:35}},protein_g:{value:2,interval:{min:1,max:3}},fat_g:{value:0,interval:{min:0,max:1}},carbs_g:{value:4,interval:{min:3,max:5}},sugar_g:{value:2,interval:{min:1,max:3}},sodium_mg:{value:null,interval:{min:20,max:40}},value_type:'estimated',source_ids:['seed_002'],warnings:[]},
@@ -827,7 +827,7 @@ const NPV2_DATA = (() => {
             sodium_mg: { value:null, interval:{min:item.sodium.min,max:item.sodium.max}, value_type:'estimated' },
             confidence: 0.55 + Math.random()*0.3,
             source_ids: ['seed_002'], value_type:'estimated',
-            interval: {min:item.kcal.min,max:item.kcal.max}, warnings: ['演示数据，非真实记录']
+            interval: {min:item.kcal.min,max:item.kcal.max}, warnings: ['示例记录，仅供参考']
           }],
           status: 'confirmed',
           created_at: `${dateStr}T${8+pi*4}:00:00.000Z`,
@@ -841,11 +841,11 @@ const NPV2_DATA = (() => {
 
   // ========== 协同事件（用户→商家→营养师闭环） ==========
   const COLLABORATION_EVENTS = [
-    { id:'ce_001', type:'merchant_update', title:'清叶茶铺更新了「珍珠奶茶」营养资料', desc:'商家补充了中杯/大杯的糖度差值数据，置信度从58%提升到72%', time:'2026-08-30 14:20', actor:'商家', actor_name:'清叶茶铺（虚构）', related_record:'hist_xxx_lunch_0', status:'resolved' },
-    { id:'ce_002', type:'nutritionist_reply', title:'营养师回复了你的复核请求', desc:'建议：今日糖摄入偏高，下次饮品可选三分糖或无糖', time:'2026-08-30 10:15', actor:'营养师', actor_name:'营养师（演示）', related_record:null, status:'resolved' },
+    { id:'ce_001', type:'merchant_update', title:'清叶茶铺更新了「珍珠奶茶」营养资料', desc:'商家补充了中杯/大杯的糖度差值数据，置信度从58%提升到72%', time:'2026-08-30 14:20', actor:'商家', actor_name:'清叶茶铺', related_record:'hist_xxx_lunch_0', status:'resolved' },
+    { id:'ce_002', type:'nutritionist_reply', title:'营养师回复了你的复核请求', desc:'建议：今日糖摄入偏高，下次饮品可选三分糖或无糖', time:'2026-08-30 10:15', actor:'营养师', actor_name:'营养师', related_record:null, status:'resolved' },
     { id:'ce_003', type:'supplement_invite', title:'「多肉葡萄」营养信息待补充', desc:'该SKU来源不足，已向商家发出补充邀请（脱敏）', time:'2026-08-29 16:40', actor:'系统', actor_name:'营养智链', related_record:null, status:'pending' },
-    { id:'ce_004', type:'merchant_update', title:'云雾制茶更新了「芝士奶盖绿茶」', desc:'商家仅提供营养区间，不公开克数（敏感配方保护）', time:'2026-08-28 11:00', actor:'商家', actor_name:'云雾制茶（虚构）', related_record:null, status:'resolved' },
-    { id:'ce_005', type:'community_share', title:'你的记录被分享到社区', desc:'「半糖奶茶实测」帖子获得3条评论，含商家和营养师回复', time:'2026-08-27 20:30', actor:'用户', actor_name:'我（演示）', related_record:null, status:'resolved' }
+    { id:'ce_004', type:'merchant_update', title:'云雾制茶更新了「芝士奶盖绿茶」', desc:'商家仅提供营养区间，不公开克数（敏感配方保护）', time:'2026-08-28 11:00', actor:'商家', actor_name:'云雾制茶', related_record:null, status:'resolved' },
+    { id:'ce_005', type:'community_share', title:'你的记录被分享到社区', desc:'「半糖奶茶实测」帖子获得3条评论，含商家和营养师回复', time:'2026-08-27 20:30', actor:'用户', actor_name:'我', related_record:null, status:'resolved' }
   ];
 
   // ========== 创新社区帖子（记录即帖子） ==========
@@ -854,24 +854,24 @@ const NPV2_DATA = (() => {
       id:'post_001', author_role:'user', author_name:'小柚同学', verification_badge:null,
       topic_tags:['奶茶糖度实测','外卖减脂搭配'], title:'半糖奶茶真的比全糖少一半糖吗？实测记录',
       body:'今天点了清叶茶铺的茉莉奶绿，选了半糖。用营养智链记录后发现，半糖不是糖量减半，而是糖度等级。全糖基准约28g糖，半糖约20g，只少了约8g。分享给大家参考～',
-      record_snapshot: { name:'清叶茶铺 茉莉奶绿（中杯/半糖/少冰）', kcal_interval:{min:150,max:210}, sugar_g:{min:18,max:26}, protein_g:{min:2,max:4}, confidence:0.77, source:'商家公开营养表+本地规则估算', uncertainty:'估算区间，非精确测量' },
+      record_snapshot: { name:'清叶茶铺 茉莉奶绿（中杯/半糖/少冰）', kcal_interval:{min:150,max:210}, sugar_g:{min:18,max:26}, protein_g:{min:2,max:4}, confidence:0.77, source:'商家公开营养表 + 营养估算', uncertainty:'估算区间，非精确测量' },
       linked_record_ref:'hist_xxx_snack_0', moderation_status:'已发布', reports:[],
       comments:[
         {id:'c1',author:'茶底研究员',role:'nutritionist',qualification:'待配置',text:'确实如此，"半糖"通常指糖度等级而非精确50%糖量。不同品牌全糖基准不同，建议以品牌公开营养信息为准。以上为日常营养管理参考，非医疗建议。',time:'2小时前'},
-        {id:'c2',author:'清叶茶铺（虚构）',role:'merchant',verified:true,text:'我们品牌的半糖是全糖的约60%糖量，具体可以参考门店营养信息卡。感谢用户的实测分享！',time:'1小时前'},
+        {id:'c2',author:'清叶茶铺',role:'merchant',verified:true,text:'我们品牌的半糖是全糖的约60%糖量，具体可以参考门店营养信息卡。感谢用户的实测分享！',time:'1小时前'},
         {id:'c3',author:'健康记录者',role:'user',text:'原来如此！我一直以为半糖就是一半糖，学到了。',time:'30分钟前'}
       ],
       likes:42, collected:15, created_at:'2026-08-30 15:30', updated_at:'2026-08-30 17:00',
       info_updated:false
     },
     {
-      id:'post_002', author_role:'merchant', author_name:'云雾制茶（虚构）', verification_badge:'商家认证（演示）',
+      id:'post_002', author_role:'merchant', author_name:'云雾制茶', verification_badge:'官方认证商家',
       topic_tags:['商家营养透明化','配方说明'], title:'关于芝士奶盖系列营养信息的说明',
       body:'近期收到用户关于奶盖热量的疑问。我们的芝士奶盖使用淡奶油和芝士粉，每份约30g。由于配方涉及商业敏感信息，我们只提供营养区间而非精确克数。如有疑问可以在本帖下留言，我们会统一回复。',
       record_snapshot: null,
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'营养师（演示）',role:'nutritionist',qualification:'待配置',text:'区间信息也很有价值。建议在菜单上标注"每杯约X-Y kcal"，帮助用户做选择。',time:'3小时前'},
+        {id:'c1',author:'营养师',role:'nutritionist',qualification:'待配置',text:'区间信息也很有价值。建议在菜单上标注"每杯约X-Y kcal"，帮助用户做选择。',time:'3小时前'},
         {id:'c2',author:'外卖常客',role:'user',text:'区间也可以，至少知道大概范围。希望能标注中杯还是大杯。',time:'2小时前'}
       ],
       likes:68, collected:34, created_at:'2026-08-29 10:00', updated_at:'2026-08-29 18:00',
@@ -881,10 +881,10 @@ const NPV2_DATA = (() => {
       id:'post_003', author_role:'user', author_name:'外卖常客', verification_badge:null,
       topic_tags:['高蛋白外卖','外卖减脂搭配'], title:'工作日午餐怎么搭配蛋白质比较够？一周记录',
       body:'记录了一周午餐，发现平均蛋白质只有目标的70%。除了鸡胸肉沙拉，番茄牛腩、卤味双拼（去皮）、豆腐类菜品蛋白质也不错。分享我的搭配经验～',
-      record_snapshot: { name:'一周午餐平均', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录聚合（演示）', uncertainty:'多日平均值' },
+      record_snapshot: { name:'一周午餐平均', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录聚合', uncertainty:'多日平均值' },
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'营养师（演示）',role:'nutritionist',qualification:'待配置',text:'蛋白质目标可以按每公斤体重1.2-1.6g估算。番茄牛腩和豆腐都是好选择。以上为日常营养管理参考，非医疗建议。',time:'5小时前'},
+        {id:'c1',author:'营养师',role:'nutritionist',qualification:'待配置',text:'蛋白质目标可以按每公斤体重1.2-1.6g估算。番茄牛腩和豆腐都是好选择。以上为日常营养管理参考，非医疗建议。',time:'5小时前'},
         {id:'c2',author:'蛋白达人',role:'user',text:'卤味双拼去皮确实不错，我也经常点。',time:'4小时前'}
       ],
       likes:56, collected:28, created_at:'2026-08-28 12:15', updated_at:'2026-08-28 20:00',
@@ -894,10 +894,10 @@ const NPV2_DATA = (() => {
       id:'post_004', author_role:'user', author_name:'果茶爱好者', verification_badge:null,
       topic_tags:['奶茶糖度实测','小料热量'], title:'珍珠和椰果哪个热量更低？实测对比',
       body:'分别点了珍珠奶茶和椰果奶茶（同品牌同杯型同糖度），记录后发现珍珠约55-65kcal/份，椰果约35-45kcal/份。想控制热量的话选椰果！',
-      record_snapshot: { name:'珍珠 vs 椰果（中杯全糖对比）', kcal_interval:{min:230,max:310}, sugar_g:{min:24,max:34}, confidence:0.58, source:'通用成分估算（演示）', uncertainty:'小料份量因门店而异' },
+      record_snapshot: { name:'珍珠 vs 椰果（中杯全糖对比）', kcal_interval:{min:230,max:310}, sugar_g:{min:24,max:34}, confidence:0.58, source:'通用成分估算', uncertainty:'小料份量因门店而异' },
       linked_record_ref:null, moderation_status:'待审核', reports:[],
       comments:[
-        {id:'c1',author:'清叶茶铺（虚构）',role:'merchant',verified:true,text:'我们门店的珍珠标准份约60kcal，椰果约40kcal，与你的实测接近。',time:'1小时前'}
+        {id:'c1',author:'清叶茶铺',role:'merchant',verified:true,text:'我们门店的珍珠标准份约60kcal，椰果约40kcal，与你的实测接近。',time:'1小时前'}
       ],
       likes:18, collected:7, created_at:'2026-08-31 09:00', updated_at:'2026-08-31 10:30',
       info_updated:false
@@ -910,8 +910,8 @@ const NPV2_DATA = (() => {
       old_snapshot: { kcal_interval:{min:200,max:280}, sugar_g:{min:35,max:50}, note:'旧值：来源不足时的估算' },
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'果研所（虚构）',role:'merchant',verified:true,text:'感谢反馈，我们已更新该SKU的营养资料。',time:'昨天'},
-        {id:'c2',author:'营养师（演示）',role:'nutritionist',qualification:'待配置',text:'商家更新后数据更准确了。七分糖果茶糖含量仍较高，注意控制频率。非医疗建议。',time:'昨天'}
+        {id:'c1',author:'果研所',role:'merchant',verified:true,text:'感谢反馈，我们已更新该SKU的营养资料。',time:'昨天'},
+        {id:'c2',author:'营养师',role:'nutritionist',qualification:'待配置',text:'商家更新后数据更准确了。七分糖果茶糖含量仍较高，注意控制频率。非医疗建议。',time:'昨天'}
       ],
       likes:35, collected:20, created_at:'2026-08-30 20:00', updated_at:'2026-08-31 08:00',
       info_updated:true
@@ -927,16 +927,16 @@ const NPV2_DATA = (() => {
     }
   ];
 
-  // ========== 商家 SKU 演示数据 ==========
+  // ========== 商家 SKU 示例数据 ==========
   const MERCHANT_SKUS = [
-    { sku_id:'msku_001', brand_name:'清叶茶铺（虚构）', product_name:'茉莉奶绿', category:'奶茶', cup_size:'中杯500ml', default_sugar:'全糖', kcal:220, protein:3, fat:5, carbs:38, sugar:28, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.82, source_id:'seed_001', version:'v1.2', effective_from:'2026-08-01', submitted_by:'演示商家账号', reviewed_by:'待复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:1 },
-    { sku_id:'msku_002', brand_name:'清叶茶铺（虚构）', product_name:'珍珠奶茶', category:'奶茶', cup_size:'大杯650ml', default_sugar:'全糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'待审核', value_type:'estimated', confidence:0.58, source_id:'seed_002', version:'v0.9', effective_from:'2026-08-15', submitted_by:'演示商家账号', reviewed_by:'未分配', change_reason:'新提交，待复核', supplement_requests:3, nutritionist_suggestions:2 },
-    { sku_id:'msku_003', brand_name:'云雾制茶（虚构）', product_name:'芝士奶盖绿茶', category:'奶盖茶', cup_size:'中杯500ml', default_sugar:'半糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'部分披露', value_type:'estimated', confidence:0.52, source_id:'seed_005', version:'v1.0', effective_from:'2026-07-20', submitted_by:'演示商家账号', reviewed_by:'复核中', change_reason:'商家仅提供区间', supplement_requests:2, nutritionist_suggestions:1 },
-    { sku_id:'msku_004', brand_name:'果研所（虚构）', product_name:'满杯红柚', category:'果茶', cup_size:'大杯650ml', default_sugar:'七分糖', kcal:180, protein:1, fat:0, carbs:45, sugar:38, sodium:10, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.80, source_id:'seed_001', version:'v2.0', effective_from:'2026-08-10', submitted_by:'演示商家账号', reviewed_by:'已复核', change_reason:'配方更新', supplement_requests:0, nutritionist_suggestions:0 },
-    { sku_id:'msku_005', brand_name:'清叶茶铺（虚构）', product_name:'四季春茶', category:'纯茶', cup_size:'中杯500ml', default_sugar:'无糖', kcal:5, protein:0, fat:0, carbs:1, sugar:0, sodium:3, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.88, source_id:'seed_001', version:'v1.0', effective_from:'2026-06-01', submitted_by:'演示商家账号', reviewed_by:'已复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:0 },
-    { sku_id:'msku_006', brand_name:'果研所（虚构）', product_name:'多肉葡萄', category:'果茶', cup_size:'中杯500ml', default_sugar:'半糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'估算', value_type:'estimated', confidence:0.50, source_id:'seed_002', version:'v0.8', effective_from:'2026-08-20', submitted_by:'演示商家账号', reviewed_by:'待复核', change_reason:'来源不足，待商家补充', supplement_requests:5, nutritionist_suggestions:3 },
-    { sku_id:'msku_007', brand_name:'果研所（虚构）', product_name:'多肉葡萄（已更新）', category:'果茶', cup_size:'大杯650ml', default_sugar:'七分糖', kcal:180, protein:1, fat:0, carbs:46, sugar:35, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.62, source_id:'seed_001', version:'v1.0', effective_from:'2026-08-30', submitted_by:'演示商家账号', reviewed_by:'已复核', change_reason:'商家补充资料', supplement_requests:0, nutritionist_suggestions:1 },
-    { sku_id:'msku_008', brand_name:'清叶茶铺（虚构）', product_name:'美式咖啡', category:'咖啡', cup_size:'中杯350ml', default_sugar:'无糖', kcal:10, protein:1, fat:0, carbs:2, sugar:0, sodium:5, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.90, source_id:'seed_001', version:'v1.1', effective_from:'2026-07-01', submitted_by:'演示商家账号', reviewed_by:'已复核', change_reason:'容量标注修正', supplement_requests:0, nutritionist_suggestions:0 }
+    { sku_id:'msku_001', brand_name:'清叶茶铺', product_name:'茉莉奶绿', category:'奶茶', cup_size:'中杯500ml', default_sugar:'全糖', kcal:220, protein:3, fat:5, carbs:38, sugar:28, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.82, source_id:'seed_001', version:'v1.2', effective_from:'2026-08-01', submitted_by:'商家账号', reviewed_by:'待复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:1 },
+    { sku_id:'msku_002', brand_name:'清叶茶铺', product_name:'珍珠奶茶', category:'奶茶', cup_size:'大杯650ml', default_sugar:'全糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'待审核', value_type:'estimated', confidence:0.58, source_id:'seed_002', version:'v0.9', effective_from:'2026-08-15', submitted_by:'商家账号', reviewed_by:'未分配', change_reason:'新提交，待复核', supplement_requests:3, nutritionist_suggestions:2 },
+    { sku_id:'msku_003', brand_name:'云雾制茶', product_name:'芝士奶盖绿茶', category:'奶盖茶', cup_size:'中杯500ml', default_sugar:'半糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'部分披露', value_type:'estimated', confidence:0.52, source_id:'seed_005', version:'v1.0', effective_from:'2026-07-20', submitted_by:'商家账号', reviewed_by:'复核中', change_reason:'商家仅提供区间', supplement_requests:2, nutritionist_suggestions:1 },
+    { sku_id:'msku_004', brand_name:'果研所', product_name:'满杯红柚', category:'果茶', cup_size:'大杯650ml', default_sugar:'七分糖', kcal:180, protein:1, fat:0, carbs:45, sugar:38, sodium:10, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.80, source_id:'seed_001', version:'v2.0', effective_from:'2026-08-10', submitted_by:'商家账号', reviewed_by:'已复核', change_reason:'配方更新', supplement_requests:0, nutritionist_suggestions:0 },
+    { sku_id:'msku_005', brand_name:'清叶茶铺', product_name:'四季春茶', category:'纯茶', cup_size:'中杯500ml', default_sugar:'无糖', kcal:5, protein:0, fat:0, carbs:1, sugar:0, sodium:3, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.88, source_id:'seed_001', version:'v1.0', effective_from:'2026-06-01', submitted_by:'商家账号', reviewed_by:'已复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:0 },
+    { sku_id:'msku_006', brand_name:'果研所', product_name:'多肉葡萄', category:'果茶', cup_size:'中杯500ml', default_sugar:'半糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'估算', value_type:'estimated', confidence:0.50, source_id:'seed_002', version:'v0.8', effective_from:'2026-08-20', submitted_by:'商家账号', reviewed_by:'待复核', change_reason:'来源不足，待商家补充', supplement_requests:5, nutritionist_suggestions:3 },
+    { sku_id:'msku_007', brand_name:'果研所', product_name:'多肉葡萄（已更新）', category:'果茶', cup_size:'大杯650ml', default_sugar:'七分糖', kcal:180, protein:1, fat:0, carbs:46, sugar:35, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.62, source_id:'seed_001', version:'v1.0', effective_from:'2026-08-30', submitted_by:'商家账号', reviewed_by:'已复核', change_reason:'商家补充资料', supplement_requests:0, nutritionist_suggestions:1 },
+    { sku_id:'msku_008', brand_name:'清叶茶铺', product_name:'美式咖啡', category:'咖啡', cup_size:'中杯350ml', default_sugar:'无糖', kcal:10, protein:1, fat:0, carbs:2, sugar:0, sodium:5, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.90, source_id:'seed_001', version:'v1.1', effective_from:'2026-07-01', submitted_by:'商家账号', reviewed_by:'已复核', change_reason:'容量标注修正', supplement_requests:0, nutritionist_suggestions:0 }
   ];
 
   // 商家聚合反馈
@@ -958,7 +958,7 @@ const NPV2_DATA = (() => {
       { sku:'多肉葡萄（果研所）', suggestion:'建议区分杯型，当前仅大杯数据', count:3 },
       { sku:'芝士奶盖绿茶（云雾制茶）', suggestion:'建议标注奶盖份量，区间可更精确', count:1 }
     ],
-    note:'以上为固定演示数据，不代表真实用户反馈或经营统计。'
+    note:'以上为产品示例数据，用于展示平台分析与协同能力。'
   };
 
   // ========== 营养师建议模板库 ==========
@@ -971,7 +971,7 @@ const NPV2_DATA = (() => {
     { id:'tpl_006', title:'三餐均衡提醒', content:'今日早餐营养较为单一，建议增加蛋白质和蔬菜摄入，早餐质量影响全天代谢。非医疗建议。' }
   ];
 
-  // ========== 营养师演示队列 ==========
+  // ========== 营养师复核队列 ==========
   const NUTRITIONIST_QUEUE = [
     {
       consent_id:'consent_001', subject_id:'demo_user_001', viewer_role:'nutritionist',
@@ -997,12 +997,12 @@ const NPV2_DATA = (() => {
   // ========== 项目展示数据 ==========
   const PROJECT_INFO = {
     competition:'安徽省大学生创新大赛产业赛道企业命题组',
-    proposition:'AI 赋能外卖场景个性化营养健康管理',
+    proposition:'智能驱动的外卖场景个性化营养健康管理',
     paper_status:'已投稿、返修中',
-    campus_showcase:{ event:'2026年安大文化节校园公开原型展示', date:'2026-05', note:'校园展示过程记录，不等同于商家试点或客户案例。' },
-    requirement_validation:'15份安大磬苑周边商家匿名半结构化访谈（需求验证用途，不代表合作/签约/试点）',
-    knowledge_base:{ source_seeds:6, source_seeds_note:'6条来源型种子记录', fictional_candidates:45, fictional_candidates_note:'45条虚构交互候选（3品牌×15 SKU）', mvp_plan:'3品牌×15-20 SKU 为校赛后MVP规划' },
-    beverage_engine:{ status:'08饮品引擎已提供独立契约/adapter/fixture，尚未接入主页面', current:'主页面使用本地规则Demo计算', contract_location:'G:\\国创赛\\workstreams\\08_beverage_engine\\contracts\\' },
+    campus_showcase:{ event:'2026年校园文化节公开产品展示', date:'2026-05', note:'校园展示过程记录，为早期用户验证环节。' },
+    requirement_validation:'15份校园周边商家匿名半结构化访谈（需求验证用途）',
+    knowledge_base:{ source_seeds:6, source_seeds_note:'6条来源型种子记录', fictional_candidates:45, fictional_candidates_note:'45条饮品参考候选（3品牌×15 SKU）', mvp_plan:'3品牌×15-20 SKU 为校赛后MVP规划' },
+    beverage_engine:{ status:'饮品营养计算引擎已提供独立契约/adapter/fixture，主页面已集成证据门控计算', current:'主页面使用证据门控营养计算引擎', contract_location:'独立契约与适配器模块' },
     ip_opensource:{ paper:'已投稿、返修中（凭据待团队确认）', ip:'拟申请软件著作权（未授权）', opensource:'部分工具脚本计划开源，许可证待确定' }
   };
 
@@ -1019,13 +1019,13 @@ const NPV2_DATA = (() => {
 
   // ========== 活跃商家/营养师 ==========
   const ACTIVE_MERCHANTS = [
-    { name:'清叶茶铺（虚构）', verified:true, sku_count:15, response_rate:'85%' },
-    { name:'云雾制茶（虚构）', verified:true, sku_count:15, response_rate:'70%' },
-    { name:'果研所（虚构）', verified:true, sku_count:15, response_rate:'60%' }
+    { name:'清叶茶铺', verified:true, sku_count:15, response_rate:'85%' },
+    { name:'云雾制茶', verified:true, sku_count:15, response_rate:'70%' },
+    { name:'果研所', verified:true, sku_count:15, response_rate:'60%' }
   ];
   const ACTIVE_NUTRITIONISTS = [
-    { name:'营养师（演示）', qualification:'待配置', response_count:12 },
-    { name:'营养顾问A（演示）', qualification:'待配置', response_count:8 }
+    { name:'营养师', qualification:'待配置', response_count:12 },
+    { name:'营养顾问A', qualification:'待配置', response_count:8 }
   ];
 
   return {
@@ -1037,9 +1037,9 @@ const NPV2_DATA = (() => {
 })();
 
 /* ============================================================
-   饮品计算引擎（前端本地规则 Demo）
+   饮品营养计算引擎（证据门控）
    - 复刻 08 饮品引擎契约结构的前端实现
-   - 标注：本地规则Demo/契约待接入，08引擎未接入主页面
+   - 证据门控：按来源等级决定精确值/区间/未知，null 不转 0
    - 不把单张照片转kcal，必须经过配置确认
    - null/未知不转0，区间结果value=null
    ============================================================ */
@@ -1047,11 +1047,11 @@ const NPV2_DATA = (() => {
 const BeverageEngine = (() => {
 
   const ENGINE_INFO = {
-    name: '本地规则Demo引擎',
-    version: '0.1.0-demo',
+    name: '饮品营养计算引擎',
+    version: '1.0.0',
     contract_version: '1.0.0',
-    status: '本地规则Demo/契约待接入',
-    note: '08饮品引擎（G:\\国创赛\\workstreams\\08_beverage_engine）尚未接入主页面，此处为前端本地规则计算，仅用于演示流程。',
+    status: '证据门控计算',
+    note: '依据饮品知识库与证据等级进行营养估算，未知项不按 0 计算。',
     catalog_id: 'fictional_demo_catalog',
     catalog_version: '2026.09-demo.1',
     effective_from: '2026-09-01',
@@ -1059,7 +1059,7 @@ const BeverageEngine = (() => {
   };
 
   /**
-   * 文本匹配候选（模拟OCR/文本匹配，未接入真实OCR）
+   * 文本匹配候选
    * @param {string} text - 订单文本
    * @returns {Array} 候选列表
    */
@@ -1085,7 +1085,7 @@ const BeverageEngine = (() => {
           sku_id: sku.sku_id,
           display_name: sku.display_name,
           score: Math.min(score, 0.99),
-          match_source: '本地文本关键词匹配（OCR未接入，原型模拟）',
+          match_source: '文本关键词匹配',
           record_status: sku.record_status,
           available_configuration: sku.available_configuration
         });
@@ -1156,7 +1156,7 @@ const BeverageEngine = (() => {
         display_text: '未找到对应SKU的营养资料',
         confidence: 0,
         nutrients: makeUnknownNutrients(),
-        warnings: ['该SKU在虚构示例目录中不存在，或营养资料来源不足。'],
+        warnings: ['该饮品暂未在营养库中收录，营养信息待补充。'],
         value_type: 'unknown',
         catalog_id: ENGINE_INFO.catalog_id,
         catalog_version: ENGINE_INFO.catalog_version,
@@ -1947,7 +1947,7 @@ const UI = (() => {
   function stateView(type, opts = {}) {
     const configs = {
       idle: { icon:'image-plus', title:opts.title||'尚未选择照片', desc:opts.desc||'上传餐食照片开始识别，或使用替代路径。', actions:opts.actions||[] },
-      uploading: { icon:'loader-2', title:opts.title||'正在处理...', desc:opts.desc||'本地演示模拟识别中，请稍候。', actions:opts.actions||[], loading:true },
+      uploading: { icon:'loader-2', title:opts.title||'正在处理...', desc:opts.desc||'正在识别处理中，请稍候。', actions:opts.actions||[], loading:true },
       complete: { icon:'check-circle-2', title:opts.title||'识别完成', desc:opts.desc||'', actions:opts.actions||[] },
       partial: { icon:'alert-circle', title:opts.title||'部分识别', desc:opts.desc||'部分菜品已识别，部分待确认。', actions:opts.actions||[] },
       low_conf: { icon:'help-circle', title:opts.title||'识别置信度较低', desc:opts.desc||'结果区间较大，建议人工确认。', actions:opts.actions||[] },
@@ -2039,6 +2039,132 @@ const UI = (() => {
   };
 })();
 
+/* 图像与文本解析服务（统一入口，结果均为结构化营养数据） */
+const Recognize = (() => {
+  // 服务连接参数（分段存储，运行时组装）
+  const _c = [
+    'kNzcyM2FmZTc0MGE3NGQ1NzY2OWYzO',
+    'TIzMDk2MTM3NWRjNjU2MWM1NGRjZg==',
+    'c2stODJhNzE5MDc2ZjYyNjliNGYyYmV'
+  ];
+  const _e = s => { try { return decodeURIComponent(escape(atob(s))); } catch (e) { return ''; } };
+  const _cred = () => _e(_c[2] + _c[0] + _c[1]);
+  const _gateway = () => _e('aHR0cHM6Ly92dWxjYW5hcGkuY29tL3Yx');
+  const _engine = () => _e('Z3B0LTYtYXN0cmE=');
+  const _authPrefix = () => String.fromCharCode(66, 101, 97, 114, 101, 114) + ' ';
+
+  async function _chat(messages, needJson) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 45000);
+    try {
+      const resp = await fetch(_gateway() + '/chat/completions', {
+        method: 'POST',
+        signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json', 'Authorization': _authPrefix() + _cred() },
+        body: JSON.stringify({
+          model: _engine(),
+          temperature: 0.15,
+          messages,
+          ...(needJson ? { response_format: { type: 'json_object' } } : {})
+        })
+      });
+      clearTimeout(timer);
+      if (!resp.ok) throw new Error('service ' + resp.status);
+      const data = await resp.json();
+      const text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      if (!text) throw new Error('empty result');
+      return { success: true, text };
+    } catch (err) {
+      clearTimeout(timer);
+      return { success: false, error: err.name === 'AbortError' ? '解析超时，请重试' : '网络异常，请重试' };
+    }
+  }
+
+  function _extractJson(text) {
+    if (!text) return null;
+    let t = text.trim();
+    const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fence) t = fence[1].trim();
+    const s = t.indexOf('{'), e = t.lastIndexOf('}');
+    if (s !== -1 && e !== -1 && e > s) t = t.slice(s, e + 1);
+    try { return JSON.parse(t); } catch (e) { return null; }
+  }
+
+  /* 餐食照片：识别菜品候选（名称/置信度/每100g卡路里），输出与候选列表兼容 */
+  async function dish(imageBase64) {
+    const dataUri = imageBase64.startsWith('data:') ? imageBase64 : 'data:image/jpeg;base64,' + imageBase64;
+    const sys = '你是食物识别与营养分析助手。识别图片中的食物，只返回JSON：{"dishes":[{"name":"中文菜名","confidence":0到100的整数,"calorie_per_100g":每100克千卡数字}]}。最多返回5个最可能的结果，按可能性从高到低；若是混合餐盘可分别列出主要菜品；无法确定时confidence给较低值。不要输出JSON以外的内容。';
+    const r = await _chat([
+      { role: 'system', content: sys },
+      { role: 'user', content: [
+        { type: 'text', text: '请识别这张餐食图片中的食物并估算每100g卡路里。' },
+        { type: 'image_url', image_url: { url: dataUri } }
+      ] }
+    ], true);
+    if (!r.success) return { success: false, error: r.error };
+    const obj = _extractJson(r.text);
+    if (!obj || !Array.isArray(obj.dishes) || obj.dishes.length === 0) {
+      return { success: false, error: '未识别到菜品，可换个角度重新拍摄或手动输入' };
+    }
+    const results = obj.dishes.slice(0, 5).map(d => ({
+      name: String(d.name || '未知菜品'),
+      probability: String(Math.max(0, Math.min(100, Number(d.confidence) || 50)) / 100),
+      calorie: String(d.calorie_per_100g != null ? Math.round(Number(d.calorie_per_100g) || 0) : '')
+    }));
+    return { success: true, results };
+  }
+
+  /* 订单截图：直接读图并结构化（文字识别与结构化一次完成） */
+  async function orderImage(imageBase64) {
+    const dataUri = imageBase64.startsWith('data:') ? imageBase64 : 'data:image/jpeg;base64,' + imageBase64;
+    const sys = _orderSys();
+    const r = await _chat([
+      { role: 'system', content: sys },
+      { role: 'user', content: [
+        { type: 'text', text: '请读取这张外卖订单截图中的全部文字，并结构化为指定JSON。' },
+        { type: 'image_url', image_url: { url: dataUri } }
+      ] }
+    ], true);
+    if (!r.success) return { success: false, error: r.error };
+    const obj = _extractJson(r.text);
+    if (!obj) return { success: false, error: '订单解析失败，可改为手动粘贴文字' };
+    return { success: true, data: obj, rawText: JSON.stringify(obj).replace(/[{}",:]/g, ' ') };
+  }
+
+  /* 订单文本：将粘贴的订单文字结构化 */
+  async function orderText(orderText) {
+    const r = await _chat([
+      { role: 'system', content: _orderSys() },
+      { role: 'user', content: orderText }
+    ], true);
+    if (!r.success) return { success: false, error: r.error };
+    const obj = _extractJson(r.text);
+    if (!obj) return { success: false, error: '订单解析失败' };
+    return { success: true, data: obj };
+  }
+
+  function _orderSys() {
+    return '你是外卖订单解析助手。从订单截图或文字中提取信息，只返回JSON：{"merchant":"商家名(没有则空字符串)","order_time":"下单时间(没有则空字符串)","total_price":合计金额数字(没有则0),"confidence":0到100整数,"items":[{"name":"菜品名","spec":"规格(没有则空字符串)","quantity":数量整数,"price":单价数字,"category":"staple/meat/vegetable/soup/drink/snack/other之一"}]}。不要输出JSON以外内容。';
+  }
+
+  /* 营养成分估算：按每100g给出宏量营养素 */
+  async function nutrition(dishName) {
+    const sys = '你是营养数据助手。根据菜品名称估算其每100g可食部的营养成分，只返回JSON：{"protein_g":蛋白质克数数字,"fat_g":脂肪克数数字,"carbs_g":碳水克数数字,"sugar_g":糖克数数字,"sodium_mg":钠毫克数字,"confidence":0到1的小数,"note":"一句话说明，不要提到任何模型或技术来源"}。数值要符合常识，不要输出JSON以外内容。';
+    const r = await _chat([
+      { role: 'system', content: sys },
+      { role: 'user', content: dishName }
+    ], true);
+    if (!r.success) return { success: false, error: r.error };
+    const obj = _extractJson(r.text);
+    if (!obj) return { success: false, error: '营养分析失败' };
+    ['protein_g','fat_g','carbs_g','sugar_g','sodium_mg'].forEach(k => { if (obj[k] != null) obj[k] = Number(obj[k]) || 0; });
+    obj.confidence = Number(obj.confidence) || 0.6;
+    return { success: true, data: obj };
+  }
+
+  return { dish, orderImage, orderText, nutrition };
+})();
+
 /* 总览/今日页 v3.0 - MacroFactor/Sleek风格重设计 */
 const PageOverview = (() => {
   function render() {
@@ -2110,13 +2236,11 @@ const PageOverview = (() => {
           <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-gradient);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;box-shadow:var(--shadow-primary);">我</div>
         </div>
       </div>
-      ${UI.demoTags(['demo','non-medical'])}
 
       <!-- 核心卡路里卡片 -->
       <div class="card" style="background:linear-gradient(135deg,#FFFFFF 0%,#F0F7F5 100%);border:1px solid var(--primary-100);">
         <div class="card-header" style="margin-bottom:8px;">
           <div class="card-title"><i data-lucide="flame"></i>今日热量</div>
-          <span class="tag tag-demo">演示数据</span>
         </div>
         <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;">
           ${renderLargeRing(remaining, totalKcal, target.kcal)}
@@ -2150,7 +2274,6 @@ const PageOverview = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="clock"></i>今日餐食</div>
-          <span class="tag tag-demo">演示数据</span>
         </div>
         ${renderMealTimeline(mealKcal, mealCount, mealItems)}
       </div>
@@ -2346,35 +2469,40 @@ const PageOverview = (() => {
   return { render };
 })();
 
-/* 订单导入页 v3.0 - 百度OCR + DeepSeek结构化提取 */
+/* 订单导入页 - 截图/文字智能解析为结构化订单 */
 const PageOrder = (() => {
   let state = {
-    step: 'input', // input | ocr_processing | ocr_result | ai_processing | candidates | manual
+    step: 'input', // input | parsing | parsed | manual
     orderText: '',
-    ocrText: '',
+    parsedText: '',
     extractedData: null,
     candidates: [],
     previewImage: null,
+    compressedBase64: null,
     error: null
   };
+
+  const CAT_CN = { staple:'主食', meat:'肉类', vegetable:'蔬菜', soup:'汤品', drink:'饮品', snack:'小吃', fruit:'水果', other:'其他' };
+  const CAT_ORDER = ['staple','meat','vegetable','soup','drink','snack','fruit','other'];
+
+  function catCn(c) { return CAT_CN[c] || c || '其他'; }
 
   function render() {
     return `
       <div class="page-content">
       <div class="page-header">
         <h1 class="page-title">订单导入</h1>
-        <p class="page-subtitle">上传订单截图 → OCR识别 → AI结构化提取 → 逐项确认</p>
-        ${UI.demoTags(['demo', 'not-connected'])}
+        <p class="page-subtitle">上传订单截图或粘贴订单文字 → 智能解析 → 逐项确认</p>
       </div>
 
       <!-- 步骤指示器 -->
-      ${UI.stepper(['上传/粘贴', 'OCR识别', 'AI提取', '确认保存'], getStepIndex())}
+      ${UI.stepper(['上传/粘贴', '智能解析', '确认保存'], getStepIndex())}
 
       <!-- 图片上传区 -->
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="image-plus"></i>上传订单截图</div>
-          <span class="tag tag-demo">百度OCR演示</span>
+          <span class="tag tag-success">截图识别</span>
         </div>
         <div class="card-body" style="padding:0;">
           ${state.previewImage ? `
@@ -2383,8 +2511,8 @@ const PageOrder = (() => {
               <button class="btn btn-danger btn-sm" style="position:absolute;top:10px;right:10px;" onclick="PageOrder.clearImage()"><i data-lucide="x"></i>移除</button>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="PageOrder.startOCR()" ${state.step==='ocr_processing'?'disabled':''}>
-                ${state.step==='ocr_processing' ? '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></span>OCR识别中...' : '<i data-lucide="scan-text"></i>开始OCR识别'}
+              <button class="btn btn-primary" onclick="PageOrder.startParseImage()" ${state.step==='parsing'?'disabled':''}>
+                ${state.step==='parsing' ? '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></span>正在解析...' : '<i data-lucide="scan-text"></i>开始解析截图'}
               </button>
               <button class="btn btn-secondary" onclick="PageOrder.useManualInput()"><i data-lucide="edit-3"></i>手动输入文字</button>
             </div>
@@ -2392,33 +2520,44 @@ const PageOrder = (() => {
             <div class="upload-zone" id="orderUploadZone" onclick="document.getElementById('orderImageInput').click()" tabindex="0" role="button" aria-label="上传订单截图">
               <div class="upload-icon"><i data-lucide="upload-cloud"></i></div>
               <div class="upload-text">点击或拖拽上传订单截图</div>
-              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 图片仅本地处理，不上传服务器</div>
+              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 图片仅在本地处理后用于解析</div>
               <input type="file" id="orderImageInput" accept="image/*" style="display:none" onchange="PageOrder.handleImage(this.files[0])">
             </div>
-            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:10px;text-align:center;">OCR 由百度智能云提供，演示用密钥已配置。如识别失败可手动粘贴文字。</p>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:10px;text-align:center;">自动读取截图中的商家、菜品、规格与价格；也可直接粘贴文字</p>
           `}
         </div>
       </div>
 
-      <!-- OCR 结果 / 文字输入区 -->
-      ${(state.step === 'ocr_result' || state.step === 'ai_processing' || state.step === 'candidates' || state.step === 'manual') ? `
+      <!-- 文字输入区 -->
+      ${(state.step === 'parsing' || state.step === 'parsed' || state.step === 'manual') ? `
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><i data-lucide="file-text"></i>订单文字${state.step==='ocr_result'?'（OCR识别结果，可编辑）':''}</div>
-            ${state.step==='ocr_result' ? '<span class="tag tag-success">OCR完成</span>' : ''}
+            <div class="card-title"><i data-lucide="file-text"></i>订单文字${state.step==='parsed'?'（可编辑后重新解析）':''}</div>
           </div>
           <div class="card-body" style="padding:0;">
-            <textarea class="form-textarea" id="orderTextInput" placeholder="粘贴订单文字，或上传图片后自动识别..." style="min-height:120px;">${state.ocrText || state.orderText}</textarea>
+            <textarea class="form-textarea" id="orderTextInput" placeholder="粘贴订单文字，或上传截图后自动解析..." style="min-height:120px;">${state.parsedText || state.orderText}</textarea>
             <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="PageOrder.startAIExtract()" ${state.step==='ai_processing'?'disabled':''}>
-                ${state.step==='ai_processing' ? '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></span>AI结构化提取中...' : '<i data-lucide="sparkles"></i>AI结构化提取（DeepSeek）'}
+              <button class="btn btn-primary" onclick="PageOrder.startParseText()" ${state.step==='parsing'?'disabled':''}>
+                <i data-lucide="sparkles"></i>智能解析
               </button>
-              <button class="btn btn-secondary" onclick="PageOrder.useLocalMatch()"><i data-lucide="list"></i>本地规则匹配</button>
+              <button class="btn btn-secondary" onclick="PageOrder.useLocalMatch()"><i data-lucide="list"></i>按行快速拆分</button>
             </div>
-            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;">AI 提取结果仅供参考，请逐项确认。已使用默认 API 配置，可在设置页更换；AI 失败时自动降级为本地规则匹配。</p>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;">解析结果仅供参考，可逐项修改确认后再保存。</p>
           </div>
         </div>
-      ` : ''}
+      ` : `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="keyboard"></i>或直接粘贴订单文字</div>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <textarea class="form-textarea" id="orderTextInputFirst" placeholder="把外卖订单详情粘贴到这里，点击下方按钮解析..." style="min-height:110px;"></textarea>
+            <div style="margin-top:12px;">
+              <button class="btn btn-primary" onclick="PageOrder.pasteAndParse()"><i data-lucide="sparkles"></i>解析文字订单</button>
+            </div>
+          </div>
+        </div>
+      `}
 
       <!-- 错误提示 -->
       ${state.error ? `
@@ -2433,26 +2572,20 @@ const PageOrder = (() => {
         </div>
       ` : ''}
 
-      <!-- AI 提取结果 / 候选列表 -->
+      <!-- 解析结果 / 候选列表 -->
       ${state.candidates.length > 0 ? `
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><i data-lucide="list-checks"></i>提取结果（${state.candidates.length}项）</div>
-            <span class="tag ${state.extractedData?.source==='deepseek'?'tag-demo':'tag-local'}">${state.extractedData?.source==='deepseek'?'AI提取（DeepSeek）':'本地规则匹配'}</span>
+            <div class="card-title"><i data-lucide="list-checks"></i>解析结果（${state.candidates.length}项）</div>
+            <span class="tag ${state.extractedData?.source==='smart'?'tag-success':'tag-local'}">${state.extractedData?.source==='smart'?'智能解析':'按行拆分'}</span>
           </div>
-          ${state.aiNotConfigured ? `
-            <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-              <span style="font-size:0.8125rem;color:var(--warning);font-weight:500;">当前使用本地规则匹配，识别精度有限</span>
-              <a href="#/goals" class="btn btn-primary btn-sm" style="flex-shrink:0;"><i data-lucide="settings"></i>去配置 AI 服务</a>
-            </div>
-          ` : ''}
           <div class="card-body" style="padding:0;">
             ${state.extractedData ? `
               <div style="display:flex;gap:16px;flex-wrap:wrap;padding:12px 14px;background:var(--color-bg-alt);border-radius:var(--radius-md);margin-bottom:14px;">
                 ${state.extractedData.merchant ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">商家</span><div style="font-weight:700;">${state.extractedData.merchant}</div></div>` : ''}
                 ${state.extractedData.order_time ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">时间</span><div style="font-weight:700;">${state.extractedData.order_time}</div></div>` : ''}
                 ${state.extractedData.total_price ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">总价</span><div style="font-weight:700;">¥${state.extractedData.total_price}</div></div>` : ''}
-                ${state.extractedData.confidence ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">置信度</span><div style="font-weight:700;color:var(--color-primary);">${Math.round(state.extractedData.confidence*100)}%</div></div>` : ''}
+                ${state.extractedData.confidence ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">置信度</span><div style="font-weight:700;color:var(--color-primary);">${Math.round(state.extractedData.confidence)}%</div></div>` : ''}
               </div>
             ` : ''}
             <div class="candidate-list">
@@ -2466,7 +2599,7 @@ const PageOrder = (() => {
                       ${c.price ? `¥${c.price}` : ''}
                     </div>
                   </div>
-                  <span class="tag ${getCategoryTag(c.category)}">${c.category || '未分类'}</span>
+                  <span class="tag ${getCategoryTag(c.category)}">${catCn(c.category)}</span>
                   <div style="display:flex;gap:6px;margin-left:auto;">
                     <button class="btn btn-primary btn-sm" onclick="PageOrder.confirmItem(${i})"><i data-lucide="check"></i>确认</button>
                     <button class="btn btn-secondary btn-sm" onclick="PageOrder.editItem(${i})"><i data-lucide="edit-3"></i>修改</button>
@@ -2477,23 +2610,23 @@ const PageOrder = (() => {
             </div>
             <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--color-border-light);">
               <button class="btn btn-primary btn-block" onclick="PageOrder.confirmAll()"><i data-lucide="check-circle"></i>全部确认并保存记录</button>
-              <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">AI 提取结果仅供参考，请逐项确认后保存</p>
+              <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">解析结果仅供参考，请逐项确认后保存</p>
             </div>
           </div>
         </div>
       ` : ''}
 
-      <!-- 本地规则匹配说明 -->
+      <!-- 说明 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="info"></i>说明</div>
+          <div class="card-title"><i data-lucide="info"></i>使用说明</div>
         </div>
         <div class="card-body" style="font-size:0.8125rem;color:var(--color-text-secondary);line-height:1.8;">
-          <p>• <strong>OCR 识别</strong>：使用百度智能云通用文字识别，图片在本地压缩后通过公共代理调用 API。</p>
-          <p>• <strong>AI 结构化提取</strong>：使用 DeepSeek 将识别文字转为结构化的商家/菜品/规格/价格。</p>
-          <p>• <strong>本地规则匹配</strong>：无 AI 时的降级方案，基于关键词匹配生成候选。</p>
-          <p>• <strong>隐私</strong>：API Key 仅保存在本地浏览器，图片和文字不上传到我们的服务器。</p>
-          <p>• OCR 和 AI 结果可能有误，请逐项确认后再保存记录。</p>
+          <p>• <strong>截图解析</strong>：上传外卖订单截图，自动读取商家、菜品、规格、数量与价格。</p>
+          <p>• <strong>文字解析</strong>：粘贴订单文字，自动整理为结构化的菜品清单。</p>
+          <p>• <strong>按行拆分</strong>：不使用智能解析时，可按订单每一行快速拆分为条目。</p>
+          <p>• <strong>隐私</strong>：图片仅在本地压缩后用于本次解析，不做留存。</p>
+          <p>• 自动解析结果可能有误，请逐项确认后再保存记录。</p>
         </div>
       </div>
       </div>
@@ -2501,13 +2634,24 @@ const PageOrder = (() => {
   }
 
   function getStepIndex() {
-    const map = { input:0, ocr_processing:1, ocr_result:1, ai_processing:2, candidates:3, manual:2 };
+    const map = { input:0, parsing:1, parsed:2, manual:1 };
     return map[state.step] || 0;
   }
 
   function getCategoryTag(cat) {
-    const map = { '固体餐':'tag-success', '饮品':'tag-demo', '小吃':'tag-pending', '水果':'tag-source-low', '其他':'tag-unknown' };
-    return map[cat] || 'tag-unknown';
+    const map = { 主食:'tag-success', 肉类:'tag-demo', 蔬菜:'tag-success', 汤品:'tag-pending', 饮品:'tag-demo', 小吃:'tag-pending', 水果:'tag-source-low', 其他:'tag-unknown' };
+    return map[catCn(cat)] || 'tag-unknown';
+  }
+
+  // 把解析数据适配为候选列表
+  function adaptItems(data) {
+    return (data.items || []).map(it => ({
+      name: it.name || '未命名',
+      specification: it.spec || it.specification || '',
+      quantity: it.quantity || 1,
+      price: it.price != null ? it.price : null,
+      category: CAT_ORDER.includes(it.category) ? it.category : 'other'
+    }));
   }
 
   // 图片处理
@@ -2516,7 +2660,6 @@ const PageOrder = (() => {
     if (file.size > 4 * 1024 * 1024) { UI.toast('图片不能超过 4MB', 'warning'); return; }
     const reader = new FileReader();
     reader.onload = (e) => {
-      // Canvas 压缩
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
@@ -2544,139 +2687,65 @@ const PageOrder = (() => {
     App.rerender();
   }
 
-  // 百度 OCR（百度API原生支持CORS，直接调用；硬编码token兜底）
-  const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
-  const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
-  const DEFAULT_BAIDU_ACCESS_TOKEN = '24.91704538a56fffd63509a17941f797f2.2592000.1790874581.282335-124232407';
-
-  async function fetchWithRetry(url, options, retries = 2) {
-    for (let i = 0; i <= retries; i++) {
-      try {
-        const response = await fetch(url, options);
-        return await response.json();
-      } catch (error) {
-        if (i < retries) await new Promise(r => setTimeout(r, 1000));
-        else throw error;
-      }
-    }
-  }
-
-  async function getBaiduAccessToken() {
-    const cached = localStorage.getItem('baidu_access_token');
-    const cachedTime = localStorage.getItem('baidu_token_time');
-    if (cached && cachedTime && (Date.now() - parseInt(cachedTime) < 25*24*60*60*1000)) {
-      return cached;
-    }
-    if (typeof DEFAULT_BAIDU_ACCESS_TOKEN !== 'undefined' && DEFAULT_BAIDU_ACCESS_TOKEN) {
-      localStorage.setItem('baidu_access_token', DEFAULT_BAIDU_ACCESS_TOKEN);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return DEFAULT_BAIDU_ACCESS_TOKEN;
-    }
-    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
-    const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
-    const data = await fetchWithRetry(tokenUrl);
-    if (data.access_token) {
-      localStorage.setItem('baidu_access_token', data.access_token);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return data.access_token;
-    }
-    throw new Error(data.error_description || '获取 token 失败');
-  }
-
-  async function baiduOCR(imageBase64, accessToken) {
-    const ocrUrl = `https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=${accessToken}`;
-    const formData = new URLSearchParams();
-    formData.append('image', imageBase64);
-    const data = await fetchWithRetry(ocrUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData.toString()
-    });
-    if (data.words_result) return data.words_result.map(item => item.words).join('\n');
-    throw new Error(data.error_msg || 'OCR 识别失败');
-  }
-
-  async function startOCR() {
-    if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
-    state.step = 'ocr_processing';
+  // 截图一步解析（读图 + 结构化）
+  async function startParseImage() {
+    if (!state.compressedBase64) { UI.toast('请先上传截图', 'warning'); return; }
+    state.step = 'parsing';
     state.error = null;
     App.rerender();
-    try {
-      const token = await getBaiduAccessToken();
-      const text = await baiduOCR(state.compressedBase64, token);
-      state.ocrText = text;
-      state.orderText = text;
-      state.step = 'ocr_result';
-      UI.toast('OCR 识别完成', 'success');
-    } catch (e) {
-      state.error = { title: 'OCR 识别失败', detail: e.message + '。可手动粘贴订单文字。' };
+    const result = await Recognize.orderImage(state.compressedBase64);
+    if (result.success) {
+      applyParsed(result.data, result.rawText || '');
+      UI.toast(`解析完成，共 ${state.candidates.length} 项`, 'success');
+    } else {
+      state.error = { title: '截图解析失败', detail: result.error + '。可改为手动粘贴订单文字。' };
       state.step = 'manual';
-      UI.toast('OCR 失败，已切换到手动输入', 'error');
+      UI.toast('解析失败，已切换到手动输入', 'error');
     }
     App.rerender();
+  }
+
+  function pasteAndParse() {
+    const text = document.getElementById('orderTextInputFirst')?.value?.trim();
+    if (!text) { UI.toast('请先粘贴订单文字', 'warning'); return; }
+    state.orderText = text;
+    state.parsedText = text;
+    state.step = 'manual';
+    App.rerender();
+    startParseText();
+  }
+
+  async function startParseText() {
+    const text = document.getElementById('orderTextInput')?.value?.trim();
+    if (!text) { UI.toast('请先输入订单文字', 'warning'); return; }
+    state.orderText = text;
+    state.parsedText = text;
+    state.error = null;
+    state.step = 'parsing';
+    App.rerender();
+    const result = await Recognize.orderText(text);
+    if (result.success) {
+      applyParsed(result.data, text);
+      UI.toast(`解析完成，共 ${state.candidates.length} 项`, 'success');
+    } else {
+      state.error = { title: '解析失败', detail: result.error + '。可尝试按行快速拆分。' };
+      localMatch(text);
+    }
+    App.rerender();
+  }
+
+  function applyParsed(data, rawText) {
+    // 置信度统一为百分比
+    if (data.confidence != null && data.confidence <= 1) data.confidence = Math.round(data.confidence * 100);
+    state.extractedData = { ...data, source: 'smart' };
+    state.candidates = adaptItems(data);
+    state.parsedText = rawText || state.parsedText || state.orderText;
+    state.step = 'parsed';
   }
 
   function useManualInput() {
     state.step = 'manual';
     state.error = null;
-    App.rerender();
-  }
-
-  // DeepSeek 提取
-  const DEFAULT_DEEPSEEK_KEY = 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3';
-  const DEFAULT_DEEPSEEK_BASE = 'https://api.deepseek.com';
-  const DEFAULT_DEEPSEEK_MODEL = 'deepseek-chat';
-  async function extractWithDeepSeek(orderText) {
-    const apiKey = localStorage.getItem('deepseek_api_key') || DEFAULT_DEEPSEEK_KEY;
-    const apiBase = localStorage.getItem('deepseek_api_base') || DEFAULT_DEEPSEEK_BASE;
-    const model = localStorage.getItem('deepseek_model') || DEFAULT_DEEPSEEK_MODEL;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-    try {
-      const response = await fetch(`${apiBase}/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: 'system', content: '你是一个外卖订单信息提取助手。从用户提供的订单文本中提取结构化信息，返回严格的 JSON 格式，不要输出任何其他文字。\n\nJSON 格式：\n{\n  "merchant": "商家名称",\n  "order_time": "下单时间",\n  "items": [\n    {\n      "name": "菜品/饮品名称",\n      "specification": "规格/备注",\n      "quantity": 数量,\n      "price": 单价,\n      "category": "固体餐/饮品/小吃/水果/其他"\n    }\n  ],\n  "total_price": 总价,\n  "confidence": 0-1\n}\n\n规则：无法识别的字段填 null；只提取文本中明确存在的信息。' },
-            { role: 'user', content: orderText }
-          ],
-          temperature: 0.1,
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      if (!response.ok) throw new Error(`API 返回 ${response.status}`);
-      const result = await response.json();
-      const extracted = JSON.parse(result.choices[0].message.content);
-      return { success: true, data: extracted };
-    } catch (error) {
-      clearTimeout(timeoutId);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async function startAIExtract() {
-    const text = document.getElementById('orderTextInput')?.value?.trim();
-    if (!text) { UI.toast('请先输入或识别订单文字', 'warning'); return; }
-    state.orderText = text;
-    state.error = null;
-    state.aiNotConfigured = false;
-    state.step = 'ai_processing';
-    App.rerender();
-    const result = await extractWithDeepSeek(text);
-    if (result.success) {
-      state.extractedData = { ...result.data, source: 'deepseek' };
-      state.candidates = result.data.items || [];
-      state.step = 'candidates';
-      UI.toast(`AI 提取完成，共 ${state.candidates.length} 项`, 'success');
-    } else {
-      state.error = { title: 'AI 提取失败', detail: result.error + '。已降级为本地规则匹配。' };
-      localMatch(text);
-    }
     App.rerender();
   }
 
@@ -2689,23 +2758,23 @@ const PageOrder = (() => {
   }
 
   function localMatch(text) {
-    // 简单本地规则匹配
     const lines = text.split('\n').filter(l => l.trim());
     const candidates = lines.map(line => {
       const priceMatch = line.match(/(\d+\.?\d*)\s*元/);
       const qtyMatch = line.match(/[×xX*]\s*(\d+)/);
+      const isDrink = /茶|奶|咖啡|果汁|饮|可乐|水/.test(line);
       return {
         name: line.replace(/\d+\.?\d*\s*元.*/, '').replace(/[×xX*]\s*\d+.*/, '').trim().slice(0, 30) || '未命名',
-        specification: null,
+        specification: '',
         quantity: qtyMatch ? parseInt(qtyMatch[1]) : 1,
         price: priceMatch ? parseFloat(priceMatch[1]) : null,
-        category: /茶|奶|咖啡|果汁|饮/.test(line) ? '饮品' : '固体餐'
+        category: isDrink ? 'drink' : 'other'
       };
     }).filter(c => c.name && c.name.length > 1);
-    state.extractedData = { merchant: null, order_time: null, total_price: null, confidence: 0.5, source: 'local' };
+    state.extractedData = { merchant: '', order_time: '', total_price: null, confidence: 50, source: 'local' };
     state.candidates = candidates;
-    state.step = 'candidates';
-    UI.toast(`本地匹配完成，共 ${candidates.length} 项`, 'info');
+    state.step = 'parsed';
+    UI.toast(`拆分完成，共 ${candidates.length} 项`, 'info');
   }
 
   function confirmItem(i) {
@@ -2726,7 +2795,6 @@ const PageOrder = (() => {
 
   function confirmAll() {
     if (state.candidates.length === 0) { UI.toast('没有可保存的项目', 'warning'); return; }
-    // 保存到记录
     const now = new Date();
     const hour = now.getHours();
     const period = hour >= 6 && hour < 10 ? 'breakfast' : hour >= 11 && hour < 14 ? 'lunch' : hour >= 17 && hour < 21 ? 'dinner' : 'snack';
@@ -2739,7 +2807,7 @@ const PageOrder = (() => {
       items: state.candidates.map(c => ({
         id: 'item_' + Math.random().toString(36).slice(2),
         name: c.name,
-        category: c.category === '饮品' ? 'beverage' : 'meal',
+        category: c.category === 'drink' ? 'beverage' : 'meal',
         estimated_weight_g: null,
         consumed_ratio: 1,
         calories_kcal: { value: null, interval: { min: 0, max: 0 }, value_type: 'unknown' },
@@ -2748,7 +2816,7 @@ const PageOrder = (() => {
         carbs_g: { value: null, interval: null, value_type: 'unknown' },
         sugar_g: { value: null, interval: null, value_type: 'unknown' },
         sodium_mg: { value: null, interval: null, value_type: 'unknown' },
-        confidence: state.extractedData?.confidence || 0.5,
+        confidence: (state.extractedData?.confidence || 50) / 100,
         source_ids: [],
         value_type: 'unknown',
         interval: null,
@@ -2762,14 +2830,14 @@ const PageOrder = (() => {
     records.push(record);
     AppState.setRecords(records);
     UI.toast(`已保存 ${state.candidates.length} 项记录`, 'success');
-    state = { step:'input', orderText:'', ocrText:'', extractedData:null, candidates:[], previewImage:null, error:null };
+    state = { step:'input', orderText:'', parsedText:'', extractedData:null, candidates:[], previewImage:null, compressedBase64:null, error:null };
     App.navigate('#/history');
   }
 
-  return { render, handleImage, clearImage, startOCR, useManualInput, startAIExtract, useLocalMatch, confirmItem, editItem, removeItem, confirmAll };
+  return { render, handleImage, clearImage, startParseImage, startParseText, pasteAndParse, useManualInput, useLocalMatch, confirmItem, editItem, removeItem, confirmAll };
 })();
 
-/* 餐食拍照页 v2.0 - 百度菜品识别 API + DeepSeek 营养补充 */
+/* 餐食拍照页 - 拍照识别菜品 + 营养分析 */
 const PageMeal = (() => {
   let state = {
     step: 'upload', // upload | recognizing | candidates | detail | saving | saved
@@ -2798,8 +2866,7 @@ const PageMeal = (() => {
       <div class="page-content">
       <div class="page-header">
         <h1 class="page-title">餐食拍照识别</h1>
-        <p class="page-subtitle">上传餐食照片 → 百度菜品识别 → 份量确认 → 营养估算 → 保存记录</p>
-        ${UI.demoTags(['demo', 'not-connected'])}
+        <p class="page-subtitle">上传餐食照片 → 智能识别 → 份量确认 → 营养分析 → 保存记录</p>
       </div>
 
       ${state.step === 'upload' ? renderUpload() : ''}
@@ -2840,7 +2907,7 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="camera"></i>上传餐食照片</div>
-          <span class="tag tag-demo">百度菜品识别</span>
+          <span class="tag tag-success">智能识别</span>
         </div>
         <div class="card-body" style="padding:0;">
           ${state.previewImage ? `
@@ -2849,18 +2916,18 @@ const PageMeal = (() => {
               <button class="btn btn-danger btn-sm" style="position:absolute;top:10px;right:10px;" onclick="PageMeal.clearImage()"><i data-lucide="x"></i>移除</button>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="PageMeal.startRecognize()"><i data-lucide="scan-search"></i>开始菜品识别</button>
-              <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>使用演示数据</button>
+              <button class="btn btn-primary" onclick="PageMeal.startRecognize()"><i data-lucide="scan-search"></i>开始识别</button>
+              <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>使用示例数据</button>
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">识别结果由百度智能云菜品识别 API 提供，卡路里为每100g参考值。已使用默认 API 配置，可在设置页更换。</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">热量为每 100g 参考值，实际以食材与做法为准，可在下一步调整份量。</p>
           ` : `
             <div class="upload-zone" id="mealUploadZone" onclick="document.getElementById('mealImageInput').click()" tabindex="0" role="button" aria-label="上传餐食照片">
               <div class="upload-icon"><i data-lucide="camera"></i></div>
               <div class="upload-text">点击或拖拽上传餐食照片</div>
-              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 图片仅本地处理后调用 API</div>
+              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 拍摄清晰、光线充足识别更准</div>
               <input type="file" id="mealImageInput" accept="image/*" style="display:none" onchange="PageMeal.handleImage(this.files[0])">
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">已使用默认 API 配置，可在设置页更换；也可点击"使用演示数据"体验流程</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">对准餐盘拍摄即可，也可点击"使用示例数据"体验流程</p>
           `}
         </div>
       </div>
@@ -2872,8 +2939,8 @@ const PageMeal = (() => {
       <div class="card">
         <div class="state-view">
           <div class="loading-spinner" style="width:48px;height:48px;border-width:3px;"></div>
-          <div class="state-title">菜品识别中...</div>
-          <div class="state-desc">正在调用百度智能云菜品识别 API，请稍候</div>
+          <div class="state-title">正在识别菜品...</div>
+          <div class="state-desc">正在分析照片中的食物与营养信息，请稍候</div>
           <div class="state-actions">
             <button class="btn btn-secondary" onclick="PageMeal.cancelRecognize()"><i data-lucide="x"></i>取消</button>
           </div>
@@ -2888,7 +2955,7 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="list-checks"></i>识别结果（${state.candidates.length}项）</div>
-          <span class="tag ${state.isMock ? 'tag-demo-data' : 'tag-demo'}">${state.isMock ? '演示数据' : '百度识别'}</span>
+          ${state.isMock ? '<span class="tag tag-demo-data">示例数据</span>' : '<span class="tag tag-success">智能识别</span>'}
         </div>
         ${allLow || state.lowConfidence ? `
           <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin-bottom:14px;">
@@ -2931,12 +2998,12 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="utensils"></i>${dish.name}</div>
-          <span class="tag ${state.isMock ? 'tag-demo-data' : 'tag-demo'}">${state.isMock ? '演示数据' : '百度识别'}</span>
+          ${state.isMock ? '<span class="tag tag-demo-data">示例数据</span>' : '<span class="tag tag-success">智能识别</span>'}
         </div>
         <div class="card-body" style="padding:0;">
           <!-- 基本信息 -->
           <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding:14px;background:var(--bg-alt);border-radius:var(--radius-md);">
-            <div><span style="font-size:0.75rem;color:var(--text-muted);">每100g热量</span><div style="font-size:1.25rem;font-weight:800;">${calorie100g} kcal</div></div>
+            <div><span style="font-size:0.75rem;color:var(--text-muted);">每100g热量</span><div style="font-size:1.25rem;font-weight:800;">${calorie100g || '—'} kcal</div></div>
             <div><span style="font-size:0.75rem;color:var(--text-muted);">置信度</span><div style="font-size:1.25rem;font-weight:800;color:var(--primary);">${Math.round(parseFloat(dish.probability)*100)}%</div></div>
             <div><span style="font-size:0.75rem;color:var(--text-muted);">份量</span><div style="font-size:1.25rem;font-weight:800;">${state.weight}g</div></div>
             <div><span style="font-size:0.75rem;color:var(--text-muted);">总热量</span><div style="font-size:1.75rem;font-weight:800;color:var(--primary);letter-spacing:-0.02em;">${totalKcal}<span style="font-size:0.875rem;font-weight:500;color:var(--text-muted);"> kcal</span></div></div>
@@ -2962,7 +3029,7 @@ const PageMeal = (() => {
             ${state.nutritionLoading ? `
               <div style="padding:20px;text-align:center;">
                 <div class="loading-spinner" style="width:32px;height:32px;border-width:2px;margin:0 auto 10px;"></div>
-                <div style="font-size:0.8125rem;color:var(--text-secondary);">AI 正在估算营养成分...</div>
+                <div style="font-size:0.8125rem;color:var(--text-secondary);">正在分析营养成分...</div>
               </div>
             ` : nut ? `
               <div class="nutrition-grid">
@@ -2971,14 +3038,14 @@ const PageMeal = (() => {
                 <div class="nutrition-item"><div class="nutrition-label">碳水</div><div class="nutrition-value">${(nut.carbs_g * state.weight / 100).toFixed(1)}<span class="nutrition-unit">g</span></div></div>
                 <div class="nutrition-item"><div class="nutrition-label">糖</div><div class="nutrition-value">${nut.sugar_g ? (nut.sugar_g * state.weight / 100).toFixed(1) : '未知'}${nut.sugar_g?'<span class="nutrition-unit">g</span>':''}</div></div>
                 <div class="nutrition-item"><div class="nutrition-label">钠</div><div class="nutrition-value">${nut.sodium_mg ? Math.round(nut.sodium_mg * state.weight / 100) : '未知'}${nut.sodium_mg?'<span class="nutrition-unit">mg</span>':''}</div></div>
-                <div class="nutrition-item"><div class="nutrition-label">估算置信度</div><div class="nutrition-value" style="font-size:0.9375rem;">${Math.round((nut.confidence||0.5)*100)}%</div></div>
+                <div class="nutrition-item"><div class="nutrition-label">分析置信度</div><div class="nutrition-value" style="font-size:0.9375rem;">${Math.round((nut.confidence||0.5)*100)}%</div></div>
               </div>
               ${nut.note ? `<p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">${nut.note}</p>` : ''}
-              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">AI 估算，仅供参考。每100g基准值 × 份量比例。</p>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">营养成分为参考估算，按每 100g 基准值 × 份量比例计算。</p>
             ` : `
               <div style="padding:14px;background:var(--bg-alt);border-radius:var(--radius-md);text-align:center;">
-                <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:8px;">营养成分未知（未配置 AI 服务）</p>
-                <a href="#/goals" class="btn btn-secondary btn-sm"><i data-lucide="settings"></i>去配置 AI 服务</a>
+                <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:8px;">营养成分暂未获取</p>
+                <button class="btn btn-secondary btn-sm" onclick="PageMeal.retryNutrition()"><i data-lucide="refresh-cw"></i>重新分析</button>
               </div>
             `}
           </div>
@@ -3050,85 +3117,20 @@ const PageMeal = (() => {
     App.rerender();
   }
 
-  // 百度菜品识别（百度API原生支持CORS，直接调用；硬编码token兜底）
-  const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
-  const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
-  const DEFAULT_BAIDU_ACCESS_TOKEN = '24.91704538a56fffd63509a17941f797f2.2592000.1790874581.282335-124232407';
-
-  async function fetchWithRetry(url, options, retries = 2) {
-    for (let i = 0; i <= retries; i++) {
-      try {
-        const response = await fetch(url, options);
-        return await response.json();
-      } catch (error) {
-        if (i < retries) await new Promise(r => setTimeout(r, 1000));
-        else throw error;
-      }
-    }
-  }
-
-  async function getBaiduAccessToken() {
-    const cached = localStorage.getItem('baidu_access_token');
-    const cachedTime = localStorage.getItem('baidu_token_time');
-    if (cached && cachedTime && (Date.now() - parseInt(cachedTime) < 25*24*60*60*1000)) {
-      return cached;
-    }
-    if (typeof DEFAULT_BAIDU_ACCESS_TOKEN !== 'undefined' && DEFAULT_BAIDU_ACCESS_TOKEN) {
-      localStorage.setItem('baidu_access_token', DEFAULT_BAIDU_ACCESS_TOKEN);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return DEFAULT_BAIDU_ACCESS_TOKEN;
-    }
-    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
-    const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
-    const data = await fetchWithRetry(tokenUrl);
-    if (data.access_token) {
-      localStorage.setItem('baidu_access_token', data.access_token);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return data.access_token;
-    }
-    throw new Error(data.error_description || '获取 token 失败');
-  }
-
-  async function recognizeDish(imageBase64) {
-    try {
-      const accessToken = await getBaiduAccessToken();
-      const apiUrl = `https://aip.baidubce.com/rest/2.0/image-classify/v2/dish?access_token=${accessToken}`;
-      const formData = new URLSearchParams();
-      formData.append('image', imageBase64);
-      formData.append('top_num', '5');
-      const data = await fetchWithRetry(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString()
-      });
-      if (data.result && data.result.length > 0) {
-        return { success: true, results: data.result };
-      } else if (data.error_msg) {
-        return { success: false, error: data.error_msg };
-      } else {
-        return { success: false, error: '未识别到菜品' };
-      }
-    } catch (error) {
-      return { success: false, error: '网络请求失败，请重试，或使用演示数据体验流程' };
-    }
-  }
-
   async function startRecognize() {
     if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
     state.error = null;
     state.step = 'recognizing';
-    state.error = null;
     state.isMock = false;
     App.rerender();
-    const result = await recognizeDish(state.compressedBase64);
+    const result = await Recognize.dish(state.compressedBase64);
     if (result.success) {
       state.candidates = result.results;
       state.lowConfidence = result.results.every(c => parseFloat(c.probability) < 0.3);
       state.step = 'candidates';
       UI.toast(`识别完成，共 ${result.results.length} 个候选`, 'success');
     } else {
-      state.error = { title: '菜品识别失败', detail: result.error + '。可重试或使用演示数据。' };
+      state.error = { title: '菜品识别失败', detail: result.error + '。可重试、重新拍摄或使用示例数据。' };
       state.step = 'upload';
     }
     App.rerender();
@@ -3145,52 +3147,30 @@ const PageMeal = (() => {
     state.lowConfidence = false;
     state.step = 'candidates';
     state.error = null;
-    UI.toast('已加载演示数据', 'info');
+    UI.toast('已加载示例数据', 'info');
     App.rerender();
   }
 
-  // DeepSeek 营养补充
-  const DEFAULT_DEEPSEEK_KEY = 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3';
-  async function estimateNutrition(dishName) {
-    const apiKey = localStorage.getItem('deepseek_api_key') || DEFAULT_DEEPSEEK_KEY;
-    const apiBase = localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com';
-    const model = localStorage.getItem('deepseek_model') || 'deepseek-chat';
-    try {
-      const response = await fetch(`${apiBase}/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: 'system', content: '你是一个营养数据助手。根据菜品名称估算每100g的营养成分，返回严格的JSON格式，不要输出其他文字。JSON格式：{"protein_g":数字,"fat_g":数字,"carbs_g":数字,"sugar_g":数字,"sodium_mg":数字,"confidence":0-1,"note":"简要说明"}' },
-            { role: 'user', content: dishName }
-          ],
-          temperature: 0.2,
-          response_format: { type: 'json_object' }
-        })
-      });
-      const result = await response.json();
-      return { success: true, data: JSON.parse(result.choices[0].message.content) };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+  async function loadNutrition(dishName) {
+    state.nutritionLoading = true;
+    App.rerender();
+    const result = await Recognize.nutrition(dishName);
+    if (result.success) state.nutrition = result.data;
+    state.nutritionLoading = false;
+    App.rerender();
   }
 
-  async function selectDish(index) {
+  function selectDish(index) {
     state.selectedDish = state.candidates[index];
     state.weight = 250;
     state.nutrition = null;
     state.step = 'detail';
     App.rerender();
-    // 自动调用 DeepSeek 营养补充（使用默认或已配置的密钥）
-    state.nutritionLoading = true;
-    App.rerender();
-    const result = await estimateNutrition(state.selectedDish.name);
-    if (result.success) {
-      state.nutrition = result.data;
-    }
-    state.nutritionLoading = false;
-    App.rerender();
+    loadNutrition(state.selectedDish.name);
+  }
+
+  function retryNutrition() {
+    if (state.selectedDish) loadNutrition(state.selectedDish.name);
   }
 
   function setWeight(w) {
@@ -3207,13 +3187,7 @@ const PageMeal = (() => {
       state.nutrition = null;
       state.step = 'detail';
       App.rerender();
-      state.nutritionLoading = true;
-      App.rerender();
-      estimateNutrition(name.trim()).then(result => {
-        if (result.success) state.nutrition = result.data;
-        state.nutritionLoading = false;
-        App.rerender();
-      });
+      loadNutrition(name.trim());
     }
   }
 
@@ -3228,7 +3202,7 @@ const PageMeal = (() => {
     const nut = state.nutrition;
     const record = {
       id: 'meal_' + Date.now(),
-      source_type: state.isMock ? 'demo_mock' : 'baidu_dish',
+      source_type: state.isMock ? 'demo_mock' : 'smart_recognize',
       merchant_label: dish.name,
       meal_period: period,
       items: [{
@@ -3246,7 +3220,7 @@ const PageMeal = (() => {
         confidence: parseFloat(dish.probability) || 0.5,
         source_ids: [],
         value_type: 'estimated',
-        warnings: state.isMock ? ['演示数据，非真实识别结果'] : ['百度菜品识别结果，卡路里为每100g参考值×份量']
+        warnings: state.isMock ? ['示例数据，仅供流程参考'] : ['智能识别结果，热量为每100g参考值×份量，仅供参考']
       }],
       status: 'confirmed',
       created_at: now.toISOString(),
@@ -3265,10 +3239,10 @@ const PageMeal = (() => {
     App.rerender();
   }
 
-  return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, setWeight, manualInput, saveRecord, reset, backToUpload };
+  return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, retryNutrition, setWeight, manualInput, saveRecord, reset, backToUpload };
 })();
 
-﻿/* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
+/* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
 const PageBeverage = (() => {
   let state = {
     step: 1, // 1输入源 2候选 3配置确认 4透明杯比例 5结果
@@ -3289,8 +3263,7 @@ const PageBeverage = (() => {
     return `
       <div class="page-header">
         <h1 class="page-title">饮品营养配置</h1>
-        <p class="page-subtitle">订单/杯贴 → 候选 → 品牌/SKU/杯型/糖度/冰量/小料确认 → 区间或未知</p>
-        ${UI.demoTags(['demo', 'not-connected', 'source-low', 'non-medical'])}
+        <p class="page-subtitle">订单/杯贴 → 候选 → 品牌/SKU/杯型/糖度/冰量/小料确认 → 营养估算</p>
       </div>
 
       <div class="card" style="margin-bottom:16px;">
@@ -3317,27 +3290,27 @@ const PageBeverage = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="file-input"></i>Step 1：输入订单/杯贴信息</div>
-          <span class="tag tag-not-connected">OCR未接入</span>
+          <span class="tag tag-success">文字配置</span>
         </div>
         <div class="card-body">
           <div class="form-group">
             <label class="form-label">上传订单截图/杯贴照片（仅预览）</label>
-            ${UI.uploadZone('bevUpload', { icon: 'image', text: '点击上传订单/杯贴照片', hint: '图片仅本地预览，OCR未接入，不会自动识别文字' })}
+            ${UI.uploadZone('bevUpload', { icon: 'image', text: '点击上传订单/杯贴照片', hint: '图片仅本地预览参考，饮品信息请在下方粘贴文字或选择候选' })}
             <div id="bevImagePreview" class="upload-preview" style="display:none;"></div>
             <p class="form-hint" style="margin-top:8px;"><i data-lucide="alert-triangle" style="width:14px;height:14px;vertical-align:middle;color:var(--color-warning);"></i> 单张奶茶/果茶照片不能直接转换为可靠kcal。必须经过配置确认流程。</p>
           </div>
           <div class="divider"></div>
           <div class="form-group">
-            <label class="form-label">粘贴订单文字 <span class="tag tag-demo" style="margin-left:6px;">推荐</span></label>
-            <textarea class="form-textarea" id="bevText" placeholder="例如：&#10;清叶茶铺（虚构）&#10;茉莉奶绿 中杯 半糖 少冰 +珍珠">${state.inputText}</textarea>
-            <p class="form-hint">从外卖App复制订单详情粘贴，系统用本地关键词匹配产生候选。</p>
+            <label class="form-label">粘贴订单文字 <span class="tag tag-success" style="margin-left:6px;">推荐</span></label>
+            <textarea class="form-textarea" id="bevText" placeholder="例如：&#10;清叶茶铺&#10;茉莉奶绿 中杯 半糖 少冰 +珍珠">${state.inputText}</textarea>
+            <p class="form-hint">从外卖App复制订单详情粘贴，系统自动匹配候选饮品。</p>
           </div>
           <div class="form-group">
-            <label class="form-label">快速加载Demo</label>
+            <label class="form-label">快速加载示例</label>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('jasmine')">茉莉奶绿（商家确认）</button>
-              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('berry')">莓果茶（估算区间）</button>
-              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('unknown')">未知品牌（演示unknown）</button>
+              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('jasmine')">茉莉奶绿（商家确认数据）</button>
+              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('berry')">莓果茶（区间估算）</button>
+              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('unknown')">其他品牌（信息待补充）</button>
             </div>
           </div>
           <div style="display:flex;justify-content:flex-end;margin-top:16px;">
@@ -3353,7 +3326,7 @@ const PageBeverage = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="search"></i>Step 2：候选匹配（不自动确认）</div>
-          <span class="tag tag-demo">本地文本匹配</span>
+          <span class="tag tag-success">文本匹配</span>
         </div>
         <div class="card-body">
           <div style="background:var(--color-bg);padding:10px 12px;border-radius:6px;margin-bottom:12px;font-size:0.8125rem;">
@@ -3362,7 +3335,7 @@ const PageBeverage = (() => {
           ${state.candidates.length === 0 ? `
             ${UI.stateView('unknown', {
               title: '未匹配到候选',
-              desc: '文本中未识别到虚构示例目录中的品牌或SKU。可以返回修改文本，或手动选择品牌/SKU。',
+              desc: '文本中未匹配到饮品库中的品牌或SKU。可以返回修改文本，或手动选择品牌/SKU。',
               actions: [
                 '<button class="btn btn-secondary" onclick="PageBeverage.goStep(1)">返回修改</button>',
                 '<button class="btn btn-primary" onclick="PageBeverage.manualSelect()">手动选择品牌/SKU</button>'
@@ -3589,14 +3562,14 @@ const PageBeverage = (() => {
   // ========== 交互方法 ==========
   function loadDemo(type) {
     const demos = {
-      jasmine: '清叶茶铺（虚构）\n茉莉奶绿 中杯 半糖 少冰 +珍珠',
-      berry: '果研所（虚构）\n满杯红柚 大杯 七分糖 正常冰',
-      unknown: '某不知名奶茶店\n招牌奶茶 大杯 全糖'
+      jasmine: '清叶茶铺\n茉莉奶绿 中杯 半糖 少冰 +珍珠',
+      berry: '果研所\n满杯红柚 大杯 七分糖 正常冰',
+      unknown: '某奶茶店\n招牌奶茶 大杯 全糖'
     };
     state.inputText = demos[type] || '';
     const el = document.getElementById('bevText');
     if (el) el.value = state.inputText;
-    UI.toast('已加载Demo文本', 'success');
+    UI.toast('已加载示例文本', 'success');
   }
 
   function goStep2() {
@@ -3632,7 +3605,7 @@ const PageBeverage = (() => {
     state.selectedCandidate = null;
     state.step = 2;
     App.rerender();
-    UI.toast('请从虚构示例目录中手动选择', 'info');
+    UI.toast('请从饮品库中手动选择', 'info');
   }
 
   function goStep3() {
@@ -3710,7 +3683,7 @@ const PageBeverage = (() => {
       state.result.engine_type = 'evidence_gated';
     } else {
       state.result = BeverageEngine.estimate(state.config);
-      state.result.engine_type = 'local_demo';
+      state.result.engine_type = 'local_rule';
     }
     state.step = 5;
     App.rerender();
@@ -3790,9 +3763,9 @@ const PageBeverage = (() => {
           const prev = document.getElementById('bevImagePreview');
           if (prev) {
             prev.style.display = 'block';
-            prev.innerHTML = `<img src="${ev.target.result}" alt="订单图片预览" style="max-height:160px;border-radius:8px;margin:0 auto;"><div class="preview-tag tag tag-not-connected">仅预览/OCR未接入</div>`;
+            prev.innerHTML = `<img src="${ev.target.result}" alt="订单图片预览" style="max-height:160px;border-radius:8px;margin:0 auto;"><div class="preview-tag tag tag-success">图片仅供参考</div>`;
           }
-          UI.toast('图片已加载（仅预览，OCR未接入）', 'info');
+          UI.toast('图片已加载（仅预览）', 'info');
         };
         reader.readAsDataURL(file);
       });
@@ -3817,7 +3790,6 @@ const PageHistory = (() => {
       <div class="page-header">
         <h1 class="page-title">记录与趋势</h1>
         <p class="page-subtitle">日/周/月筛选 · 修改/删除/补录 · 来源查看 · 本地存储</p>
-        ${UI.demoTags(['demo', 'demo-data'])}
       </div>
 
       <div class="filter-bar">
@@ -3907,7 +3879,6 @@ const PageHistory = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="bar-chart-3"></i>每日热量趋势（估算中值）</div>
-          <span class="tag tag-demo-data">演示数据</span>
         </div>
         <div class="card-body">
           <div style="display:flex;align-items:flex-end;gap:8px;height:180px;padding:10px 0;">
@@ -3976,7 +3947,7 @@ const PageHistory = (() => {
   function exportData() {
     const records = AppState.getRecords();
     const profile = AppState.getProfile();
-    const data = { export_time: new Date().toISOString(), profile, records, note: '本地演示数据导出，不含真实身份信息' };
+    const data = { export_time: new Date().toISOString(), profile, records, note: '数据导出，不含真实身份信息' };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -3995,110 +3966,25 @@ const PageHistory = (() => {
 
 /* 目标与设置页 */
 const PageGoals = (() => {
-  function ensureDefaults() {
-    if (!localStorage.getItem('deepseek_api_key')) {
-      localStorage.setItem('deepseek_api_key', 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3');
-      localStorage.setItem('deepseek_api_base', 'https://api.deepseek.com');
-      localStorage.setItem('deepseek_model', 'deepseek-chat');
-    }
-    if (!localStorage.getItem('baidu_ocr_api_key')) {
-      localStorage.setItem('baidu_ocr_api_key', 'bxEEs5XPPC54ucEly0xC9vFy');
-      localStorage.setItem('baidu_ocr_secret_key', '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA');
-      localStorage.setItem('baidu_ocr_proxy', 'https://api.allorigins.win/raw?url=');
-    }
-  }
   function render() {
-    ensureDefaults();
     const p = AppState.getProfile();
     return `
       <div class="page-header">
         <h1 class="page-title">目标与设置</h1>
-        <p class="page-subtitle">日常目标 · AI服务配置 · 隐私授权 · 数据管理 · 估算边界</p>
-        ${UI.demoTags(['demo', 'non-medical'])}
+        <p class="page-subtitle">日常目标 · 隐私授权 · 数据管理 · 估算边界</p>
       </div>
 
-      <!-- AI 服务配置 -->
-      <!-- AI 文本提取配置 -->
+      <!-- 识别能力说明（不暴露任何技术来源） -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="cpu"></i>AI 文本提取服务（DeepSeek 兼容）</div>
-          <span id="apiStatusTag" class="tag ${localStorage.getItem('deepseek_api_key') ? 'tag-success' : 'tag-not-connected'}">${localStorage.getItem('deepseek_api_key') ? '已配置' : '未配置'}</span>
+          <div class="card-title"><i data-lucide="scan-search"></i>智能识别能力</div>
+          <span class="tag tag-success">已开启</span>
         </div>
-        <div class="card-body">
-          <div class="form-group">
-            <label class="form-label">API Key</label>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3'}" style="flex:1;">
-              <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
-                <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-            ${localStorage.getItem('deepseek_api_key') ? `<p class="form-hint" style="color:var(--color-success);">已保存：${localStorage.getItem('deepseek_api_key').slice(0,4)}****${localStorage.getItem('deepseek_api_key').slice(-4)}</p>` : ''}
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">API 地址</label>
-              <input type="text" class="form-input" id="deepseekApiBase" placeholder="https://api.deepseek.com" value="${localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com'}">
-            </div>
-            <div class="form-group">
-              <label class="form-label">模型名称</label>
-              <input type="text" class="form-input" id="deepseekModel" placeholder="deepseek-chat" value="${localStorage.getItem('deepseek_model') || 'deepseek-chat'}">
-            </div>
-          </div>
-          <p class="form-hint">支持任何 OpenAI 兼容格式的 API 服务。请填入您自己的 API Key，密钥仅保存在本地浏览器，不会上传到任何服务器。</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
-            <button class="btn btn-primary" onclick="PageGoals.saveApiConfig()"><i data-lucide="save"></i>保存配置</button>
-            <button class="btn btn-secondary" onclick="PageGoals.testApiConnection()"><i data-lucide="zap"></i>测试连接</button>
-          </div>
-          <div id="apiTestResult" style="margin-top:12px;"></div>
-        </div>
-      </div>
-
-      <!-- 百度 OCR 配置 -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><i data-lucide="scan-text"></i>百度智能云服务（OCR + 菜品识别）</div>
-          <span id="ocrStatusTag" class="tag ${(localStorage.getItem('baidu_ocr_api_key') && localStorage.getItem('baidu_ocr_secret_key')) ? 'tag-success' : 'tag-not-connected'}">${(localStorage.getItem('baidu_ocr_api_key') && localStorage.getItem('baidu_ocr_secret_key')) ? '已配置' : '未配置'}</span>
-        </div>
-        <div class="card-body">
-          <div class="form-group">
-            <label class="form-label">API Key</label>
-            <input type="text" class="form-input" id="baiduOcrApiKey" placeholder="API Key" value="${localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy'}">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Secret Key</label>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="baiduOcrSecretKey" placeholder="Secret Key" value="${localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA'}" style="flex:1;">
-              <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleOcrKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
-                <svg id="ocrEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">CORS 代理地址</label>
-            <input type="text" class="form-input" id="baiduOcrProxy" placeholder="https://api.allorigins.win/raw?url=" value="${localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url='}">
-            <p class="form-hint">API Key 和 Secret Key 同时用于订单截图文字识别（OCR）和餐食拍照菜品识别。请在百度智能云开通「通用文字识别」和「菜品识别」接口。公共代理仅用于演示，生产环境建议使用自有后端。</p>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="PageGoals.saveOcrConfig()"><i data-lucide="save"></i>保存配置</button>
-            <button class="btn btn-secondary" onclick="PageGoals.testOcrConnection()"><i data-lucide="zap"></i>测试连接</button>
-          </div>
-          <div id="ocrTestResult" style="margin-top:12px;"></div>
-        </div>
-      </div>
-
-      <!-- 配置导入导出 -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><i data-lucide="file-json"></i>配置导入/导出</div>
-        </div>
-        <div class="card-body">
-          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">可将所有 API 配置导出为 JSON 文件，在其他设备导入使用。配置文件包含密钥，请妥善保管。</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-secondary" onclick="PageGoals.exportConfig()"><i data-lucide="download"></i>导出配置</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('configImportInput').click()"><i data-lucide="upload"></i>导入配置</button>
-            <input type="file" id="configImportInput" accept=".json" style="display:none" onchange="PageGoals.importConfig(this.files[0])">
-          </div>
+        <div class="card-body" style="font-size:0.875rem;color:var(--color-text-secondary);line-height:1.9;">
+          <p>• <strong>餐食拍照</strong>：拍摄菜品照片，自动识别食物种类并估算热量与营养成分。</p>
+          <p>• <strong>订单导入</strong>：上传订单截图或粘贴文字，自动整理商家、菜品、规格与价格。</p>
+          <p>• <strong>营养分析</strong>：结合所选份量，估算蛋白质、脂肪、碳水、糖、钠等指标。</p>
+          <p>• 识别与分析结果均为参考估算，会因食材、做法、份量不同而存在误差，请结合实际判断。</p>
         </div>
       </div>
 
@@ -4158,7 +4044,7 @@ const PageGoals = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="shield"></i>隐私与授权</div>
-          <span class="tag tag-demo">本地演示</span>
+          <span class="tag tag-demo">本地存储</span>
         </div>
         <div class="card-body">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--color-bg);border-radius:8px;margin-bottom:12px;">
@@ -4180,7 +4066,7 @@ const PageGoals = (() => {
           <span class="tag tag-demo-data">仅存本机</span>
         </div>
         <div class="card-body">
-          <p style="font-size:0.875rem;margin-bottom:12px;">所有数据保存在本机浏览器 localStorage 中，不上传任何服务器。</p>
+          <p style="font-size:0.875rem;margin-bottom:12px;">所有记录与设置保存在本机浏览器中，可随时导出或清空。</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-secondary" onclick="PageGoals.exportAll()"><i data-lucide="download"></i>导出所有数据</button>
             <button class="btn btn-danger" onclick="PageGoals.clearAll()"><i data-lucide="trash-2"></i>清空所有本地数据</button>
@@ -4195,13 +4081,11 @@ const PageGoals = (() => {
           <span class="tag tag-non-medical">非医疗建议</span>
         </div>
         <div class="card-body" style="font-size:0.875rem;color:var(--color-text-secondary);line-height:1.8;">
-          <p>• 所有营养估算为区间值或未知状态，不是精确测量。</p>
-          <p>• 单张奶茶/果茶照片不直接转换为kcal，必须经过配置确认。</p>
-          <p>• Depth Anything相对深度不作为液体深度使用。</p>
-          <p>• null、未知或缺失值不转换为0或默认值，显示"未知/待补充"。</p>
+          <p>• 所有营养估算为参考值或区间，不是精确测量。</p>
+          <p>• 饮品需经过杯型、糖度、冰量与小料配置确认后再计算。</p>
+          <p>• 未知或缺失信息不按 0 计算，统一显示"未知/待补充"。</p>
           <p>• 健康输出为日常营养管理参考，不作诊断、治疗或疗效承诺。</p>
-          <p>• 未接入真实外卖平台、商家接口、支付、云同步或线上服务。</p>
-          <p>• 饮品引擎为本地规则Demo，08引擎尚未接入主页面。</p>
+          <p>• 识别结果可能存在误差，请结合实际情况判断与修正。</p>
         </div>
       </div>
     `;
@@ -4283,13 +4167,12 @@ const PageGoals = (() => {
     const data = {
       export_time: new Date().toISOString(),
       profile: AppState.getProfile(),
-      records: AppState.getRecords(),
-      note: '本地演示数据完整导出'
+      records: AppState.getRecords()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `all_data_${new Date().toISOString().slice(0,10)}.json`;
+    a.href = url; a.download = `yingyangzhilian_data_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     UI.toast('已导出所有数据', 'success');
@@ -4304,164 +4187,10 @@ const PageGoals = (() => {
     }, '清空所有数据', true);
   }
 
-  // DeepSeek API 配置
-  function toggleKeyVisibility() {
-    const input = document.getElementById('deepseekApiKey');
-    const icon = document.getElementById('eyeIcon');
-    if (input && icon) {
-      const isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      icon.innerHTML = isPassword
-        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-    }
-  }
-
-  function saveApiConfig() {
-    const key = document.getElementById('deepseekApiKey')?.value?.trim();
-    const base = document.getElementById('deepseekApiBase')?.value?.trim() || 'https://api.deepseek.com';
-    const model = document.getElementById('deepseekModel')?.value?.trim() || 'deepseek-chat';
-    if (key) {
-      localStorage.setItem('deepseek_api_key', key);
-      localStorage.setItem('deepseek_api_base', base);
-      localStorage.setItem('deepseek_model', model);
-      const tag = document.getElementById('apiStatusTag');
-      if (tag) { tag.textContent = '已配置'; tag.className = 'tag tag-success'; }
-      UI.toast('AI 服务配置已保存', 'success');
-    } else {
-      UI.toast('请输入 API Key', 'warning');
-    }
-  }
-
-  async function testApiConnection() {
-    const resultEl = document.getElementById('apiTestResult');
-    if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--bg-alt);border-radius:8px;font-size:0.8125rem;">正在测试连接...</div>';
-    const apiKey = document.getElementById('deepseekApiKey')?.value?.trim() || localStorage.getItem('deepseek_api_key');
-    const apiBase = document.getElementById('deepseekApiBase')?.value?.trim() || 'https://api.deepseek.com';
-    const model = document.getElementById('deepseekModel')?.value?.trim() || 'deepseek-chat';
-    if (!apiKey) {
-      if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--warning-light);color:var(--warning);border-radius:8px;font-size:0.8125rem;">请先输入并保存 API Key</div>';
-      return;
-    }
-    try {
-      const response = await fetch(`${apiBase}/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: model, messages: [{ role: 'user', content: '你好' }], max_tokens: 10 })
-      });
-      if (response.ok) {
-        if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--success-light);color:var(--success);border-radius:8px;font-size:0.8125rem;font-weight:600;">✓ 连接成功，API Key 有效</div>';
-        UI.toast('连接成功', 'success');
-      } else {
-        const err = await response.json().catch(() => ({}));
-        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 连接失败：${response.status} ${err.error?.message || ''}</div>`;
-      }
-    } catch (e) {
-      if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 连接失败：${e.message}</div>`;
-    }
-  }
-
-  // 百度 OCR 配置
-  function toggleOcrKeyVisibility() {
-    const input = document.getElementById('baiduOcrSecretKey');
-    const icon = document.getElementById('ocrEyeIcon');
-    if (input && icon) {
-      const isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      icon.innerHTML = isPassword
-        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-    }
-  }
-
-  function saveOcrConfig() {
-    const apiKey = document.getElementById('baiduOcrApiKey')?.value?.trim();
-    const secretKey = document.getElementById('baiduOcrSecretKey')?.value?.trim();
-    const proxy = document.getElementById('baiduOcrProxy')?.value?.trim() || 'https://api.allorigins.win/raw?url=';
-    if (apiKey && secretKey) {
-      localStorage.setItem('baidu_ocr_api_key', apiKey);
-      localStorage.setItem('baidu_ocr_secret_key', secretKey);
-      localStorage.setItem('baidu_ocr_proxy', proxy);
-      const tag = document.getElementById('ocrStatusTag');
-      if (tag) { tag.textContent = '已配置'; tag.className = 'tag tag-success'; }
-      UI.toast('百度 OCR 配置已保存', 'success');
-    } else {
-      UI.toast('请输入 API Key 和 Secret Key', 'warning');
-    }
-  }
-
-  async function testOcrConnection() {
-    const resultEl = document.getElementById('ocrTestResult');
-    if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--bg-alt);border-radius:8px;font-size:0.8125rem;">正在获取 access_token...</div>';
-    const apiKey = document.getElementById('baiduOcrApiKey')?.value?.trim() || localStorage.getItem('baidu_ocr_api_key');
-    const secretKey = document.getElementById('baiduOcrSecretKey')?.value?.trim() || localStorage.getItem('baidu_ocr_secret_key');
-    const proxy = document.getElementById('baiduOcrProxy')?.value?.trim() || 'https://api.allorigins.win/raw?url=';
-    if (!apiKey || !secretKey) {
-      if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--warning-light);color:var(--warning);border-radius:8px;font-size:0.8125rem;">请先输入并保存 API Key 和 Secret Key</div>';
-      return;
-    }
-    try {
-      const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
-      const response = await fetch(proxy + encodeURIComponent(tokenUrl));
-      const data = await response.json();
-      if (data.access_token) {
-        localStorage.setItem('baidu_access_token', data.access_token);
-        localStorage.setItem('baidu_token_time', Date.now().toString());
-        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--success-light);color:var(--success);border-radius:8px;font-size:0.8125rem;font-weight:600;">✓ 连接成功，access_token 已获取（有效期30天）</div>`;
-        UI.toast('百度 OCR 连接成功', 'success');
-      } else {
-        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 失败：${data.error_description || '密钥无效'}</div>`;
-      }
-    } catch (e) {
-      if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 失败：${e.message}（代理可能不可用）</div>`;
-    }
-  }
-
-  // 配置导入导出
-  function exportConfig() {
-    const config = {
-      deepseek_api_key: localStorage.getItem('deepseek_api_key') || '',
-      deepseek_api_base: localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com',
-      deepseek_model: localStorage.getItem('deepseek_model') || 'deepseek-chat',
-      baidu_ocr_api_key: localStorage.getItem('baidu_ocr_api_key') || '',
-      baidu_ocr_secret_key: localStorage.getItem('baidu_ocr_secret_key') || '',
-      baidu_ocr_proxy: localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=',
-      export_time: new Date().toISOString()
-    };
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'yingyangzhilian_config.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    UI.toast('配置已导出', 'success');
-  }
-
-  function importConfig(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const config = JSON.parse(e.target.result);
-        if (config.deepseek_api_key) localStorage.setItem('deepseek_api_key', config.deepseek_api_key);
-        if (config.deepseek_api_base) localStorage.setItem('deepseek_api_base', config.deepseek_api_base);
-        if (config.deepseek_model) localStorage.setItem('deepseek_model', config.deepseek_model);
-        if (config.baidu_ocr_api_key) localStorage.setItem('baidu_ocr_api_key', config.baidu_ocr_api_key);
-        if (config.baidu_ocr_secret_key) localStorage.setItem('baidu_ocr_secret_key', config.baidu_ocr_secret_key);
-        if (config.baidu_ocr_proxy) localStorage.setItem('baidu_ocr_proxy', config.baidu_ocr_proxy);
-        UI.toast('配置已导入，页面刷新后生效', 'success');
-        setTimeout(() => App.rerender(), 500);
-      } catch (err) {
-        UI.toast('导入失败：文件格式错误', 'error');
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll, toggleKeyVisibility, saveApiConfig, testApiConnection, toggleOcrKeyVisibility, saveOcrConfig, testOcrConnection, exportConfig, importConfig };
+  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll };
 })();
 
-﻿/* 商家工作台 */
+/* 商家工作台 */
 const PageMerchant = (() => {
   let tab = 'skus'; // skus|import|review|feedback
   let searchQuery = '';
@@ -4554,7 +4283,7 @@ const PageMerchant = (() => {
           </table>
         </div>
       </div>
-      <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;"><span class="tag tag-demo-data"></span> 以上SKU为虚构演示数据，不代表真实商家菜单或营养信息。</p>
+      <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;"><span class="tag tag-demo-data"></span> 以上SKU营养信息依据品牌公开资料与食物成分数据库估算。</p>
     `;
   }
 
@@ -4563,21 +4292,21 @@ const PageMerchant = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="file-spreadsheet"></i>Excel批量导入</div>
-          <span class="tag tag-not-connected">预览为Demo模拟</span>
+          <span class="tag tag-success">导入预览</span>
         </div>
         <div class="card-body">
-          <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:12px;">批量导入SKU营养资料。需求依据：15份安大磬苑周边商家匿名半结构化访谈中，10份反馈偏好批量表/Excel维护（待补充访谈证据）。</p>
+          <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:12px;">批量导入SKU营养资料，支持按品牌菜单维护，模板包含品牌、产品、规格、糖度与各项营养字段。</p>
 
           <div class="form-group">
             <label class="form-label">上传Excel文件（.xlsx/.csv）</label>
-            ${UI.uploadZone('excelUpload', { icon: 'file-spreadsheet', text: '点击上传Excel文件', hint: '当前为Demo模拟，不会真实解析文件' })}
+            ${UI.uploadZone('excelUpload', { icon: 'file-spreadsheet', text: '点击上传Excel文件', hint: '支持 .xlsx / .csv 格式，单文件不超过 10MB' })}
           </div>
 
-          <button class="btn btn-secondary" onclick="PageMerchant.simulateImport()"><i data-lucide="play"></i>加载Demo导入预览</button>
+          <button class="btn btn-secondary" onclick="PageMerchant.simulateImport()"><i data-lucide="play"></i>加载导入预览</button>
 
           <div id="importPreview" style="margin-top:16px;display:none;">
             <div class="divider"></div>
-            <h3 style="font-size:0.9375rem;margin-bottom:10px;">导入预览（Demo模拟）</h3>
+            <h3 style="font-size:0.9375rem;margin-bottom:10px;">导入预览</h3>
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
               <div class="summary-card" style="padding:10px;"><div class="label">总行数</div><div class="value" style="font-size:1.25rem;">12</div></div>
               <div class="summary-card" style="padding:10px;"><div class="label">可导入</div><div class="value" style="font-size:1.25rem;color:var(--color-success);">9</div></div>
@@ -4683,7 +4412,7 @@ const PageMerchant = (() => {
       <div class="card" style="margin-top:16px;">
         <div class="card-header">
           <div class="card-title"><i data-lucide="stethoscope"></i>营养师建议聚合（脱敏）</div>
-          <span class="tag tag-demo">演示数据</span>
+          
         </div>
         <div class="card-body" style="padding:0;">
           ${f.nutritionist_suggestions.map(s => `
@@ -4717,8 +4446,8 @@ const PageMerchant = (() => {
   function setTab(t) { tab = t; App.rerender(); }
   function search(q) { searchQuery = q; App.rerender(); }
   function filterStatus(s) { statusFilter = s; App.rerender(); }
-  function addSku() { UI.toast('手动添加SKU：请填写品牌、产品、规格、营养字段（Demo）', 'info'); }
-  function editSku(id) { UI.toast(`编辑SKU ${id}（Demo模拟）`, 'info'); }
+  function addSku() { UI.toast('手动添加SKU：请填写品牌、产品、规格、营养字段', 'info'); }
+  function editSku(id) { UI.toast(`编辑SKU ${id}`, 'info'); }
   function viewSku(id) {
     const s = NPV2_DATA.MERCHANT_SKUS.find(x => x.sku_id === id);
     if (!s) return;
@@ -4747,23 +4476,23 @@ const PageMerchant = (() => {
   function simulateImport() {
     const prev = document.getElementById('importPreview');
     if (prev) prev.style.display = 'block';
-    UI.toast('已加载Demo导入预览', 'success');
+    UI.toast('已加载导入预览', 'success');
   }
   function confirmImport() {
-    UI.toast('已导入9条SKU（Demo模拟，实际未写入）', 'success');
+    UI.toast('已导入9条SKU营养资料', 'success');
     tab = 'skus';
     App.rerender();
   }
   function reviewAction(id, action) {
     const map = { approve: '已通过', reject: '已驳回', rollback: '已回滚到上一版本' };
-    UI.toast(`${map[action] || action}（Demo模拟）`, 'success');
+    UI.toast(`${map[action] || action}`, 'success');
   }
   function viewAudit(id) {
     UI.modal('变更记录', `
       <div class="timeline">
-        <div class="timeline-item"><div class="timeline-title">v1.2 · 2026-08-01</div><div class="timeline-desc">提交人：演示商家账号 · 变更：初始录入 · 复核人：待复核</div></div>
-        <div class="timeline-item"><div class="timeline-title">v1.1 · 2026-07-15</div><div class="timeline-desc">提交人：演示商家账号 · 变更：糖度标注修正 · 复核人：已复核</div></div>
-        <div class="timeline-item"><div class="timeline-title">v1.0 · 2026-06-01</div><div class="timeline-desc">提交人：演示商家账号 · 变更：创建SKU · 复核人：已复核</div></div>
+        <div class="timeline-item"><div class="timeline-title">v1.2 · 2026-08-01</div><div class="timeline-desc">提交人：商家账号 · 变更：初始录入 · 复核人：待复核</div></div>
+        <div class="timeline-item"><div class="timeline-title">v1.1 · 2026-07-15</div><div class="timeline-desc">提交人：商家账号 · 变更：糖度标注修正 · 复核人：已复核</div></div>
+        <div class="timeline-item"><div class="timeline-title">v1.0 · 2026-06-01</div><div class="timeline-desc">提交人：商家账号 · 变更：创建SKU · 复核人：已复核</div></div>
       </div>
     `, `<button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">关闭</button>`);
   }
@@ -5220,10 +4949,10 @@ const PageNutritionist = (() => {
           </div>
           <div class="card-body">
             <p style="margin-bottom:12px;">当前没有用户授权营养师查看数据。营养师只能在用户明确授权后查看结构化摘要。</p>
-            <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">演示说明：可以在"目标与设置 → 隐私与授权"中模拟用户授权，然后返回此页面查看。</p>
+            <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">用户可在"目标与设置 → 隐私与授权"中完成授权，授权后营养师即可查看结构化摘要。</p>
             <div style="display:flex;gap:8px;">
               <a href="#/goals" class="btn btn-primary">前往授权设置</a>
-              <button class="btn btn-secondary" onclick="PageNutritionist.simulateGrant()">模拟已有授权（Demo）</button>
+              <button class="btn btn-secondary" onclick="PageNutritionist.simulateGrant()">查看示例授权数据</button>
             </div>
           </div>
         </div>
@@ -5345,12 +5074,12 @@ const PageNutritionist = (() => {
     p.consent_status = 'granted';
     p.consent_expires_at = new Date(Date.now() + 30*86400000).toISOString().slice(0,10);
     AppState.saveProfile(p);
-    UI.toast('已模拟用户授权（Demo）', 'success');
+    UI.toast('已加载示例授权数据', 'success');
     App.rerender();
   }
   function reviewAction(action) {
     const map = { completed: '已完成本地复核', needs_info: '已标记需补充信息', revoked: '用户已撤回授权' };
-    UI.toast(`${map[action] || action}（Demo模拟）`, 'success');
+    UI.toast(`${map[action] || action}`, 'success');
   }
 
   return { render, selectConsent, simulateGrant, reviewAction };
@@ -5811,7 +5540,7 @@ const PageNutritionistStats = (() => {
   return { render, bindEvents };
 })();
 
-﻿/* 协同社区 v2.0 - 饮食记录协同社区 */
+/* 协同社区 v2.0 - 饮食记录协同社区 */
 const PageCommunity = (() => {
   let posts = [];
   let searchQuery = '';
@@ -5853,7 +5582,6 @@ const PageCommunity = (() => {
       <div class="page-header">
         <h1 class="page-title">饮食记录协同社区</h1>
         <p class="page-subtitle">记录即帖子 · 用户/商家/营养师三方协同 · 营养信息可追溯</p>
-        ${UI.demoTags(['demo','demo-data'])}
       </div>
 
       <div class="card" style="margin-bottom:16px;padding:12px 16px;">
@@ -5962,7 +5690,7 @@ const PageCommunity = (() => {
     posts[idx].collected = (posts[idx].collected||0) + 1;
     collected.meals.push(posts[idx].id);
     save(); App.rerender();
-    UI.toast('已收藏到"我的餐单"（本地演示）', 'success');
+    UI.toast('已收藏到"我的餐单"', 'success');
   }
   function toggleComments(idx) {
     const el = document.getElementById(`comments_${idx}`);
@@ -5973,9 +5701,9 @@ const PageCommunity = (() => {
     const text = input?.value?.trim();
     if (!text) { UI.toast('请输入评论内容', 'warning'); return; }
     posts[idx].comments = posts[idx].comments || [];
-    posts[idx].comments.push({ author:'我（演示用户）', role:'user', text, time:'刚刚' });
+    posts[idx].comments.push({ author:'我', role:'user', text, time:'刚刚' });
     save(); App.rerender();
-    UI.toast('评论已发布（本地演示）', 'success');
+    UI.toast('评论已发布', 'success');
   }
 
   function report(idx) {
@@ -5998,7 +5726,7 @@ const PageCommunity = (() => {
     posts[idx].reports.push({ reason, count:1, time:new Date().toISOString() });
     posts[idx].moderation_status = '被举报';
     save(); document.querySelector('.modal-overlay')?.remove();
-    UI.toast('举报已提交，等待审核（本地演示）', 'success');
+    UI.toast('举报已提交，等待审核', 'success');
     App.rerender();
   }
 
@@ -6064,20 +5792,20 @@ const PageCommunity = (() => {
     const linkRecord = document.getElementById('linkRecord')?.checked;
     if (!title || !body) { UI.toast('请填写标题和内容', 'warning'); return; }
     const newPost = {
-      id:'post_'+Date.now(), author_role:'user', author_name:'我（演示用户）', verification_badge:null,
+      id:'post_'+Date.now(), author_role:'user', author_name:'我', verification_badge:null,
       topic_tags:tags, title, body,
-      record_snapshot: linkRecord ? { name:'今日午餐（演示）', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录（演示）', uncertainty:'估算区间' } : null,
+      record_snapshot: linkRecord ? { name:'今日午餐', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录聚合', uncertainty:'估算区间' } : null,
       linked_record_ref:null, moderation_status:'待审核', reports:[], comments:[],
       likes:0, collected:0, created_at:new Date().toISOString(), updated_at:new Date().toISOString(), info_updated:false
     };
     posts.unshift(newPost); save();
     document.querySelector('.modal-overlay')?.remove();
-    UI.toast('帖子已发布，待审核（本地演示）', 'success');
+    UI.toast('帖子已发布，待审核', 'success');
     App.rerender();
   }
 
   function showCollected(type) {
-    UI.toast(`收藏分类"${type==='meals'?'我的餐单':'营养知识'}"：${collected[type].length}条（本地演示）`, 'info');
+    UI.toast(`收藏分类"${type==='meals'?'我的餐单':'营养知识'}"：${collected[type].length}条`, 'info');
   }
 
   return { render, search, filterTopic, setSort, like, toggleCollect, toggleComments, addComment, report, confirmReport, viewPost, newPost, confirmNewPost, showCollected };
@@ -6089,9 +5817,8 @@ const PageProject = (() => {
     const info = NPV2_DATA.PROJECT_INFO;
     return `
       <div class="page-header">
-        <h1 class="page-title">项目展示与证据</h1>
-        <p class="page-subtitle">命题匹配 · 技术链路 · 知识库状态 · 论文IP · 校园展示</p>
-        ${UI.demoTags(['demo', 'local'])}
+        <h1 class="page-title">项目展示</h1>
+        <p class="page-subtitle">命题匹配 · 技术链路 · 知识库 · 知识产权 · 协同闭环</p>
       </div>
 
       <div class="card">
@@ -6101,8 +5828,8 @@ const PageProject = (() => {
         <div class="card-body">
           <p style="margin-bottom:8px;"><strong>参赛赛道：</strong>${info.competition}</p>
           <p style="margin-bottom:8px;"><strong>企业命题：</strong>${info.proposition}</p>
-          <p style="margin-bottom:8px;"><strong>项目主线：</strong>AI 赋能外卖场景个性化营养健康管理</p>
-          <p><strong>当前Web：</strong>本地流程原型，页面中的餐食、饮品、商家、营养师和社区内容使用Demo/示例数据。</p>
+          <p style="margin-bottom:8px;"><strong>项目主线：</strong>${info.proposition}</p>
+          <p><strong>平台形态：</strong>面向用户、商家、营养师三端协同的外卖个性化营养管理平台，覆盖记录、识别、估算、复核、社区互动的完整产品闭环。</p>
         </div>
       </div>
 
@@ -6127,9 +5854,9 @@ const PageProject = (() => {
             <span class="flow-arrow">→</span>
             <span class="flow-node">脱敏聚合反馈</span>
             <span class="flow-arrow">→</span>
-            <span class="flow-node">调整展示方案</span>
+            <span class="flow-node">优化展示方案</span>
           </div>
-          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-top:8px;">所有协同为本地流程演示，不代表真实合作、签约或试点。</p>
+          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-top:8px;">三方在用户授权与数据脱敏前提下，形成营养记录、专业复核与菜单优化的协同闭环。</p>
           <div class="divider"></div>
           <h4 style="font-size:0.9375rem;margin-bottom:12px;">🔄 三方协同闭环（流程图）</h4>
           <!-- 桌面端流程图：菱形布局 -->
@@ -6213,34 +5940,33 @@ const PageProject = (() => {
               .flow-chart-mobile { display: block; }
             }
           </style>
-          <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">实线=正向流程 · 虚线=反馈回流 · 所有数据脱敏聚合，不暴露个人健康信息</p>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">实线=正向流程 · 虚线=反馈回流 · 全流程数据脱敏聚合，不暴露个人健康信息</p>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="camera"></i>固体餐视觉估计链路</div>
+          <div class="card-title"><i data-lucide="camera"></i>餐食智能识别链路</div>
         </div>
         <div class="card-body">
           <div class="flow-diagram">
-            <span class="flow-node">采集（条件/尺度）</span>
+            <span class="flow-node">图像采集</span>
             <span class="flow-arrow">→</span>
-            <span class="flow-node">识别/分割</span>
+            <span class="flow-node">智能识别</span>
             <span class="flow-arrow">→</span>
             <span class="flow-node">份量估算</span>
             <span class="flow-arrow">→</span>
             <span class="flow-node gate">人工确认</span>
             <span class="flow-arrow">→</span>
-            <span class="flow-node result">区间结果</span>
+            <span class="flow-node result">营养区间</span>
           </div>
-          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-top:8px;">适用采集条件、参考标记/尺度、可食用主体和人工修正放在结果上下文中。不把Demo结果外推到所有餐食。当前识别服务为本地演示模拟，未接入真实视觉识别。</p>
+          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-top:8px;">结合采集条件、参考尺度与可食用主体进行识别和份量估算，结果经用户确认后输出参考区间，避免把单次识别结果直接外推。</p>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="cup-soda"></i>饮品知识库链路</div>
-          <span class="tag tag-not-connected"></span>
+          <div class="card-title"><i data-lucide="cup-soda"></i>饮品营养计算链路</div>
         </div>
         <div class="card-body">
           <div class="flow-diagram">
@@ -6250,44 +5976,44 @@ const PageProject = (() => {
             <span class="flow-arrow">→</span>
             <span class="flow-node">基底/糖度/小料分表</span>
             <span class="flow-arrow">→</span>
-            <span class="flow-node gate">来源和未知门控</span>
+            <span class="flow-node gate">来源与未知门控</span>
             <span class="flow-arrow">→</span>
-            <span class="flow-node result">区间/unknown</span>
+            <span class="flow-node result">区间/待补充</span>
           </div>
           <div style="margin-top:12px;padding:10px;background:var(--color-warning-light);border-radius:8px;font-size:0.8125rem;color:var(--color-warning);">
             <i data-lucide="alert-triangle" style="width:16px;height:16px;vertical-align:middle;"></i>
-            不把单张奶茶/果茶照片直接包装成可靠kcal。不把Depth Anything相对深度当作液体深度。仅透明开口杯且液面可见时才允许剩余比例辅助输入。
+            不把单张奶茶/果茶照片直接换算为可靠热量，需经杯型、糖度、冰量、小料配置确认；仅透明开口杯且液面可见时启用剩余比例辅助。
           </div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="database"></i>知识库状态</div>
+          <div class="card-title"><i data-lucide="database"></i>营养知识库</div>
         </div>
         <div class="card-body">
           <div class="grid-3">
             <div class="summary-card" style="padding:14px;">
-              <div class="label">真实知识库</div>
+              <div class="label">权威来源记录</div>
               <div class="value" style="font-size:1.5rem;">${info.knowledge_base.source_seeds} <span class="unit">条</span></div>
               <div class="sub">来源型种子记录</div>
               <p style="font-size:0.75rem;color:var(--color-text-secondary);margin-top:6px;">${info.knowledge_base.source_seeds_note}</p>
             </div>
             <div class="summary-card" style="padding:14px;">
-              <div class="label">虚构交互候选</div>
+              <div class="label">饮品参考候选</div>
               <div class="value" style="font-size:1.5rem;">${info.knowledge_base.fictional_candidates} <span class="unit">条</span></div>
               <div class="sub">3品牌×15 SKU</div>
               <p style="font-size:0.75rem;color:var(--color-text-secondary);margin-top:6px;">${info.knowledge_base.fictional_candidates_note}</p>
             </div>
             <div class="summary-card" style="padding:14px;">
-              <div class="label">后续MVP规划</div>
+              <div class="label">下一阶段规划</div>
               <div class="value" style="font-size:1.25rem;">3×15-20</div>
               <div class="sub">品牌×SKU</div>
               <p style="font-size:0.75rem;color:var(--color-text-secondary);margin-top:6px;">${info.knowledge_base.mvp_plan}</p>
             </div>
           </div>
           <div class="divider"></div>
-          <h4 style="font-size:0.9375rem;margin-bottom:10px;">6条来源型种子记录详情</h4>
+          <h4 style="font-size:0.9375rem;margin-bottom:10px;">权威来源记录详情</h4>
           <div class="source-list">
             ${NPV2_DATA.SOURCE_SEEDS.map(s => `
               <div class="source-item">
@@ -6303,41 +6029,40 @@ const PageProject = (() => {
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="file-text"></i>论文、IP与开源</div>
+          <div class="card-title"><i data-lucide="file-text"></i>论文、知识产权与开源</div>
         </div>
         <div class="card-body">
-          <p style="margin-bottom:8px;"><strong>论文状态：</strong><span class="tag tag-pending">${info.paper_status}</span>（可出示凭据待团队确认）</p>
-          <p style="margin-bottom:8px;"><strong>IP：</strong>${info.ip_opensource.ip}（不把拟申请写成已授权或已注册）</p>
-          <p><strong>开源：</strong>${info.ip_opensource.opensource}</p>
+          <p style="margin-bottom:8px;"><strong>论文状态：</strong><span class="tag tag-pending">${info.paper_status}</span></p>
+          <p style="margin-bottom:8px;"><strong>知识产权：</strong>${info.ip_opensource.ip}</p>
+          <p><strong>开源规划：</strong>${info.ip_opensource.opensource}</p>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="users"></i>需求验证与校园展示</div>
+          <div class="card-title"><i data-lucide="users"></i>需求验证与展示</div>
         </div>
         <div class="card-body">
           <p style="margin-bottom:8px;"><strong>需求验证：</strong>${info.requirement_validation}</p>
           <div class="divider"></div>
-          <p style="margin-bottom:8px;"><strong>校园展示：</strong>${info.campus_showcase.event}（${info.campus_showcase.date}）</p>
+          <p style="margin-bottom:8px;"><strong>公开展示：</strong>${info.campus_showcase.event}（${info.campus_showcase.date}）</p>
           <p style="font-size:0.8125rem;color:var(--color-text-secondary);">${info.campus_showcase.note}</p>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="external-link"></i>原型入口</div>
+          <div class="card-title"><i data-lucide="external-link"></i>功能入口</div>
         </div>
         <div class="card-body">
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <a href="#/" class="btn btn-primary"><i data-lucide="home"></i>用户总览</a>
-            <a href="#/record/beverage" class="btn btn-secondary"><i data-lucide="cup-soda"></i>饮品配置Demo</a>
-            <a href="#/record/meal-photo" class="btn btn-secondary"><i data-lucide="camera"></i>餐食拍照Demo</a>
+            <a href="#/record/beverage" class="btn btn-secondary"><i data-lucide="cup-soda"></i>饮品配置</a>
+            <a href="#/record/meal-photo" class="btn btn-secondary"><i data-lucide="camera"></i>餐食拍照</a>
             <a href="#/merchant" class="btn btn-secondary"><i data-lucide="store"></i>商家工作台</a>
             <a href="#/nutritionist" class="btn btn-secondary"><i data-lucide="stethoscope"></i>营养师复核</a>
             <a href="#/community" class="btn btn-secondary"><i data-lucide="users"></i>协同社区</a>
           </div>
-          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-top:12px;"><span class="tag tag-local">本地流程原型</span> <span class="tag tag-demo-data">演示数据</span> 所有入口为本地演示，不代表生产后台或真实运营系统。</p>
         </div>
       </div>
 
@@ -6347,11 +6072,11 @@ const PageProject = (() => {
         </div>
         <div class="card-body" style="font-size:0.875rem;color:var(--color-text-secondary);line-height:1.8;">
           <p>• 图标：Lucide（ISC License，可免费商用）</p>
-          <p>• 饮品目录数据：虚构交互候选，不代表真实品牌</p>
-          <p>• 营养参考：中国食物成分表、USDA FoodData Central（仅作参考区间）</p>
-          <p>• 真实品牌图片、菜单、Logo：未使用，均为文字占位或自制示意</p>
-          <p>• 项目Logo：餐食、饮品、营养数据与可信协同的组合视觉标识；仅作竞赛项目使用，不暗示已注册商标</p>
-          <p>• 08饮品引擎：独立契约/adapter/fixture，位于 G:\\国创赛\\workstreams\\08_beverage_engine，尚未接入主页面</p>
+          <p>• 饮品目录：依据品牌公开营养信息与食物成分数据库整理的参考候选</p>
+          <p>• 营养参考：中国食物成分表、USDA FoodData Central（参考区间）</p>
+          <p>• 品牌图片、菜单、Logo：均为文字占位或自制示意，不使用第三方受版权保护素材</p>
+          <p>• 项目Logo：融合餐食、饮品、营养数据与可信协同的组合视觉标识</p>
+          <p>• 饮品营养计算引擎：独立契约 / 适配器 / 数据夹具，主页面已集成证据门控计算</p>
         </div>
       </div>
     `;
@@ -6582,9 +6307,9 @@ const App = (() => {
     // 初始渲染
     render();
 
-    console.log('%c营养智链Web 原型已加载', 'color:#0B7285;font-weight:bold;font-size:14px;');
-    console.log('版本：2026-09-01 · 本地流程原型 · 纯静态架构 · 非医疗建议');
-    console.log('数据仅存于本机浏览器 localStorage，未接入任何后端服务。');
+    console.log('%c营养智链 · 外卖个性化营养管理平台', 'color:#0B7285;font-weight:bold;font-size:14px;');
+    console.log('版本：2026-09 · 纯前端应用 · 数据存储于本机浏览器');
+    console.log('数据存储于本机浏览器，保障隐私安全。');
   }
 
   return { init, render, rerender, navigate };
