@@ -35,6 +35,10 @@ const AppState = (() => {
     localStorage.setItem(KEYS.records, JSON.stringify(records));
   }
 
+  function setRecords(records) {
+    localStorage.setItem(KEYS.records, JSON.stringify(records || []));
+  }
+
   function updateRecord(id, updates) {
     const records = getRecords();
     const idx = records.findIndex(r => r.id === id);
@@ -57,7 +61,7 @@ const AppState = (() => {
     localStorage.setItem(KEYS.role, role);
   }
 
-  return { init, getProfile, saveProfile, getRecords, addRecord, updateRecord, deleteRecord, getRole, setRole };
+  return { init, getProfile, saveProfile, getRecords, addRecord, setRecords, updateRecord, deleteRecord, getRole, setRole };
 })();
 
 const App = (() => {
@@ -221,7 +225,7 @@ const App = (() => {
     render();
 
     console.log('%c营养智链 · 外卖个性化营养管理平台', 'color:#0B7285;font-weight:bold;font-size:14px;');
-    console.log('版本：2026-09 · 纯前端应用 · 数据存储于本机浏览器');
+    console.log('营养智链 · 数据安全存储于本机浏览器');
     console.log('数据存储于本机浏览器，保障隐私安全。');
   }
 
