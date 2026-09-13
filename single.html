@@ -3468,7 +3468,7 @@ const PageMeal = (() => {
 
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="alternate-route"></i>其他记录方式</div>
+          <div class="card-title"><i data-lucide="layers"></i>其他记录方式</div>
         </div>
         <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
           <a href="#/record/order" class="btn btn-secondary"><i data-lucide="receipt"></i>订单导入</a>
@@ -3505,7 +3505,8 @@ const PageMeal = (() => {
               <div class="upload-hint">支持 JPG/PNG，最大 4MB · 俯拍 + 参照物（1cm网格/硬币）识别更准</div>
               <input type="file" id="mealImageInput" accept="image/*" style="display:none" onchange="PageMeal.handleImage(this.files[0])">
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">系统将自动分割食物、标定尺度并估算体积与重量，也可点"快速体验"查看流程</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">系统将自动分割食物、标定尺度并估算体积与重量，暂无照片也可先体验完整估算流程</p>
+            <div style="text-align:center;margin-top:8px;"><button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>快速体验定量流程</button></div>
           `}
         </div>
       </div>
