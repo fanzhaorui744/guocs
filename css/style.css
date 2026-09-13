@@ -41,7 +41,7 @@ ul,ol{list-style:none}
 :focus-visible{outline:2px solid var(--primary-light);outline-offset:2px;border-radius:var(--radius-xs)}
 ::selection{background:var(--primary-100);color:var(--primary-dark)}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.page-content{animation:fadeInUp .35s cubic-bezier(.4,0,.2,1)}
+.page-content{opacity:1;animation:fadeInUp .35s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes modalIn{from{transform:translateY(20px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
@@ -50,7 +50,7 @@ ul,ol{list-style:none}
 .app-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);border-bottom:1px solid rgba(11,114,133,.08)}
 .header-inner{max-width:var(--max-width);margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:var(--header-height);padding:0 20px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text-primary)}
-.brand-logo{height:34px;width:auto;object-fit:contain;flex-shrink:0}
+.brand-logo{height:38px;width:auto;object-fit:contain;flex-shrink:0}
 .brand-mark{width:34px;height:34px;border-radius:var(--radius-sm);background:var(--primary-gradient);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;box-shadow:var(--shadow-primary)}
 .brand-mark::after{content:'';width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.95);position:absolute}
 .brand-text{font-weight:700;font-size:1.0625rem;letter-spacing:-.01em;white-space:nowrap;background:var(--primary-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -435,7 +435,7 @@ ul,ol{list-style:none}
   .mini-ring-group{gap:8px}
   .mini-ring{width:58px;height:58px}
   .mini-ring svg{width:58px;height:58px}
-  .brand-logo{height:28px}.brand-text{font-size:.9375rem}
+  .brand-logo{height:32px}.brand-text{font-size:.9375rem}
   .filter-bar{gap:8px}
   .filter-bar .form-input{min-width:140px}
   .post-footer{gap:12px}
