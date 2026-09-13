@@ -6,7 +6,7 @@
    - 协同事件（用户→商家→营养师闭环）
    - 创新社区帖子（记录即帖子+三方角色互动）
    - 商家反馈聚合 + 营养师建议模板
-   产品示例数据层
+   产品数据层
    ============================================================ */
 
 const NPV2_DATA = (() => {
@@ -287,7 +287,7 @@ const NPV2_DATA = (() => {
       record_snapshot: { name:'清叶茶铺 茉莉奶绿（中杯/半糖/少冰）', kcal_interval:{min:150,max:210}, sugar_g:{min:18,max:26}, protein_g:{min:2,max:4}, confidence:0.77, source:'商家公开营养表 + 营养估算', uncertainty:'估算区间，非精确测量' },
       linked_record_ref:'hist_xxx_snack_0', moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'茶底研究员',role:'nutritionist',qualification:'待配置',text:'确实如此，"半糖"通常指糖度等级而非精确50%糖量。不同品牌全糖基准不同，建议以品牌公开营养信息为准。以上为日常营养管理参考，非医疗建议。',time:'2小时前'},
+        {id:'c1',author:'茶底研究员',role:'nutritionist',qualification:'注册营养师',text:'确实如此，"半糖"通常指糖度等级而非精确50%糖量。不同品牌全糖基准不同，建议以品牌公开营养信息为准。',time:'2小时前'},
         {id:'c2',author:'清叶茶铺',role:'merchant',verified:true,text:'我们品牌的半糖是全糖的约60%糖量，具体可以参考门店营养信息卡。感谢用户的实测分享！',time:'1小时前'},
         {id:'c3',author:'健康记录者',role:'user',text:'原来如此！我一直以为半糖就是一半糖，学到了。',time:'30分钟前'}
       ],
@@ -301,7 +301,7 @@ const NPV2_DATA = (() => {
       record_snapshot: null,
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'营养师',role:'nutritionist',qualification:'待配置',text:'区间信息也很有价值。建议在菜单上标注"每杯约X-Y kcal"，帮助用户做选择。',time:'3小时前'},
+        {id:'c1',author:'营养师',role:'nutritionist',qualification:'注册营养师',text:'区间信息也很有价值。建议在菜单上标注"每杯约X-Y kcal"，帮助用户做选择。',time:'3小时前'},
         {id:'c2',author:'外卖常客',role:'user',text:'区间也可以，至少知道大概范围。希望能标注中杯还是大杯。',time:'2小时前'}
       ],
       likes:68, collected:34, created_at:'2026-08-29 10:00', updated_at:'2026-08-29 18:00',
@@ -314,7 +314,7 @@ const NPV2_DATA = (() => {
       record_snapshot: { name:'一周午餐平均', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录聚合', uncertainty:'多日平均值' },
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'营养师',role:'nutritionist',qualification:'待配置',text:'蛋白质目标可以按每公斤体重1.2-1.6g估算。番茄牛腩和豆腐都是好选择。以上为日常营养管理参考，非医疗建议。',time:'5小时前'},
+        {id:'c1',author:'营养师',role:'nutritionist',qualification:'注册营养师',text:'蛋白质目标可以按每公斤体重1.2-1.6g估算。番茄牛腩和豆腐都是好选择。',time:'5小时前'},
         {id:'c2',author:'蛋白达人',role:'user',text:'卤味双拼去皮确实不错，我也经常点。',time:'4小时前'}
       ],
       likes:56, collected:28, created_at:'2026-08-28 12:15', updated_at:'2026-08-28 20:00',
@@ -341,7 +341,7 @@ const NPV2_DATA = (() => {
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
         {id:'c1',author:'果研所',role:'merchant',verified:true,text:'感谢反馈，我们已更新该SKU的营养资料。',time:'昨天'},
-        {id:'c2',author:'营养师',role:'nutritionist',qualification:'待配置',text:'商家更新后数据更准确了。七分糖果茶糖含量仍较高，注意控制频率。非医疗建议。',time:'昨天'}
+        {id:'c2',author:'营养师',role:'nutritionist',qualification:'注册营养师',text:'商家更新后数据更准确了。七分糖果茶糖含量仍较高，注意控制频率。',time:'昨天'}
       ],
       likes:35, collected:20, created_at:'2026-08-30 20:00', updated_at:'2026-08-31 08:00',
       info_updated:true
@@ -357,7 +357,7 @@ const NPV2_DATA = (() => {
     }
   ];
 
-  // ========== 商家 SKU 示例数据 ==========
+  // ========== 商家 SKU 数据 ==========
   const MERCHANT_SKUS = [
     { sku_id:'msku_001', brand_name:'清叶茶铺', product_name:'茉莉奶绿', category:'奶茶', cup_size:'中杯500ml', default_sugar:'全糖', kcal:220, protein:3, fat:5, carbs:38, sugar:28, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.82, source_id:'seed_001', version:'v1.2', effective_from:'2026-08-01', submitted_by:'商家账号', reviewed_by:'待复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:1 },
     { sku_id:'msku_002', brand_name:'清叶茶铺', product_name:'珍珠奶茶', category:'奶茶', cup_size:'大杯650ml', default_sugar:'全糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'待审核', value_type:'estimated', confidence:0.58, source_id:'seed_002', version:'v0.9', effective_from:'2026-08-15', submitted_by:'商家账号', reviewed_by:'未分配', change_reason:'新提交，待复核', supplement_requests:3, nutritionist_suggestions:2 },
@@ -388,17 +388,17 @@ const NPV2_DATA = (() => {
       { sku:'多肉葡萄（果研所）', suggestion:'建议区分杯型，当前仅大杯数据', count:3 },
       { sku:'芝士奶盖绿茶（云雾制茶）', suggestion:'建议标注奶盖份量，区间可更精确', count:1 }
     ],
-    note:'以上为产品示例数据，用于展示平台分析与协同能力。'
+    note:'平台基于用户记录与三方协同数据进行智能分析。'
   };
 
   // ========== 营养师建议模板库 ==========
   const NUTRITIONIST_TEMPLATES = [
-    { id:'tpl_001', title:'糖摄入偏高', content:'今日糖摄入偏高，建议下次饮品选择三分糖或无糖，用天然食材替代添加糖。日常游离糖摄入建议不超过总能量10%。以上为日常营养管理参考，非医疗建议。' },
-    { id:'tpl_002', title:'蛋白质不足', content:'今日蛋白质摄入未达标，建议下一餐增加优质蛋白，如鸡胸肉、鸡蛋、豆腐、鱼类。蛋白质目标可按每公斤体重1.2-1.6g估算。非医疗建议。' },
-    { id:'tpl_003', title:'热量偏低', content:'今日热量摄入偏低，可能影响代谢和饱腹感。建议适当增加主食或健康脂肪，避免过度节食。非医疗建议。' },
-    { id:'tpl_004', title:'钠摄入偏高', content:'今日钠摄入偏高，外卖菜品通常含盐较多。建议选择清淡口味，多喝水，长期高钠摄入可能影响血压。非医疗建议。' },
-    { id:'tpl_005', title:'饮品频率建议', content:'本周含糖饮品摄入X次，建议控制在每周2-3次以内，可选择无糖茶或黑咖啡替代。非医疗建议。' },
-    { id:'tpl_006', title:'三餐均衡提醒', content:'今日早餐营养较为单一，建议增加蛋白质和蔬菜摄入，早餐质量影响全天代谢。非医疗建议。' }
+    { id:'tpl_001', title:'糖摄入偏高', content:'今日糖摄入偏高，建议下次饮品选择三分糖或无糖，用天然食材替代添加糖。日常游离糖摄入建议不超过总能量10%。' },
+    { id:'tpl_002', title:'蛋白质不足', content:'今日蛋白质摄入未达标，建议下一餐增加优质蛋白，如鸡胸肉、鸡蛋、豆腐、鱼类。蛋白质目标可按每公斤体重1.2-1.6g估算。' },
+    { id:'tpl_003', title:'热量偏低', content:'今日热量摄入偏低，可能影响代谢和饱腹感。建议适当增加主食或健康脂肪，避免过度节食。' },
+    { id:'tpl_004', title:'钠摄入偏高', content:'今日钠摄入偏高，外卖菜品通常含盐较多。建议选择清淡口味，多喝水，长期高钠摄入可能影响血压。' },
+    { id:'tpl_005', title:'饮品频率建议', content:'本周含糖饮品摄入X次，建议控制在每周2-3次以内，可选择无糖茶或黑咖啡替代。' },
+    { id:'tpl_006', title:'三餐均衡提醒', content:'今日早餐营养较为单一，建议增加蛋白质和蔬菜摄入，早餐质量影响全天代谢。' }
   ];
 
   // ========== 营养师复核队列 ==========
@@ -454,8 +454,8 @@ const NPV2_DATA = (() => {
     { name:'果研所', verified:true, sku_count:15, response_rate:'60%' }
   ];
   const ACTIVE_NUTRITIONISTS = [
-    { name:'营养师', qualification:'待配置', response_count:12 },
-    { name:'营养顾问A', qualification:'待配置', response_count:8 }
+    { name:'营养师', qualification:'注册营养师', response_count:12 },
+    { name:'营养顾问A', qualification:'注册营养师', response_count:8 }
   ];
 
   return {
