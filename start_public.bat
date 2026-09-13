@@ -1,9 +1,9 @@
-﻿@echo off
+@echo off
 chcp 65001 >nul
-title 餐量智估Web原型 - 局域网访问
+title 营养智链 - 局域网访问
 echo ============================================================
-echo   餐量智估Web 原型
-echo   版本：2026-09-01 · 本地流程原型 · 纯静态架构
+echo   营养智链 —— 外卖个性化营养管理平台
+echo   本地静态服务（完整能力请使用后端同源启动，见根目录 README）
 echo ============================================================
 echo.
 
@@ -15,13 +15,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: 配置（无密钥，仅环境变量占位）
+:: 服务配置
 set PORT=8765
 set HOST=0.0.0.0
-set DEMO_MODE=true
-set API_KEY=
-echo [配置] 端口：%PORT%  绑定：%HOST%  Demo模式：%DEMO_MODE%
-echo [配置] API_KEY：（空值占位，无真实密钥）
+echo [配置] 端口：%PORT%  绑定：%HOST%
 echo.
 
 :: 获取局域网IP
@@ -36,7 +33,7 @@ echo   访问地址：
 echo   本机：    http://127.0.0.1:%PORT%/
 echo   局域网：  http://%LOCAL_IP%:%PORT%/
 echo.
-echo   同一WiFi下的评委可通过局域网地址访问
+echo   同一WiFi下可通过局域网地址访问
 echo   按 Ctrl+C 停止服务
 echo ============================================================
 echo.
