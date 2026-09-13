@@ -13,7 +13,6 @@ const PageHistory = (() => {
       <div class="page-header">
         <h1 class="page-title">记录与趋势</h1>
         <p class="page-subtitle">日/周/月筛选 · 修改/删除/补录 · 来源查看 · 本地存储</p>
-        ${UI.demoTags(['demo', 'demo-data'])}
       </div>
 
       <div class="filter-bar">
@@ -103,7 +102,6 @@ const PageHistory = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="bar-chart-3"></i>每日热量趋势（估算中值）</div>
-          <span class="tag tag-demo-data">演示数据</span>
         </div>
         <div class="card-body">
           <div style="display:flex;align-items:flex-end;gap:8px;height:180px;padding:10px 0;">
@@ -172,7 +170,7 @@ const PageHistory = (() => {
   function exportData() {
     const records = AppState.getRecords();
     const profile = AppState.getProfile();
-    const data = { export_time: new Date().toISOString(), profile, records, note: '本地演示数据导出，不含真实身份信息' };
+    const data = { export_time: new Date().toISOString(), profile, records, note: '数据导出，不含真实身份信息' };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
