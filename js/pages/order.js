@@ -1,32 +1,37 @@
-/* 订单导入页 v3.0 - 百度OCR + DeepSeek结构化提取 */
+/* 订单导入页 - 截图/文字智能解析为结构化订单 */
 const PageOrder = (() => {
   let state = {
-    step: 'input', // input | ocr_processing | ocr_result | ai_processing | candidates | manual
+    step: 'input', // input | parsing | parsed | manual
     orderText: '',
-    ocrText: '',
+    parsedText: '',
     extractedData: null,
     candidates: [],
     previewImage: null,
+    compressedBase64: null,
     error: null
   };
+
+  const CAT_CN = { staple:'主食', meat:'肉类', vegetable:'蔬菜', soup:'汤品', drink:'饮品', snack:'小吃', fruit:'水果', other:'其他' };
+  const CAT_ORDER = ['staple','meat','vegetable','soup','drink','snack','fruit','other'];
+
+  function catCn(c) { return CAT_CN[c] || c || '其他'; }
 
   function render() {
     return `
       <div class="page-content">
       <div class="page-header">
         <h1 class="page-title">订单导入</h1>
-        <p class="page-subtitle">上传订单截图 → OCR识别 → AI结构化提取 → 逐项确认</p>
-        ${UI.demoTags(['demo', 'not-connected'])}
+        <p class="page-subtitle">上传订单截图或粘贴订单文字 → 智能解析 → 逐项确认</p>
       </div>
 
       <!-- 步骤指示器 -->
-      ${UI.stepper(['上传/粘贴', 'OCR识别', 'AI提取', '确认保存'], getStepIndex())}
+      ${UI.stepper(['上传/粘贴', '智能解析', '确认保存'], getStepIndex())}
 
       <!-- 图片上传区 -->
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="image-plus"></i>上传订单截图</div>
-          <span class="tag tag-demo">百度OCR演示</span>
+          <span class="tag tag-success">截图识别</span>
         </div>
         <div class="card-body" style="padding:0;">
           ${state.previewImage ? `
@@ -35,8 +40,8 @@ const PageOrder = (() => {
               <button class="btn btn-danger btn-sm" style="position:absolute;top:10px;right:10px;" onclick="PageOrder.clearImage()"><i data-lucide="x"></i>移除</button>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="PageOrder.startOCR()" ${state.step==='ocr_processing'?'disabled':''}>
-                ${state.step==='ocr_processing' ? '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></span>OCR识别中...' : '<i data-lucide="scan-text"></i>开始OCR识别'}
+              <button class="btn btn-primary" onclick="PageOrder.startParseImage()" ${state.step==='parsing'?'disabled':''}>
+                ${state.step==='parsing' ? '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></span>正在解析...' : '<i data-lucide="scan-text"></i>开始解析截图'}
               </button>
               <button class="btn btn-secondary" onclick="PageOrder.useManualInput()"><i data-lucide="edit-3"></i>手动输入文字</button>
             </div>
@@ -44,33 +49,44 @@ const PageOrder = (() => {
             <div class="upload-zone" id="orderUploadZone" onclick="document.getElementById('orderImageInput').click()" tabindex="0" role="button" aria-label="上传订单截图">
               <div class="upload-icon"><i data-lucide="upload-cloud"></i></div>
               <div class="upload-text">点击或拖拽上传订单截图</div>
-              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 图片仅本地处理，不上传服务器</div>
+              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 图片仅在本地处理后用于解析</div>
               <input type="file" id="orderImageInput" accept="image/*" style="display:none" onchange="PageOrder.handleImage(this.files[0])">
             </div>
-            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:10px;text-align:center;">OCR 由百度智能云提供，演示用密钥已配置。如识别失败可手动粘贴文字。</p>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:10px;text-align:center;">自动读取截图中的商家、菜品、规格与价格；也可直接粘贴文字</p>
           `}
         </div>
       </div>
 
-      <!-- OCR 结果 / 文字输入区 -->
-      ${(state.step === 'ocr_result' || state.step === 'ai_processing' || state.step === 'candidates' || state.step === 'manual') ? `
+      <!-- 文字输入区 -->
+      ${(state.step === 'parsing' || state.step === 'parsed' || state.step === 'manual') ? `
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><i data-lucide="file-text"></i>订单文字${state.step==='ocr_result'?'（OCR识别结果，可编辑）':''}</div>
-            ${state.step==='ocr_result' ? '<span class="tag tag-success">OCR完成</span>' : ''}
+            <div class="card-title"><i data-lucide="file-text"></i>订单文字${state.step==='parsed'?'（可编辑后重新解析）':''}</div>
           </div>
           <div class="card-body" style="padding:0;">
-            <textarea class="form-textarea" id="orderTextInput" placeholder="粘贴订单文字，或上传图片后自动识别..." style="min-height:120px;">${state.ocrText || state.orderText}</textarea>
+            <textarea class="form-textarea" id="orderTextInput" placeholder="粘贴订单文字，或上传截图后自动解析..." style="min-height:120px;">${state.parsedText || state.orderText}</textarea>
             <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="PageOrder.startAIExtract()" ${state.step==='ai_processing'?'disabled':''}>
-                ${state.step==='ai_processing' ? '<span class="loading-spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></span>AI结构化提取中...' : '<i data-lucide="sparkles"></i>AI结构化提取（DeepSeek）'}
+              <button class="btn btn-primary" onclick="PageOrder.startParseText()" ${state.step==='parsing'?'disabled':''}>
+                <i data-lucide="sparkles"></i>智能解析
               </button>
-              <button class="btn btn-secondary" onclick="PageOrder.useLocalMatch()"><i data-lucide="list"></i>本地规则匹配</button>
+              <button class="btn btn-secondary" onclick="PageOrder.useLocalMatch()"><i data-lucide="list"></i>按行快速拆分</button>
             </div>
-            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;">AI 提取结果仅供参考，请逐项确认。已使用默认 API 配置，可在设置页更换；AI 失败时自动降级为本地规则匹配。</p>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;">解析结果仅供参考，可逐项修改确认后再保存。</p>
           </div>
         </div>
-      ` : ''}
+      ` : `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i data-lucide="keyboard"></i>或直接粘贴订单文字</div>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <textarea class="form-textarea" id="orderTextInputFirst" placeholder="把外卖订单详情粘贴到这里，点击下方按钮解析..." style="min-height:110px;"></textarea>
+            <div style="margin-top:12px;">
+              <button class="btn btn-primary" onclick="PageOrder.pasteAndParse()"><i data-lucide="sparkles"></i>解析文字订单</button>
+            </div>
+          </div>
+        </div>
+      `}
 
       <!-- 错误提示 -->
       ${state.error ? `
@@ -85,26 +101,20 @@ const PageOrder = (() => {
         </div>
       ` : ''}
 
-      <!-- AI 提取结果 / 候选列表 -->
+      <!-- 解析结果 / 候选列表 -->
       ${state.candidates.length > 0 ? `
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><i data-lucide="list-checks"></i>提取结果（${state.candidates.length}项）</div>
-            <span class="tag ${state.extractedData?.source==='deepseek'?'tag-demo':'tag-local'}">${state.extractedData?.source==='deepseek'?'AI提取（DeepSeek）':'本地规则匹配'}</span>
+            <div class="card-title"><i data-lucide="list-checks"></i>解析结果（${state.candidates.length}项）</div>
+            <span class="tag ${state.extractedData?.source==='smart'?'tag-success':'tag-local'}">${state.extractedData?.source==='smart'?'智能解析':'按行拆分'}</span>
           </div>
-          ${state.aiNotConfigured ? `
-            <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-              <span style="font-size:0.8125rem;color:var(--warning);font-weight:500;">当前使用本地规则匹配，识别精度有限</span>
-              <a href="#/goals" class="btn btn-primary btn-sm" style="flex-shrink:0;"><i data-lucide="settings"></i>去配置 AI 服务</a>
-            </div>
-          ` : ''}
           <div class="card-body" style="padding:0;">
             ${state.extractedData ? `
               <div style="display:flex;gap:16px;flex-wrap:wrap;padding:12px 14px;background:var(--color-bg-alt);border-radius:var(--radius-md);margin-bottom:14px;">
                 ${state.extractedData.merchant ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">商家</span><div style="font-weight:700;">${state.extractedData.merchant}</div></div>` : ''}
                 ${state.extractedData.order_time ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">时间</span><div style="font-weight:700;">${state.extractedData.order_time}</div></div>` : ''}
                 ${state.extractedData.total_price ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">总价</span><div style="font-weight:700;">¥${state.extractedData.total_price}</div></div>` : ''}
-                ${state.extractedData.confidence ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">置信度</span><div style="font-weight:700;color:var(--color-primary);">${Math.round(state.extractedData.confidence*100)}%</div></div>` : ''}
+                ${state.extractedData.confidence ? `<div><span style="font-size:0.75rem;color:var(--color-text-muted);">置信度</span><div style="font-weight:700;color:var(--color-primary);">${Math.round(state.extractedData.confidence)}%</div></div>` : ''}
               </div>
             ` : ''}
             <div class="candidate-list">
@@ -118,7 +128,7 @@ const PageOrder = (() => {
                       ${c.price ? `¥${c.price}` : ''}
                     </div>
                   </div>
-                  <span class="tag ${getCategoryTag(c.category)}">${c.category || '未分类'}</span>
+                  <span class="tag ${getCategoryTag(c.category)}">${catCn(c.category)}</span>
                   <div style="display:flex;gap:6px;margin-left:auto;">
                     <button class="btn btn-primary btn-sm" onclick="PageOrder.confirmItem(${i})"><i data-lucide="check"></i>确认</button>
                     <button class="btn btn-secondary btn-sm" onclick="PageOrder.editItem(${i})"><i data-lucide="edit-3"></i>修改</button>
@@ -129,23 +139,23 @@ const PageOrder = (() => {
             </div>
             <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--color-border-light);">
               <button class="btn btn-primary btn-block" onclick="PageOrder.confirmAll()"><i data-lucide="check-circle"></i>全部确认并保存记录</button>
-              <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">AI 提取结果仅供参考，请逐项确认后保存</p>
+              <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">解析结果仅供参考，请逐项确认后保存</p>
             </div>
           </div>
         </div>
       ` : ''}
 
-      <!-- 本地规则匹配说明 -->
+      <!-- 说明 -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="info"></i>说明</div>
+          <div class="card-title"><i data-lucide="info"></i>使用说明</div>
         </div>
         <div class="card-body" style="font-size:0.8125rem;color:var(--color-text-secondary);line-height:1.8;">
-          <p>• <strong>OCR 识别</strong>：使用百度智能云通用文字识别，图片在本地压缩后通过公共代理调用 API。</p>
-          <p>• <strong>AI 结构化提取</strong>：使用 DeepSeek 将识别文字转为结构化的商家/菜品/规格/价格。</p>
-          <p>• <strong>本地规则匹配</strong>：无 AI 时的降级方案，基于关键词匹配生成候选。</p>
-          <p>• <strong>隐私</strong>：API Key 仅保存在本地浏览器，图片和文字不上传到我们的服务器。</p>
-          <p>• OCR 和 AI 结果可能有误，请逐项确认后再保存记录。</p>
+          <p>• <strong>截图解析</strong>：上传外卖订单截图，自动读取商家、菜品、规格、数量与价格。</p>
+          <p>• <strong>文字解析</strong>：粘贴订单文字，自动整理为结构化的菜品清单。</p>
+          <p>• <strong>按行拆分</strong>：不使用智能解析时，可按订单每一行快速拆分为条目。</p>
+          <p>• <strong>隐私</strong>：图片仅在本地压缩后用于本次解析，不做留存。</p>
+          <p>• 自动解析结果可能有误，请逐项确认后再保存记录。</p>
         </div>
       </div>
       </div>
@@ -153,13 +163,24 @@ const PageOrder = (() => {
   }
 
   function getStepIndex() {
-    const map = { input:0, ocr_processing:1, ocr_result:1, ai_processing:2, candidates:3, manual:2 };
+    const map = { input:0, parsing:1, parsed:2, manual:1 };
     return map[state.step] || 0;
   }
 
   function getCategoryTag(cat) {
-    const map = { '固体餐':'tag-success', '饮品':'tag-demo', '小吃':'tag-pending', '水果':'tag-source-low', '其他':'tag-unknown' };
-    return map[cat] || 'tag-unknown';
+    const map = { 主食:'tag-success', 肉类:'tag-demo', 蔬菜:'tag-success', 汤品:'tag-pending', 饮品:'tag-demo', 小吃:'tag-pending', 水果:'tag-source-low', 其他:'tag-unknown' };
+    return map[catCn(cat)] || 'tag-unknown';
+  }
+
+  // 把解析数据适配为候选列表
+  function adaptItems(data) {
+    return (data.items || []).map(it => ({
+      name: it.name || '未命名',
+      specification: it.spec || it.specification || '',
+      quantity: it.quantity || 1,
+      price: it.price != null ? it.price : null,
+      category: CAT_ORDER.includes(it.category) ? it.category : 'other'
+    }));
   }
 
   // 图片处理
@@ -168,7 +189,6 @@ const PageOrder = (() => {
     if (file.size > 4 * 1024 * 1024) { UI.toast('图片不能超过 4MB', 'warning'); return; }
     const reader = new FileReader();
     reader.onload = (e) => {
-      // Canvas 压缩
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
@@ -196,139 +216,65 @@ const PageOrder = (() => {
     App.rerender();
   }
 
-  // 百度 OCR（百度API原生支持CORS，直接调用；硬编码token兜底）
-  const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
-  const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
-  const DEFAULT_BAIDU_ACCESS_TOKEN = '24.91704538a56fffd63509a17941f797f2.2592000.1790874581.282335-124232407';
-
-  async function fetchWithRetry(url, options, retries = 2) {
-    for (let i = 0; i <= retries; i++) {
-      try {
-        const response = await fetch(url, options);
-        return await response.json();
-      } catch (error) {
-        if (i < retries) await new Promise(r => setTimeout(r, 1000));
-        else throw error;
-      }
-    }
-  }
-
-  async function getBaiduAccessToken() {
-    const cached = localStorage.getItem('baidu_access_token');
-    const cachedTime = localStorage.getItem('baidu_token_time');
-    if (cached && cachedTime && (Date.now() - parseInt(cachedTime) < 25*24*60*60*1000)) {
-      return cached;
-    }
-    if (typeof DEFAULT_BAIDU_ACCESS_TOKEN !== 'undefined' && DEFAULT_BAIDU_ACCESS_TOKEN) {
-      localStorage.setItem('baidu_access_token', DEFAULT_BAIDU_ACCESS_TOKEN);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return DEFAULT_BAIDU_ACCESS_TOKEN;
-    }
-    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
-    const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
-    const data = await fetchWithRetry(tokenUrl);
-    if (data.access_token) {
-      localStorage.setItem('baidu_access_token', data.access_token);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return data.access_token;
-    }
-    throw new Error(data.error_description || '获取 token 失败');
-  }
-
-  async function baiduOCR(imageBase64, accessToken) {
-    const ocrUrl = `https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=${accessToken}`;
-    const formData = new URLSearchParams();
-    formData.append('image', imageBase64);
-    const data = await fetchWithRetry(ocrUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData.toString()
-    });
-    if (data.words_result) return data.words_result.map(item => item.words).join('\n');
-    throw new Error(data.error_msg || 'OCR 识别失败');
-  }
-
-  async function startOCR() {
-    if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
-    state.step = 'ocr_processing';
+  // 截图一步解析（读图 + 结构化）
+  async function startParseImage() {
+    if (!state.compressedBase64) { UI.toast('请先上传截图', 'warning'); return; }
+    state.step = 'parsing';
     state.error = null;
     App.rerender();
-    try {
-      const token = await getBaiduAccessToken();
-      const text = await baiduOCR(state.compressedBase64, token);
-      state.ocrText = text;
-      state.orderText = text;
-      state.step = 'ocr_result';
-      UI.toast('OCR 识别完成', 'success');
-    } catch (e) {
-      state.error = { title: 'OCR 识别失败', detail: e.message + '。可手动粘贴订单文字。' };
+    const result = await Recognize.orderImage(state.compressedBase64);
+    if (result.success) {
+      applyParsed(result.data, result.rawText || '');
+      UI.toast(`解析完成，共 ${state.candidates.length} 项`, 'success');
+    } else {
+      state.error = { title: '截图解析失败', detail: result.error + '。可改为手动粘贴订单文字。' };
       state.step = 'manual';
-      UI.toast('OCR 失败，已切换到手动输入', 'error');
+      UI.toast('解析失败，已切换到手动输入', 'error');
     }
     App.rerender();
+  }
+
+  function pasteAndParse() {
+    const text = document.getElementById('orderTextInputFirst')?.value?.trim();
+    if (!text) { UI.toast('请先粘贴订单文字', 'warning'); return; }
+    state.orderText = text;
+    state.parsedText = text;
+    state.step = 'manual';
+    App.rerender();
+    startParseText();
+  }
+
+  async function startParseText() {
+    const text = document.getElementById('orderTextInput')?.value?.trim();
+    if (!text) { UI.toast('请先输入订单文字', 'warning'); return; }
+    state.orderText = text;
+    state.parsedText = text;
+    state.error = null;
+    state.step = 'parsing';
+    App.rerender();
+    const result = await Recognize.orderText(text);
+    if (result.success) {
+      applyParsed(result.data, text);
+      UI.toast(`解析完成，共 ${state.candidates.length} 项`, 'success');
+    } else {
+      state.error = { title: '解析失败', detail: result.error + '。可尝试按行快速拆分。' };
+      localMatch(text);
+    }
+    App.rerender();
+  }
+
+  function applyParsed(data, rawText) {
+    // 置信度统一为百分比
+    if (data.confidence != null && data.confidence <= 1) data.confidence = Math.round(data.confidence * 100);
+    state.extractedData = { ...data, source: 'smart' };
+    state.candidates = adaptItems(data);
+    state.parsedText = rawText || state.parsedText || state.orderText;
+    state.step = 'parsed';
   }
 
   function useManualInput() {
     state.step = 'manual';
     state.error = null;
-    App.rerender();
-  }
-
-  // DeepSeek 提取
-  const DEFAULT_DEEPSEEK_KEY = 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3';
-  const DEFAULT_DEEPSEEK_BASE = 'https://api.deepseek.com';
-  const DEFAULT_DEEPSEEK_MODEL = 'deepseek-chat';
-  async function extractWithDeepSeek(orderText) {
-    const apiKey = localStorage.getItem('deepseek_api_key') || DEFAULT_DEEPSEEK_KEY;
-    const apiBase = localStorage.getItem('deepseek_api_base') || DEFAULT_DEEPSEEK_BASE;
-    const model = localStorage.getItem('deepseek_model') || DEFAULT_DEEPSEEK_MODEL;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-    try {
-      const response = await fetch(`${apiBase}/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: 'system', content: '你是一个外卖订单信息提取助手。从用户提供的订单文本中提取结构化信息，返回严格的 JSON 格式，不要输出任何其他文字。\n\nJSON 格式：\n{\n  "merchant": "商家名称",\n  "order_time": "下单时间",\n  "items": [\n    {\n      "name": "菜品/饮品名称",\n      "specification": "规格/备注",\n      "quantity": 数量,\n      "price": 单价,\n      "category": "固体餐/饮品/小吃/水果/其他"\n    }\n  ],\n  "total_price": 总价,\n  "confidence": 0-1\n}\n\n规则：无法识别的字段填 null；只提取文本中明确存在的信息。' },
-            { role: 'user', content: orderText }
-          ],
-          temperature: 0.1,
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      if (!response.ok) throw new Error(`API 返回 ${response.status}`);
-      const result = await response.json();
-      const extracted = JSON.parse(result.choices[0].message.content);
-      return { success: true, data: extracted };
-    } catch (error) {
-      clearTimeout(timeoutId);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async function startAIExtract() {
-    const text = document.getElementById('orderTextInput')?.value?.trim();
-    if (!text) { UI.toast('请先输入或识别订单文字', 'warning'); return; }
-    state.orderText = text;
-    state.error = null;
-    state.aiNotConfigured = false;
-    state.step = 'ai_processing';
-    App.rerender();
-    const result = await extractWithDeepSeek(text);
-    if (result.success) {
-      state.extractedData = { ...result.data, source: 'deepseek' };
-      state.candidates = result.data.items || [];
-      state.step = 'candidates';
-      UI.toast(`AI 提取完成，共 ${state.candidates.length} 项`, 'success');
-    } else {
-      state.error = { title: 'AI 提取失败', detail: result.error + '。已降级为本地规则匹配。' };
-      localMatch(text);
-    }
     App.rerender();
   }
 
@@ -341,23 +287,23 @@ const PageOrder = (() => {
   }
 
   function localMatch(text) {
-    // 简单本地规则匹配
     const lines = text.split('\n').filter(l => l.trim());
     const candidates = lines.map(line => {
       const priceMatch = line.match(/(\d+\.?\d*)\s*元/);
       const qtyMatch = line.match(/[×xX*]\s*(\d+)/);
+      const isDrink = /茶|奶|咖啡|果汁|饮|可乐|水/.test(line);
       return {
         name: line.replace(/\d+\.?\d*\s*元.*/, '').replace(/[×xX*]\s*\d+.*/, '').trim().slice(0, 30) || '未命名',
-        specification: null,
+        specification: '',
         quantity: qtyMatch ? parseInt(qtyMatch[1]) : 1,
         price: priceMatch ? parseFloat(priceMatch[1]) : null,
-        category: /茶|奶|咖啡|果汁|饮/.test(line) ? '饮品' : '固体餐'
+        category: isDrink ? 'drink' : 'other'
       };
     }).filter(c => c.name && c.name.length > 1);
-    state.extractedData = { merchant: null, order_time: null, total_price: null, confidence: 0.5, source: 'local' };
+    state.extractedData = { merchant: '', order_time: '', total_price: null, confidence: 50, source: 'local' };
     state.candidates = candidates;
-    state.step = 'candidates';
-    UI.toast(`本地匹配完成，共 ${candidates.length} 项`, 'info');
+    state.step = 'parsed';
+    UI.toast(`拆分完成，共 ${candidates.length} 项`, 'info');
   }
 
   function confirmItem(i) {
@@ -378,7 +324,6 @@ const PageOrder = (() => {
 
   function confirmAll() {
     if (state.candidates.length === 0) { UI.toast('没有可保存的项目', 'warning'); return; }
-    // 保存到记录
     const now = new Date();
     const hour = now.getHours();
     const period = hour >= 6 && hour < 10 ? 'breakfast' : hour >= 11 && hour < 14 ? 'lunch' : hour >= 17 && hour < 21 ? 'dinner' : 'snack';
@@ -391,7 +336,7 @@ const PageOrder = (() => {
       items: state.candidates.map(c => ({
         id: 'item_' + Math.random().toString(36).slice(2),
         name: c.name,
-        category: c.category === '饮品' ? 'beverage' : 'meal',
+        category: c.category === 'drink' ? 'beverage' : 'meal',
         estimated_weight_g: null,
         consumed_ratio: 1,
         calories_kcal: { value: null, interval: { min: 0, max: 0 }, value_type: 'unknown' },
@@ -400,7 +345,7 @@ const PageOrder = (() => {
         carbs_g: { value: null, interval: null, value_type: 'unknown' },
         sugar_g: { value: null, interval: null, value_type: 'unknown' },
         sodium_mg: { value: null, interval: null, value_type: 'unknown' },
-        confidence: state.extractedData?.confidence || 0.5,
+        confidence: (state.extractedData?.confidence || 50) / 100,
         source_ids: [],
         value_type: 'unknown',
         interval: null,
@@ -414,9 +359,9 @@ const PageOrder = (() => {
     records.push(record);
     AppState.setRecords(records);
     UI.toast(`已保存 ${state.candidates.length} 项记录`, 'success');
-    state = { step:'input', orderText:'', ocrText:'', extractedData:null, candidates:[], previewImage:null, error:null };
+    state = { step:'input', orderText:'', parsedText:'', extractedData:null, candidates:[], previewImage:null, compressedBase64:null, error:null };
     App.navigate('#/history');
   }
 
-  return { render, handleImage, clearImage, startOCR, useManualInput, startAIExtract, useLocalMatch, confirmItem, editItem, removeItem, confirmAll };
+  return { render, handleImage, clearImage, startParseImage, startParseText, pasteAndParse, useManualInput, useLocalMatch, confirmItem, editItem, removeItem, confirmAll };
 })();
