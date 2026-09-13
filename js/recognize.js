@@ -311,5 +311,37 @@ const Recognize = (() => {
     return 'other';
   }
 
-  return { dish, orderImage, orderText, nutrition };
+  /* ---------- 餐食视觉定量：分类+分割+参照物标定+形状厚度，一次调用后由 Volume 计算体积质量热量 ---------- */
+  function _measureSys() {
+    return '你是严谨的食物视觉测量与营养分析专家，需同时完成食物分类、实例分割、参照物尺度标定、视角评估、形状厚度判定。坐标用归一化整数：左上(0,0)、右下(999,999)，x向右y向下。'
+      + '【参照物reference】按优先级判断type：grid1cm(1cm方格，px_points依次给一个方格左上/右上/右下/左下四角,known_cm=1.0)、plate(标准餐盘,给盘沿最左最右两点,known_cm取盘径20/22/24)、coin(一元硬币水平左右两点,known_cm=2.5)、card(银行卡短边上下两点,known_cm=5.4)、chopstick(筷子沿身两点,known_cm=22)、none(无参照物,scale_reliable=false)；px_length为标定边在归一化坐标跨越长度(1位小数)。'
+      + '【视角view】angle=top(倾斜≤15)/tilt(15-55)/side(>55)，tilt_deg为镜头与竖直夹角0-80整数，quality=good/ok/poor。'
+      + '【食物foods】每种可区分食物一个对象(混合菜分列,最多6个)：name中文菜名；confidence 0-100整数；polygon沿可见外轮廓顺时针10-24个[x,y]顶点紧贴边缘；bbox=[x,y,w,h]；'
+      + 'shape取dome(隆起一团/勺盛/饭团)/prism(等厚平铺/切块/摊平米饭)/ellipsoid(椭球/蛋/丸/包子)/liquid(汤/饮品近圆柱)/pile(不规则堆叠/薯条/沙拉)/flat(薄片/饼/菜叶)；'
+      + 'thickness_cm_est平均厚度厘米(1位小数)；dome_ratio最高/边缘厚度倍数1.0-2.0(flat/prism取1.0,dome约1.4-1.8)；'
+      + 'density_g_cm3视密度(汤饮1.0/米饭主食0.55-0.8/紧实肉蛋1.0-1.1/松散蔬菜0.4-0.6/油炸蓬松0.3-0.5/面条0.7-0.9)；calorie_per_100g每100g千卡整数。'
+      + '只输出一个JSON，不要任何解释或代码块：{"view":{"angle":"top","tilt_deg":0,"quality":"good"},"reference":{"type":"grid1cm","known_cm":1.0,"px_points":[[0,0],[0,0],[0,0],[0,0]],"px_length":0,"scale_reliable":true},"foods":[{"name":"","confidence":0,"polygon":[[0,0]],"bbox":[0,0,0,0],"shape":"dome","thickness_cm_est":0,"dome_ratio":1.5,"density_g_cm3":0,"calorie_per_100g":0}]}。无法判断给最合理保守估计不要给null。';
+  }
+
+  async function measure(imageBase64, imgW, imgH) {
+    const dataUri = imageBase64.startsWith('data:') ? imageBase64 : 'data:image/jpeg;base64,' + imageBase64;
+    const r = await _chat([
+      { role: 'system', content: _measureSys() },
+      { role: 'user', content: [
+        { type: 'text', text: '请对这张餐食照片完成分割、参照物标定、视角与形状厚度判定，并输出指定JSON。' },
+        { type: 'image_url', image_url: { url: dataUri } }
+      ] }
+    ], true);
+    if (!r.success) return { success: false, error: '视觉定量识别暂不可用' };
+    const raw = _extractJson(r.text);
+    if (!raw || !Array.isArray(raw.foods) || raw.foods.length === 0) {
+      return { success: false, error: '未能完成视觉定量分析' };
+    }
+    // DepthAnything 未接入时 depthMap 为空，Volume 自动使用语义厚度兜底
+    const result = (typeof Volume !== 'undefined') ? Volume.analyze(raw, imgW || 1024, imgH || 1024, null) : null;
+    if (!result) return { success: false, error: '定量计算内核不可用' };
+    return { success: true, data: result, raw };
+  }
+
+  return { dish, orderImage, orderText, nutrition, measure };
 })();
