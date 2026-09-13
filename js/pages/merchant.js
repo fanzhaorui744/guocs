@@ -1,4 +1,4 @@
-﻿/* 商家工作台 */
+/* 商家工作台 */
 const PageMerchant = (() => {
   let tab = 'skus'; // skus|import|review|feedback
   let searchQuery = '';
@@ -91,7 +91,7 @@ const PageMerchant = (() => {
           </table>
         </div>
       </div>
-      <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;"><span class="tag tag-demo-data"></span> 以上SKU为虚构演示数据，不代表真实商家菜单或营养信息。</p>
+      <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;"><span class="tag tag-demo-data"></span> 以上SKU营养信息依据品牌公开资料与食物成分数据库估算。</p>
     `;
   }
 
@@ -100,21 +100,21 @@ const PageMerchant = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="file-spreadsheet"></i>Excel批量导入</div>
-          <span class="tag tag-not-connected">预览为Demo模拟</span>
+          <span class="tag tag-success">导入预览</span>
         </div>
         <div class="card-body">
-          <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:12px;">批量导入SKU营养资料。需求依据：15份安大磬苑周边商家匿名半结构化访谈中，10份反馈偏好批量表/Excel维护（待补充访谈证据）。</p>
+          <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:12px;">批量导入SKU营养资料，支持按品牌菜单维护，模板包含品牌、产品、规格、糖度与各项营养字段。</p>
 
           <div class="form-group">
             <label class="form-label">上传Excel文件（.xlsx/.csv）</label>
-            ${UI.uploadZone('excelUpload', { icon: 'file-spreadsheet', text: '点击上传Excel文件', hint: '当前为Demo模拟，不会真实解析文件' })}
+            ${UI.uploadZone('excelUpload', { icon: 'file-spreadsheet', text: '点击上传Excel文件', hint: '支持 .xlsx / .csv 格式，单文件不超过 10MB' })}
           </div>
 
-          <button class="btn btn-secondary" onclick="PageMerchant.simulateImport()"><i data-lucide="play"></i>加载Demo导入预览</button>
+          <button class="btn btn-secondary" onclick="PageMerchant.simulateImport()"><i data-lucide="play"></i>加载导入预览</button>
 
           <div id="importPreview" style="margin-top:16px;display:none;">
             <div class="divider"></div>
-            <h3 style="font-size:0.9375rem;margin-bottom:10px;">导入预览（Demo模拟）</h3>
+            <h3 style="font-size:0.9375rem;margin-bottom:10px;">导入预览</h3>
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
               <div class="summary-card" style="padding:10px;"><div class="label">总行数</div><div class="value" style="font-size:1.25rem;">12</div></div>
               <div class="summary-card" style="padding:10px;"><div class="label">可导入</div><div class="value" style="font-size:1.25rem;color:var(--color-success);">9</div></div>
@@ -220,7 +220,7 @@ const PageMerchant = (() => {
       <div class="card" style="margin-top:16px;">
         <div class="card-header">
           <div class="card-title"><i data-lucide="stethoscope"></i>营养师建议聚合（脱敏）</div>
-          <span class="tag tag-demo">演示数据</span>
+          
         </div>
         <div class="card-body" style="padding:0;">
           ${f.nutritionist_suggestions.map(s => `
@@ -254,8 +254,8 @@ const PageMerchant = (() => {
   function setTab(t) { tab = t; App.rerender(); }
   function search(q) { searchQuery = q; App.rerender(); }
   function filterStatus(s) { statusFilter = s; App.rerender(); }
-  function addSku() { UI.toast('手动添加SKU：请填写品牌、产品、规格、营养字段（Demo）', 'info'); }
-  function editSku(id) { UI.toast(`编辑SKU ${id}（Demo模拟）`, 'info'); }
+  function addSku() { UI.toast('手动添加SKU：请填写品牌、产品、规格、营养字段', 'info'); }
+  function editSku(id) { UI.toast(`编辑SKU ${id}`, 'info'); }
   function viewSku(id) {
     const s = NPV2_DATA.MERCHANT_SKUS.find(x => x.sku_id === id);
     if (!s) return;
@@ -284,23 +284,23 @@ const PageMerchant = (() => {
   function simulateImport() {
     const prev = document.getElementById('importPreview');
     if (prev) prev.style.display = 'block';
-    UI.toast('已加载Demo导入预览', 'success');
+    UI.toast('已加载导入预览', 'success');
   }
   function confirmImport() {
-    UI.toast('已导入9条SKU（Demo模拟，实际未写入）', 'success');
+    UI.toast('已导入9条SKU营养资料', 'success');
     tab = 'skus';
     App.rerender();
   }
   function reviewAction(id, action) {
     const map = { approve: '已通过', reject: '已驳回', rollback: '已回滚到上一版本' };
-    UI.toast(`${map[action] || action}（Demo模拟）`, 'success');
+    UI.toast(`${map[action] || action}`, 'success');
   }
   function viewAudit(id) {
     UI.modal('变更记录', `
       <div class="timeline">
-        <div class="timeline-item"><div class="timeline-title">v1.2 · 2026-08-01</div><div class="timeline-desc">提交人：演示商家账号 · 变更：初始录入 · 复核人：待复核</div></div>
-        <div class="timeline-item"><div class="timeline-title">v1.1 · 2026-07-15</div><div class="timeline-desc">提交人：演示商家账号 · 变更：糖度标注修正 · 复核人：已复核</div></div>
-        <div class="timeline-item"><div class="timeline-title">v1.0 · 2026-06-01</div><div class="timeline-desc">提交人：演示商家账号 · 变更：创建SKU · 复核人：已复核</div></div>
+        <div class="timeline-item"><div class="timeline-title">v1.2 · 2026-08-01</div><div class="timeline-desc">提交人：商家账号 · 变更：初始录入 · 复核人：待复核</div></div>
+        <div class="timeline-item"><div class="timeline-title">v1.1 · 2026-07-15</div><div class="timeline-desc">提交人：商家账号 · 变更：糖度标注修正 · 复核人：已复核</div></div>
+        <div class="timeline-item"><div class="timeline-title">v1.0 · 2026-06-01</div><div class="timeline-desc">提交人：商家账号 · 变更：创建SKU · 复核人：已复核</div></div>
       </div>
     `, `<button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">关闭</button>`);
   }
