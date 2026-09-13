@@ -113,7 +113,7 @@ const PageNutritionist = (() => {
               </div>
 
               <div class="form-group" style="margin-top:16px;">
-                <label class="form-label">复核备注/建议 <span class="tag tag-non-medical" style="margin-left:6px;">非医疗建议</span></label>
+                <label class="form-label">复核备注/建议</label>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
                   ${NPV2_DATA.NUTRITIONIST_TEMPLATES.map(t => `<button class="config-option" style="font-size:0.75rem;padding:5px 10px;" onclick="const ta=document.getElementById('nutNote');if(ta){ta.value+='${t.content.replace(/'/g,"\\'").replace(/\n/g,' ')}';}">${t.title}</button>`).join('')}
                 </div>
