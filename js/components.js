@@ -247,7 +247,7 @@ const UI = (() => {
   function stateView(type, opts = {}) {
     const configs = {
       idle: { icon:'image-plus', title:opts.title||'尚未选择照片', desc:opts.desc||'上传餐食照片开始识别，或使用替代路径。', actions:opts.actions||[] },
-      uploading: { icon:'loader-2', title:opts.title||'正在处理...', desc:opts.desc||'本地演示模拟识别中，请稍候。', actions:opts.actions||[], loading:true },
+      uploading: { icon:'loader-2', title:opts.title||'正在处理...', desc:opts.desc||'正在识别处理中，请稍候。', actions:opts.actions||[], loading:true },
       complete: { icon:'check-circle-2', title:opts.title||'识别完成', desc:opts.desc||'', actions:opts.actions||[] },
       partial: { icon:'alert-circle', title:opts.title||'部分识别', desc:opts.desc||'部分菜品已识别，部分待确认。', actions:opts.actions||[] },
       low_conf: { icon:'help-circle', title:opts.title||'识别置信度较低', desc:opts.desc||'结果区间较大，建议人工确认。', actions:opts.actions||[] },
