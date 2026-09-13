@@ -220,9 +220,9 @@ const App = (() => {
     // 初始渲染
     render();
 
-    console.log('%c营养智链Web 原型已加载', 'color:#0B7285;font-weight:bold;font-size:14px;');
-    console.log('版本：2026-09-01 · 本地流程原型 · 纯静态架构 · 非医疗建议');
-    console.log('数据仅存于本机浏览器 localStorage，未接入任何后端服务。');
+    console.log('%c营养智链 · 外卖个性化营养管理平台', 'color:#0B7285;font-weight:bold;font-size:14px;');
+    console.log('版本：2026-09 · 纯前端应用 · 数据存储于本机浏览器');
+    console.log('数据存储于本机浏览器，保障隐私安全。');
   }
 
   return { init, render, rerender, navigate };
