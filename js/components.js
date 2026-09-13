@@ -330,11 +330,73 @@ const UI = (() => {
   }
 
   function refreshIcons(root = document) { if (window.lucide) lucide.createIcons({ root }); }
+  // 三角色差异化欢迎卡：登录身份 + 角色专属概览与快捷入口
+  function roleWelcome() {
+    const role = (typeof AppState !== 'undefined') ? AppState.getRole() : 'user';
+    const u = (typeof Auth !== 'undefined') ? Auth.current() : null;
+    const name = u ? u.nickname : '访客';
+    const h = new Date().getHours();
+    const greet = h < 6 ? '夜深了' : h < 11 ? '早上好' : h < 14 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+
+    if (role === 'merchant') {
+      const shop = (u && u.extra && u.extra.shop) ? u.extra.shop : '轻食集 · 南山店';
+      const stats = [['今日订单', '198'], ['待处理反馈', '12'], ['菜品浏览', '1.2k'], ['店铺评分', '4.7']];
+      return `<div class="role-hero" style="background:linear-gradient(120deg,#B8860B,#D9A441);">
+        <div class="role-hero-main">
+          <div class="role-hero-eyebrow">商家工作台</div>
+          <div class="role-hero-title">${greet}，${name} · ${shop}</div>
+          <div class="role-hero-sub">维护菜品营养数据、查看经营与社区互动，形成用户—商家—营养师协同闭环</div>
+          <div class="role-hero-actions">
+            <a href="#/merchant/analytics" class="role-hero-btn">经营数据</a>
+            <a href="#/merchant/dishes" class="role-hero-btn ghost">菜品管理</a>
+            <a href="#/merchant/community" class="role-hero-btn ghost">社区运营</a>
+          </div>
+        </div>
+        <div class="role-hero-stats">${stats.map(s => `<div class="role-stat"><div class="role-stat-num">${s[1]}</div><div class="role-stat-label">${s[0]}</div></div>`).join('')}</div>
+      </div>`;
+    }
+    if (role === 'nutritionist') {
+      const qual = (u && u.extra && u.extra.qualification) ? u.extra.qualification : '注册营养师 · 减脂/控糖';
+      const stats = [['待复核', '8'], ['今日已复核', '15'], ['建议采纳率', '92%'], ['服务用户', '126']];
+      return `<div class="role-hero" style="background:linear-gradient(120deg,#4F46E5,#818CF8);">
+        <div class="role-hero-main">
+          <div class="role-hero-eyebrow">营养师工作台</div>
+          <div class="role-hero-title">${greet}，${name} · ${qual}</div>
+          <div class="role-hero-sub">复核用户记录、给出个性化建议、发布营养科普，沉淀专业影响力</div>
+          <div class="role-hero-actions">
+            <a href="#/nutritionist" class="role-hero-btn">去复核</a>
+            <a href="#/nutritionist/users" class="role-hero-btn ghost">用户管理</a>
+            <a href="#/nutritionist/articles" class="role-hero-btn ghost">知识发布</a>
+          </div>
+        </div>
+        <div class="role-hero-stats">${stats.map(s => `<div class="role-stat"><div class="role-stat-num">${s[1]}</div><div class="role-stat-label">${s[0]}</div></div>`).join('')}</div>
+      </div>`;
+    }
+    // 普通用户
+    return `<div class="role-hero" style="background:linear-gradient(120deg,#0B7285,#2A9D8F);">
+      <div class="role-hero-main">
+        <div class="role-hero-eyebrow">个人营养中心</div>
+        <div class="role-hero-title">${greet}，${name}，今天也要好好吃饭</div>
+        <div class="role-hero-sub">拍照即可定量估算一餐的重量与热量，三餐分时段记录，趋势一目了然</div>
+        <div class="role-hero-actions">
+          <a href="#/record/meal-photo" class="role-hero-btn">拍照定量</a>
+          <a href="#/record/order" class="role-hero-btn ghost">订单导入</a>
+          <a href="#/record/beverage" class="role-hero-btn ghost">饮品记录</a>
+          ${u ? '' : '<a href="#/auth" class="role-hero-btn ghost">登录 / 注册</a>'}
+        </div>
+      </div>
+      <div class="role-hero-stats">
+        <div class="role-stat"><div class="role-stat-num">3</div><div class="role-stat-label">三餐时段</div></div>
+        <div class="role-stat"><div class="role-stat-num">±20%</div><div class="role-stat-label">定量误差</div></div>
+        <div class="role-stat"><div class="role-stat-num">3端</div><div class="role-stat-label">协同</div></div>
+      </div>
+    </div>`;
+  }
 
   return {
     tag, demoTags, nutrientValue, nutritionGrid,
     ringProgress, macroDonut, mealBarChart, trendChart, sugarCard,
     resultCard, collabTimeline, postCard,
-    stateView, toast, modal, confirmDialog, stepper, uploadZone, emptyState, refreshIcons
+    roleWelcome, stateView, toast, modal, confirmDialog, stepper, uploadZone, emptyState, refreshIcons
   };
 })();
