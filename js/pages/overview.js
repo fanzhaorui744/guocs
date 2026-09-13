@@ -178,7 +178,7 @@ const PageOverview = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="lightbulb"></i>今日建议</div>
-          <span class="tag tag-non-medical">非医疗建议</span>
+          
         </div>
         <div class="card-body">
           <p style="margin-bottom:8px;">${totalProtein < target.protein_g * 0.7 ? '🥩 蛋白质摄入偏低，下一餐可考虑增加鸡胸肉、鸡蛋、豆腐等优质蛋白。' : '✅ 蛋白质摄入尚可，注意保持均衡。'}</p>
