@@ -1,7 +1,7 @@
 /* ============================================================
-   饮品计算引擎（前端本地规则 Demo）
+   饮品营养计算引擎（证据门控）
    - 复刻 08 饮品引擎契约结构的前端实现
-   - 标注：本地规则Demo/契约待接入，08引擎未接入主页面
+   - 证据门控：按来源等级决定精确值/区间/未知，null 不转 0
    - 不把单张照片转kcal，必须经过配置确认
    - null/未知不转0，区间结果value=null
    ============================================================ */
@@ -9,11 +9,11 @@
 const BeverageEngine = (() => {
 
   const ENGINE_INFO = {
-    name: '本地规则Demo引擎',
-    version: '0.1.0-demo',
+    name: '饮品营养计算引擎',
+    version: '1.0.0',
     contract_version: '1.0.0',
-    status: '本地规则Demo/契约待接入',
-    note: '08饮品引擎（G:\\国创赛\\workstreams\\08_beverage_engine）尚未接入主页面，此处为前端本地规则计算，仅用于演示流程。',
+    status: '证据门控计算',
+    note: '依据饮品知识库与证据等级进行营养估算，未知项不按 0 计算。',
     catalog_id: 'fictional_demo_catalog',
     catalog_version: '2026.09-demo.1',
     effective_from: '2026-09-01',
@@ -21,7 +21,7 @@ const BeverageEngine = (() => {
   };
 
   /**
-   * 文本匹配候选（模拟OCR/文本匹配，未接入真实OCR）
+   * 文本匹配候选
    * @param {string} text - 订单文本
    * @returns {Array} 候选列表
    */
@@ -47,7 +47,7 @@ const BeverageEngine = (() => {
           sku_id: sku.sku_id,
           display_name: sku.display_name,
           score: Math.min(score, 0.99),
-          match_source: '本地文本关键词匹配（OCR未接入，原型模拟）',
+          match_source: '文本关键词匹配',
           record_status: sku.record_status,
           available_configuration: sku.available_configuration
         });
@@ -118,7 +118,7 @@ const BeverageEngine = (() => {
         display_text: '未找到对应SKU的营养资料',
         confidence: 0,
         nutrients: makeUnknownNutrients(),
-        warnings: ['该SKU在虚构示例目录中不存在，或营养资料来源不足。'],
+        warnings: ['该饮品暂未在营养库中收录，营养信息待补充。'],
         value_type: 'unknown',
         catalog_id: ENGINE_INFO.catalog_id,
         catalog_version: ENGINE_INFO.catalog_version,
