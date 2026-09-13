@@ -112,6 +112,8 @@ const App = (() => {
       // 滚动到顶部
       main.scrollTop = 0;
       window.scrollTo(0, 0);
+      const _pc = main.querySelector(".page-content");
+      if (_pc) setTimeout(() => { _pc.style.opacity = "1"; _pc.style.transform = "none"; }, 400);
     }
     updateNavActive();
     updateRoleUI();
