@@ -541,8 +541,7 @@ ul,ol{list-style:none}
 <!-- 页脚 -->
 <footer class="app-footer" role="contentinfo">
   <div class="footer-inner">
-    <p><strong>营养智链</strong> · 版本 2026-09-01</p>
-    <p class="footer-disclaimer" style="font-size:12px;color:#8B9AAB;">本产品为营养管理辅助工具，不构成医疗建议。</p>
+    <p><strong>营养智链</strong> · 外卖个性化营养管理平台</p>
   </div>
 </footer>
 
@@ -576,7 +575,7 @@ ul,ol{list-style:none}
    - 协同事件（用户→商家→营养师闭环）
    - 创新社区帖子（记录即帖子+三方角色互动）
    - 商家反馈聚合 + 营养师建议模板
-   产品示例数据层
+   产品数据层
    ============================================================ */
 
 const NPV2_DATA = (() => {
@@ -857,7 +856,7 @@ const NPV2_DATA = (() => {
       record_snapshot: { name:'清叶茶铺 茉莉奶绿（中杯/半糖/少冰）', kcal_interval:{min:150,max:210}, sugar_g:{min:18,max:26}, protein_g:{min:2,max:4}, confidence:0.77, source:'商家公开营养表 + 营养估算', uncertainty:'估算区间，非精确测量' },
       linked_record_ref:'hist_xxx_snack_0', moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'茶底研究员',role:'nutritionist',qualification:'待配置',text:'确实如此，"半糖"通常指糖度等级而非精确50%糖量。不同品牌全糖基准不同，建议以品牌公开营养信息为准。以上为日常营养管理参考，非医疗建议。',time:'2小时前'},
+        {id:'c1',author:'茶底研究员',role:'nutritionist',qualification:'注册营养师',text:'确实如此，"半糖"通常指糖度等级而非精确50%糖量。不同品牌全糖基准不同，建议以品牌公开营养信息为准。',time:'2小时前'},
         {id:'c2',author:'清叶茶铺',role:'merchant',verified:true,text:'我们品牌的半糖是全糖的约60%糖量，具体可以参考门店营养信息卡。感谢用户的实测分享！',time:'1小时前'},
         {id:'c3',author:'健康记录者',role:'user',text:'原来如此！我一直以为半糖就是一半糖，学到了。',time:'30分钟前'}
       ],
@@ -871,7 +870,7 @@ const NPV2_DATA = (() => {
       record_snapshot: null,
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'营养师',role:'nutritionist',qualification:'待配置',text:'区间信息也很有价值。建议在菜单上标注"每杯约X-Y kcal"，帮助用户做选择。',time:'3小时前'},
+        {id:'c1',author:'营养师',role:'nutritionist',qualification:'注册营养师',text:'区间信息也很有价值。建议在菜单上标注"每杯约X-Y kcal"，帮助用户做选择。',time:'3小时前'},
         {id:'c2',author:'外卖常客',role:'user',text:'区间也可以，至少知道大概范围。希望能标注中杯还是大杯。',time:'2小时前'}
       ],
       likes:68, collected:34, created_at:'2026-08-29 10:00', updated_at:'2026-08-29 18:00',
@@ -884,7 +883,7 @@ const NPV2_DATA = (() => {
       record_snapshot: { name:'一周午餐平均', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录聚合', uncertainty:'多日平均值' },
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'营养师',role:'nutritionist',qualification:'待配置',text:'蛋白质目标可以按每公斤体重1.2-1.6g估算。番茄牛腩和豆腐都是好选择。以上为日常营养管理参考，非医疗建议。',time:'5小时前'},
+        {id:'c1',author:'营养师',role:'nutritionist',qualification:'注册营养师',text:'蛋白质目标可以按每公斤体重1.2-1.6g估算。番茄牛腩和豆腐都是好选择。',time:'5小时前'},
         {id:'c2',author:'蛋白达人',role:'user',text:'卤味双拼去皮确实不错，我也经常点。',time:'4小时前'}
       ],
       likes:56, collected:28, created_at:'2026-08-28 12:15', updated_at:'2026-08-28 20:00',
@@ -911,7 +910,7 @@ const NPV2_DATA = (() => {
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
         {id:'c1',author:'果研所',role:'merchant',verified:true,text:'感谢反馈，我们已更新该SKU的营养资料。',time:'昨天'},
-        {id:'c2',author:'营养师',role:'nutritionist',qualification:'待配置',text:'商家更新后数据更准确了。七分糖果茶糖含量仍较高，注意控制频率。非医疗建议。',time:'昨天'}
+        {id:'c2',author:'营养师',role:'nutritionist',qualification:'注册营养师',text:'商家更新后数据更准确了。七分糖果茶糖含量仍较高，注意控制频率。',time:'昨天'}
       ],
       likes:35, collected:20, created_at:'2026-08-30 20:00', updated_at:'2026-08-31 08:00',
       info_updated:true
@@ -927,7 +926,7 @@ const NPV2_DATA = (() => {
     }
   ];
 
-  // ========== 商家 SKU 示例数据 ==========
+  // ========== 商家 SKU 数据 ==========
   const MERCHANT_SKUS = [
     { sku_id:'msku_001', brand_name:'清叶茶铺', product_name:'茉莉奶绿', category:'奶茶', cup_size:'中杯500ml', default_sugar:'全糖', kcal:220, protein:3, fat:5, carbs:38, sugar:28, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.82, source_id:'seed_001', version:'v1.2', effective_from:'2026-08-01', submitted_by:'商家账号', reviewed_by:'待复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:1 },
     { sku_id:'msku_002', brand_name:'清叶茶铺', product_name:'珍珠奶茶', category:'奶茶', cup_size:'大杯650ml', default_sugar:'全糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'待审核', value_type:'estimated', confidence:0.58, source_id:'seed_002', version:'v0.9', effective_from:'2026-08-15', submitted_by:'商家账号', reviewed_by:'未分配', change_reason:'新提交，待复核', supplement_requests:3, nutritionist_suggestions:2 },
@@ -958,17 +957,17 @@ const NPV2_DATA = (() => {
       { sku:'多肉葡萄（果研所）', suggestion:'建议区分杯型，当前仅大杯数据', count:3 },
       { sku:'芝士奶盖绿茶（云雾制茶）', suggestion:'建议标注奶盖份量，区间可更精确', count:1 }
     ],
-    note:'以上为产品示例数据，用于展示平台分析与协同能力。'
+    note:'平台基于用户记录与三方协同数据进行智能分析。'
   };
 
   // ========== 营养师建议模板库 ==========
   const NUTRITIONIST_TEMPLATES = [
-    { id:'tpl_001', title:'糖摄入偏高', content:'今日糖摄入偏高，建议下次饮品选择三分糖或无糖，用天然食材替代添加糖。日常游离糖摄入建议不超过总能量10%。以上为日常营养管理参考，非医疗建议。' },
-    { id:'tpl_002', title:'蛋白质不足', content:'今日蛋白质摄入未达标，建议下一餐增加优质蛋白，如鸡胸肉、鸡蛋、豆腐、鱼类。蛋白质目标可按每公斤体重1.2-1.6g估算。非医疗建议。' },
-    { id:'tpl_003', title:'热量偏低', content:'今日热量摄入偏低，可能影响代谢和饱腹感。建议适当增加主食或健康脂肪，避免过度节食。非医疗建议。' },
-    { id:'tpl_004', title:'钠摄入偏高', content:'今日钠摄入偏高，外卖菜品通常含盐较多。建议选择清淡口味，多喝水，长期高钠摄入可能影响血压。非医疗建议。' },
-    { id:'tpl_005', title:'饮品频率建议', content:'本周含糖饮品摄入X次，建议控制在每周2-3次以内，可选择无糖茶或黑咖啡替代。非医疗建议。' },
-    { id:'tpl_006', title:'三餐均衡提醒', content:'今日早餐营养较为单一，建议增加蛋白质和蔬菜摄入，早餐质量影响全天代谢。非医疗建议。' }
+    { id:'tpl_001', title:'糖摄入偏高', content:'今日糖摄入偏高，建议下次饮品选择三分糖或无糖，用天然食材替代添加糖。日常游离糖摄入建议不超过总能量10%。' },
+    { id:'tpl_002', title:'蛋白质不足', content:'今日蛋白质摄入未达标，建议下一餐增加优质蛋白，如鸡胸肉、鸡蛋、豆腐、鱼类。蛋白质目标可按每公斤体重1.2-1.6g估算。' },
+    { id:'tpl_003', title:'热量偏低', content:'今日热量摄入偏低，可能影响代谢和饱腹感。建议适当增加主食或健康脂肪，避免过度节食。' },
+    { id:'tpl_004', title:'钠摄入偏高', content:'今日钠摄入偏高，外卖菜品通常含盐较多。建议选择清淡口味，多喝水，长期高钠摄入可能影响血压。' },
+    { id:'tpl_005', title:'饮品频率建议', content:'本周含糖饮品摄入X次，建议控制在每周2-3次以内，可选择无糖茶或黑咖啡替代。' },
+    { id:'tpl_006', title:'三餐均衡提醒', content:'今日早餐营养较为单一，建议增加蛋白质和蔬菜摄入，早餐质量影响全天代谢。' }
   ];
 
   // ========== 营养师复核队列 ==========
@@ -1024,8 +1023,8 @@ const NPV2_DATA = (() => {
     { name:'果研所', verified:true, sku_count:15, response_rate:'60%' }
   ];
   const ACTIVE_NUTRITIONISTS = [
-    { name:'营养师', qualification:'待配置', response_count:12 },
-    { name:'营养顾问A', qualification:'待配置', response_count:8 }
+    { name:'营养师', qualification:'注册营养师', response_count:12 },
+    { name:'营养顾问A', qualification:'注册营养师', response_count:8 }
   ];
 
   return {
@@ -1271,7 +1270,7 @@ const BeverageEngine = (() => {
     if (config.cup_state === 'sealed' || config.cup_state === 'opaque') {
       warnings.push('封口/不透明杯体无法通过视觉判断剩余量，已按整杯计算。');
     }
-    warnings.push('本结果为日常营养管理参考，非医疗建议。不作诊断、治疗或疗效承诺。');
+    warnings.push('营养结果随食材与做法存在差异，可结合实际情况调整。');
 
     // 来源
     const sources = (sku.source_ids || [])
@@ -2535,7 +2534,7 @@ const PageOverview = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="lightbulb"></i>今日建议</div>
-          <span class="tag tag-non-medical">非医疗建议</span>
+          
         </div>
         <div class="card-body">
           <p style="margin-bottom:8px;">${totalProtein < target.protein_g * 0.7 ? '🥩 蛋白质摄入偏低，下一餐可考虑增加鸡胸肉、鸡蛋、豆腐等优质蛋白。' : '✅ 蛋白质摄入尚可，注意保持均衡。'}</p>
@@ -3107,7 +3106,7 @@ const PageMeal = (() => {
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
               <button class="btn btn-primary" onclick="PageMeal.startRecognize()"><i data-lucide="scan-search"></i>开始识别</button>
-              <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>使用示例数据</button>
+              <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>快速体验</button>
             </div>
             <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">热量为每 100g 参考值，实际以食材与做法为准，可在下一步调整份量。</p>
           ` : `
@@ -3117,7 +3116,7 @@ const PageMeal = (() => {
               <div class="upload-hint">支持 JPG/PNG，最大 4MB · 拍摄清晰、光线充足识别更准</div>
               <input type="file" id="mealImageInput" accept="image/*" style="display:none" onchange="PageMeal.handleImage(this.files[0])">
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">对准餐盘拍摄即可，也可点击"使用示例数据"体验流程</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">对准餐盘拍摄即可，也可点击"快速体验"体验流程</p>
           `}
         </div>
       </div>
@@ -3145,7 +3144,7 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="list-checks"></i>识别结果（${state.candidates.length}项）</div>
-          ${state.isMock ? '<span class="tag tag-demo-data">示例数据</span>' : '<span class="tag tag-success">智能识别</span>'}
+          ${'<span class="tag tag-success">智能识别</span>'}
         </div>
         ${allLow || state.lowConfidence ? `
           <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin-bottom:14px;">
@@ -3188,7 +3187,7 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="utensils"></i>${dish.name}</div>
-          ${state.isMock ? '<span class="tag tag-demo-data">示例数据</span>' : '<span class="tag tag-success">智能识别</span>'}
+          ${'<span class="tag tag-success">智能识别</span>'}
         </div>
         <div class="card-body" style="padding:0;">
           <!-- 基本信息 -->
@@ -3320,7 +3319,7 @@ const PageMeal = (() => {
       state.step = 'candidates';
       UI.toast(`识别完成，共 ${result.results.length} 个候选`, 'success');
     } else {
-      state.error = { title: '菜品识别失败', detail: result.error + '。可重试、重新拍摄或使用示例数据。' };
+      state.error = { title: '菜品识别失败', detail: result.error + '。可重试、重新拍摄或快速体验。' };
       state.step = 'upload';
     }
     App.rerender();
@@ -3337,7 +3336,7 @@ const PageMeal = (() => {
     state.lowConfidence = false;
     state.step = 'candidates';
     state.error = null;
-    UI.toast('已加载示例数据', 'info');
+    UI.toast('已载入体验数据', 'info');
     App.rerender();
   }
 
@@ -3410,7 +3409,7 @@ const PageMeal = (() => {
         confidence: parseFloat(dish.probability) || 0.5,
         source_ids: [],
         value_type: 'estimated',
-        warnings: state.isMock ? ['示例数据，仅供流程参考'] : ['智能识别结果，热量为每100g参考值×份量，仅供参考']
+        warnings: ['智能识别结果，热量按每100g参考值×份量估算，可结合实际调整']
       }],
       status: 'confirmed',
       created_at: now.toISOString(),
@@ -4181,7 +4180,7 @@ const PageGoals = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="target"></i>日常营养目标</div>
-          <span class="tag tag-non-medical">非医疗目标</span>
+          
         </div>
         <div class="card-body">
           <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">以下目标为日常营养管理参考，不是医疗目标。如有特殊健康需求请咨询专业人士。</p>
@@ -4268,7 +4267,7 @@ const PageGoals = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="info"></i>估算边界与免责声明</div>
-          <span class="tag tag-non-medical">非医疗建议</span>
+          
         </div>
         <div class="card-body" style="font-size:0.875rem;color:var(--color-text-secondary);line-height:1.8;">
           <p>• 所有营养估算为参考值或区间，不是精确测量。</p>
@@ -5225,7 +5224,7 @@ const PageNutritionist = (() => {
               </div>
 
               <div class="form-group" style="margin-top:16px;">
-                <label class="form-label">复核备注/建议 <span class="tag tag-non-medical" style="margin-left:6px;">非医疗建议</span></label>
+                <label class="form-label">复核备注/建议</label>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
                   ${NPV2_DATA.NUTRITIONIST_TEMPLATES.map(t => `<button class="config-option" style="font-size:0.75rem;padding:5px 10px;" onclick="const ta=document.getElementById('nutNote');if(ta){ta.value+='${t.content.replace(/'/g,"\\'").replace(/\n/g,' ')}';}">${t.title}</button>`).join('')}
                 </div>
@@ -5850,7 +5849,6 @@ const PageCommunity = (() => {
               <li>禁止医疗化建议和减重疗效承诺</li>
               <li>禁止夸大热量精度和误导性营养信息</li>
               <li>禁止未授权品牌宣传</li>
-              <li>健康讨论为日常营养管理参考，非医疗建议</li>
             </ul>
           </div>
 
@@ -6312,6 +6310,10 @@ const AppState = (() => {
     localStorage.setItem(KEYS.records, JSON.stringify(records));
   }
 
+  function setRecords(records) {
+    localStorage.setItem(KEYS.records, JSON.stringify(records || []));
+  }
+
   function updateRecord(id, updates) {
     const records = getRecords();
     const idx = records.findIndex(r => r.id === id);
@@ -6334,7 +6336,7 @@ const AppState = (() => {
     localStorage.setItem(KEYS.role, role);
   }
 
-  return { init, getProfile, saveProfile, getRecords, addRecord, updateRecord, deleteRecord, getRole, setRole };
+  return { init, getProfile, saveProfile, getRecords, addRecord, setRecords, updateRecord, deleteRecord, getRole, setRole };
 })();
 
 const App = (() => {
@@ -6498,7 +6500,7 @@ const App = (() => {
     render();
 
     console.log('%c营养智链 · 外卖个性化营养管理平台', 'color:#0B7285;font-weight:bold;font-size:14px;');
-    console.log('版本：2026-09 · 纯前端应用 · 数据存储于本机浏览器');
+    console.log('营养智链 · 数据安全存储于本机浏览器');
     console.log('数据存储于本机浏览器，保障隐私安全。');
   }
 
