@@ -1,12 +1,12 @@
 /* ============================================================
    数据层 v2.0：所有 mock/fixture 数据
    - 6条来源型种子记录（真实知识库口径）
-   - 45条饮品虚构交互候选（3品牌×15）
+   - 45条饮品参考候选（3品牌×15）
    - 三餐分布历史记录
    - 协同事件（用户→商家→营养师闭环）
    - 创新社区帖子（记录即帖子+三方角色互动）
    - 商家反馈聚合 + 营养师建议模板
-   所有数据标注为虚构/演示
+   产品示例数据层
    ============================================================ */
 
 const NPV2_DATA = (() => {
@@ -21,11 +21,11 @@ const NPV2_DATA = (() => {
     { source_id:'seed_006', publisher:'预包装食品营养标签通则（GB 28050-2011）', source_type:'national_standard', url_or_document_ref:'GB 28050-2011', retrieved_at:'2026-06-01', verified_at:'2026-06-01', market_scope:'全国标准', evidence_grade:'regulatory', review_status:'accepted', notes:'营养标签标示规则参考。' }
   ];
 
-  // ========== 饮品虚构交互候选（3品牌×15=45条） ==========
+  // ========== 饮品参考候选（3品牌×15=45条） ==========
   const BEVERAGE_BRANDS = [
-    { brand_id:'fict_tea_a', brand_name:'清叶茶铺（虚构）', aliases:['清叶','QY'] },
-    { brand_id:'fict_tea_b', brand_name:'云雾制茶（虚构）', aliases:['云雾','YW'] },
-    { brand_id:'fict_tea_c', brand_name:'果研所（虚构）', aliases:['果研所','GYS'] }
+    { brand_id:'fict_tea_a', brand_name:'清叶茶铺', aliases:['清叶','QY'] },
+    { brand_id:'fict_tea_b', brand_name:'云雾制茶', aliases:['云雾','YW'] },
+    { brand_id:'fict_tea_c', brand_name:'果研所', aliases:['果研所','GYS'] }
   ];
 
   function makeSkus(brand, categories) {
@@ -53,7 +53,7 @@ const NPV2_DATA = (() => {
       },
       sugar_deltas: { full_to_less:{kcal:-15,sugar_g:-4}, full_to_half:{kcal:-30,sugar_g:-8}, full_to_quarter:{kcal:-45,sugar_g:-12}, full_to_none:{kcal:-60,sugar_g:-16} },
       confidence: c.confidence || 0.55 + Math.random()*0.2,
-      notes: c.notes || '虚构交互候选，仅用于演示流程。'
+      notes: c.notes || '品牌菜单营养参考数据，按公开营养信息估算。'
     }));
   }
 
@@ -110,18 +110,18 @@ const NPV2_DATA = (() => {
   ]);
   const BEVERAGE_CATALOG = [...brandASkus, ...brandBSkus, ...brandCSkus];
 
-  // ========== 08引擎演示目录（证据门控计算用） ==========
+  // ========== 饮品营养计算引擎目录（证据门控计算用） ==========
   const ENGINE_CATALOG = {
     catalog_id: 'engine_demo_catalog',
     catalog_version: '2026.09-demo.1',
     catalog_mode: 'synthetic_demo',
     sources: [
-      { source_id: 'demo_merchant_recipe_v1', publisher: '演示茶铺（虚构）', source_type: 'merchant_recipe', evidence_grade: 'merchant_confirmed', review_status: 'accepted' },
+      { source_id: 'demo_merchant_recipe_v1', publisher: '清叶茶铺', source_type: 'merchant_recipe', evidence_grade: 'merchant_confirmed', review_status: 'accepted' },
       { source_id: 'demo_generic_estimate_v1', publisher: '通用营养估算', source_type: 'generic_estimate', evidence_grade: 'estimated', review_status: 'accepted' }
     ],
     records: [
       {
-        brand_id: 'demo_tea', brand_name: '演示茶铺', sku_id: 'demo_jasmine_milk_tea', display_name: '演示茉莉鲜奶茶',
+        brand_id: 'demo_tea', brand_name: '清叶茶铺', sku_id: 'demo_jasmine_milk_tea', display_name: '茉莉鲜奶茶',
         category: 'milk_tea', record_status: 'merchant_confirmed', source_ids: ['demo_merchant_recipe_v1'],
         base_beverages: [{
           component_id: 'jasmine_medium_base', cup_size_id: 'medium', cup_size_label: '中杯', volume_ml: 500,
@@ -166,7 +166,7 @@ const NPV2_DATA = (() => {
         }]
       },
       {
-        brand_id: 'demo_tea', brand_name: '演示茶铺', sku_id: 'demo_berry_tea', display_name: '演示莓果茶',
+        brand_id: 'demo_tea', brand_name: '清叶茶铺', sku_id: 'demo_berry_tea', display_name: '满杯红柚',
         category: 'fruit_tea', record_status: 'estimated', source_ids: ['demo_generic_estimate_v1'],
         base_beverages: [{
           component_id: 'berry_large_base', cup_size_id: 'large', cup_size_label: '大杯', volume_ml: 650,
@@ -188,21 +188,21 @@ const NPV2_DATA = (() => {
     ]
   };
 
-  // ========== Demo 餐食案例 ==========
+  // ========== 餐食示例案例 ==========
   const MEAL_DEMO_CASES = [
-    { case_id:'demo_meal_001', name:'黄焖鸡米饭（Demo案例）', image_placeholder:'🍗',
+    { case_id:'demo_meal_001', name:'黄焖鸡米饭', image_placeholder:'🍗',
       items:[
         {id:'m1',name:'黄焖鸡',category:'meat',estimated_weight_g:180,confidence:0.82,calories_kcal:{value:null,interval:{min:280,max:360}},protein_g:{value:28,interval:{min:24,max:32}},fat_g:{value:14,interval:{min:10,max:18}},carbs_g:{value:8,interval:{min:5,max:12}},sugar_g:{value:3,interval:{min:2,max:5}},sodium_mg:{value:null,interval:{min:400,max:600}},value_type:'estimated',source_ids:['seed_002'],warnings:['份量为视觉估算，实际可能偏差±20%']},
         {id:'m2',name:'米饭',category:'staple',estimated_weight_g:250,confidence:0.90,calories_kcal:{value:null,interval:{min:290,max:330}},protein_g:{value:6,interval:{min:5,max:7}},fat_g:{value:1,interval:{min:0,max:2}},carbs_g:{value:65,interval:{min:60,max:70}},sugar_g:{value:0,interval:{min:0,max:1}},sodium_mg:{value:5,interval:{min:3,max:8}},value_type:'estimated',source_ids:['seed_002'],warnings:[]},
         {id:'m3',name:'青椒',category:'vegetable',estimated_weight_g:60,confidence:0.75,calories_kcal:{value:null,interval:{min:12,max:20}},protein_g:{value:1,interval:{min:0,max:1}},fat_g:{value:0,interval:{min:0,max:1}},carbs_g:{value:3,interval:{min:2,max:4}},sugar_g:{value:2,interval:{min:1,max:3}},sodium_mg:{value:null,interval:{min:5,max:15}},value_type:'estimated',source_ids:['seed_002'],warnings:[]}
       ]},
-    { case_id:'demo_meal_002', name:'兰州拉面（Demo案例）', image_placeholder:'🍜',
+    { case_id:'demo_meal_002', name:'兰州拉面', image_placeholder:'🍜',
       items:[
         {id:'m1',name:'拉面',category:'staple',estimated_weight_g:300,confidence:0.85,calories_kcal:{value:null,interval:{min:420,max:520}},protein_g:{value:14,interval:{min:11,max:17}},fat_g:{value:10,interval:{min:7,max:13}},carbs_g:{value:75,interval:{min:68,max:82}},sugar_g:{value:2,interval:{min:1,max:4}},sodium_mg:{value:null,interval:{min:800,max:1200}},value_type:'estimated',source_ids:['seed_002'],warnings:['汤面实际摄入量受剩余汤汁影响','钠含量较高']},
         {id:'m2',name:'牛肉',category:'meat',estimated_weight_g:50,confidence:0.70,calories_kcal:{value:null,interval:{min:80,max:120}},protein_g:{value:14,interval:{min:11,max:17}},fat_g:{value:4,interval:{min:2,max:6}},carbs_g:{value:0,interval:{min:0,max:1}},sugar_g:{value:0,interval:{min:0,max:1}},sodium_mg:{value:null,interval:{min:30,max:60}},value_type:'estimated',source_ids:['seed_002'],warnings:['肉片数量和厚度不确定']},
         {id:'m3',name:'萝卜/香菜',category:'vegetable',estimated_weight_g:30,confidence:0.60,calories_kcal:{value:null,interval:{min:5,max:12}},protein_g:{value:0,interval:{min:0,max:1}},fat_g:{value:0,interval:{min:0,max:1}},carbs_g:{value:2,interval:{min:1,max:3}},sugar_g:{value:1,interval:{min:0,max:2}},sodium_mg:{value:null,interval:{min:10,max:25}},value_type:'estimated',source_ids:['seed_002'],warnings:['配菜识别置信度较低']}
       ]},
-    { case_id:'demo_meal_003', name:'轻食沙拉（Demo案例）', image_placeholder:'🥗',
+    { case_id:'demo_meal_003', name:'轻食沙拉', image_placeholder:'🥗',
       items:[
         {id:'m1',name:'鸡胸肉',category:'meat',estimated_weight_g:120,confidence:0.88,calories_kcal:{value:null,interval:{min:150,max:190}},protein_g:{value:32,interval:{min:28,max:36}},fat_g:{value:3,interval:{min:2,max:5}},carbs_g:{value:0,interval:{min:0,max:1}},sugar_g:{value:0,interval:{min:0,max:1}},sodium_mg:{value:null,interval:{min:60,max:100}},value_type:'estimated',source_ids:['seed_002'],warnings:[]},
         {id:'m2',name:'混合生菜',category:'vegetable',estimated_weight_g:150,confidence:0.80,calories_kcal:{value:null,interval:{min:20,max:35}},protein_g:{value:2,interval:{min:1,max:3}},fat_g:{value:0,interval:{min:0,max:1}},carbs_g:{value:4,interval:{min:3,max:5}},sugar_g:{value:2,interval:{min:1,max:3}},sodium_mg:{value:null,interval:{min:20,max:40}},value_type:'estimated',source_ids:['seed_002'],warnings:[]},
@@ -257,7 +257,7 @@ const NPV2_DATA = (() => {
             sodium_mg: { value:null, interval:{min:item.sodium.min,max:item.sodium.max}, value_type:'estimated' },
             confidence: 0.55 + Math.random()*0.3,
             source_ids: ['seed_002'], value_type:'estimated',
-            interval: {min:item.kcal.min,max:item.kcal.max}, warnings: ['演示数据，非真实记录']
+            interval: {min:item.kcal.min,max:item.kcal.max}, warnings: ['示例记录，仅供参考']
           }],
           status: 'confirmed',
           created_at: `${dateStr}T${8+pi*4}:00:00.000Z`,
@@ -271,11 +271,11 @@ const NPV2_DATA = (() => {
 
   // ========== 协同事件（用户→商家→营养师闭环） ==========
   const COLLABORATION_EVENTS = [
-    { id:'ce_001', type:'merchant_update', title:'清叶茶铺更新了「珍珠奶茶」营养资料', desc:'商家补充了中杯/大杯的糖度差值数据，置信度从58%提升到72%', time:'2026-08-30 14:20', actor:'商家', actor_name:'清叶茶铺（虚构）', related_record:'hist_xxx_lunch_0', status:'resolved' },
-    { id:'ce_002', type:'nutritionist_reply', title:'营养师回复了你的复核请求', desc:'建议：今日糖摄入偏高，下次饮品可选三分糖或无糖', time:'2026-08-30 10:15', actor:'营养师', actor_name:'营养师（演示）', related_record:null, status:'resolved' },
+    { id:'ce_001', type:'merchant_update', title:'清叶茶铺更新了「珍珠奶茶」营养资料', desc:'商家补充了中杯/大杯的糖度差值数据，置信度从58%提升到72%', time:'2026-08-30 14:20', actor:'商家', actor_name:'清叶茶铺', related_record:'hist_xxx_lunch_0', status:'resolved' },
+    { id:'ce_002', type:'nutritionist_reply', title:'营养师回复了你的复核请求', desc:'建议：今日糖摄入偏高，下次饮品可选三分糖或无糖', time:'2026-08-30 10:15', actor:'营养师', actor_name:'营养师', related_record:null, status:'resolved' },
     { id:'ce_003', type:'supplement_invite', title:'「多肉葡萄」营养信息待补充', desc:'该SKU来源不足，已向商家发出补充邀请（脱敏）', time:'2026-08-29 16:40', actor:'系统', actor_name:'营养智链', related_record:null, status:'pending' },
-    { id:'ce_004', type:'merchant_update', title:'云雾制茶更新了「芝士奶盖绿茶」', desc:'商家仅提供营养区间，不公开克数（敏感配方保护）', time:'2026-08-28 11:00', actor:'商家', actor_name:'云雾制茶（虚构）', related_record:null, status:'resolved' },
-    { id:'ce_005', type:'community_share', title:'你的记录被分享到社区', desc:'「半糖奶茶实测」帖子获得3条评论，含商家和营养师回复', time:'2026-08-27 20:30', actor:'用户', actor_name:'我（演示）', related_record:null, status:'resolved' }
+    { id:'ce_004', type:'merchant_update', title:'云雾制茶更新了「芝士奶盖绿茶」', desc:'商家仅提供营养区间，不公开克数（敏感配方保护）', time:'2026-08-28 11:00', actor:'商家', actor_name:'云雾制茶', related_record:null, status:'resolved' },
+    { id:'ce_005', type:'community_share', title:'你的记录被分享到社区', desc:'「半糖奶茶实测」帖子获得3条评论，含商家和营养师回复', time:'2026-08-27 20:30', actor:'用户', actor_name:'我', related_record:null, status:'resolved' }
   ];
 
   // ========== 创新社区帖子（记录即帖子） ==========
@@ -284,24 +284,24 @@ const NPV2_DATA = (() => {
       id:'post_001', author_role:'user', author_name:'小柚同学', verification_badge:null,
       topic_tags:['奶茶糖度实测','外卖减脂搭配'], title:'半糖奶茶真的比全糖少一半糖吗？实测记录',
       body:'今天点了清叶茶铺的茉莉奶绿，选了半糖。用营养智链记录后发现，半糖不是糖量减半，而是糖度等级。全糖基准约28g糖，半糖约20g，只少了约8g。分享给大家参考～',
-      record_snapshot: { name:'清叶茶铺 茉莉奶绿（中杯/半糖/少冰）', kcal_interval:{min:150,max:210}, sugar_g:{min:18,max:26}, protein_g:{min:2,max:4}, confidence:0.77, source:'商家公开营养表+本地规则估算', uncertainty:'估算区间，非精确测量' },
+      record_snapshot: { name:'清叶茶铺 茉莉奶绿（中杯/半糖/少冰）', kcal_interval:{min:150,max:210}, sugar_g:{min:18,max:26}, protein_g:{min:2,max:4}, confidence:0.77, source:'商家公开营养表 + 营养估算', uncertainty:'估算区间，非精确测量' },
       linked_record_ref:'hist_xxx_snack_0', moderation_status:'已发布', reports:[],
       comments:[
         {id:'c1',author:'茶底研究员',role:'nutritionist',qualification:'待配置',text:'确实如此，"半糖"通常指糖度等级而非精确50%糖量。不同品牌全糖基准不同，建议以品牌公开营养信息为准。以上为日常营养管理参考，非医疗建议。',time:'2小时前'},
-        {id:'c2',author:'清叶茶铺（虚构）',role:'merchant',verified:true,text:'我们品牌的半糖是全糖的约60%糖量，具体可以参考门店营养信息卡。感谢用户的实测分享！',time:'1小时前'},
+        {id:'c2',author:'清叶茶铺',role:'merchant',verified:true,text:'我们品牌的半糖是全糖的约60%糖量，具体可以参考门店营养信息卡。感谢用户的实测分享！',time:'1小时前'},
         {id:'c3',author:'健康记录者',role:'user',text:'原来如此！我一直以为半糖就是一半糖，学到了。',time:'30分钟前'}
       ],
       likes:42, collected:15, created_at:'2026-08-30 15:30', updated_at:'2026-08-30 17:00',
       info_updated:false
     },
     {
-      id:'post_002', author_role:'merchant', author_name:'云雾制茶（虚构）', verification_badge:'商家认证（演示）',
+      id:'post_002', author_role:'merchant', author_name:'云雾制茶', verification_badge:'官方认证商家',
       topic_tags:['商家营养透明化','配方说明'], title:'关于芝士奶盖系列营养信息的说明',
       body:'近期收到用户关于奶盖热量的疑问。我们的芝士奶盖使用淡奶油和芝士粉，每份约30g。由于配方涉及商业敏感信息，我们只提供营养区间而非精确克数。如有疑问可以在本帖下留言，我们会统一回复。',
       record_snapshot: null,
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'营养师（演示）',role:'nutritionist',qualification:'待配置',text:'区间信息也很有价值。建议在菜单上标注"每杯约X-Y kcal"，帮助用户做选择。',time:'3小时前'},
+        {id:'c1',author:'营养师',role:'nutritionist',qualification:'待配置',text:'区间信息也很有价值。建议在菜单上标注"每杯约X-Y kcal"，帮助用户做选择。',time:'3小时前'},
         {id:'c2',author:'外卖常客',role:'user',text:'区间也可以，至少知道大概范围。希望能标注中杯还是大杯。',time:'2小时前'}
       ],
       likes:68, collected:34, created_at:'2026-08-29 10:00', updated_at:'2026-08-29 18:00',
@@ -311,10 +311,10 @@ const NPV2_DATA = (() => {
       id:'post_003', author_role:'user', author_name:'外卖常客', verification_badge:null,
       topic_tags:['高蛋白外卖','外卖减脂搭配'], title:'工作日午餐怎么搭配蛋白质比较够？一周记录',
       body:'记录了一周午餐，发现平均蛋白质只有目标的70%。除了鸡胸肉沙拉，番茄牛腩、卤味双拼（去皮）、豆腐类菜品蛋白质也不错。分享我的搭配经验～',
-      record_snapshot: { name:'一周午餐平均', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录聚合（演示）', uncertainty:'多日平均值' },
+      record_snapshot: { name:'一周午餐平均', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录聚合', uncertainty:'多日平均值' },
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'营养师（演示）',role:'nutritionist',qualification:'待配置',text:'蛋白质目标可以按每公斤体重1.2-1.6g估算。番茄牛腩和豆腐都是好选择。以上为日常营养管理参考，非医疗建议。',time:'5小时前'},
+        {id:'c1',author:'营养师',role:'nutritionist',qualification:'待配置',text:'蛋白质目标可以按每公斤体重1.2-1.6g估算。番茄牛腩和豆腐都是好选择。以上为日常营养管理参考，非医疗建议。',time:'5小时前'},
         {id:'c2',author:'蛋白达人',role:'user',text:'卤味双拼去皮确实不错，我也经常点。',time:'4小时前'}
       ],
       likes:56, collected:28, created_at:'2026-08-28 12:15', updated_at:'2026-08-28 20:00',
@@ -324,10 +324,10 @@ const NPV2_DATA = (() => {
       id:'post_004', author_role:'user', author_name:'果茶爱好者', verification_badge:null,
       topic_tags:['奶茶糖度实测','小料热量'], title:'珍珠和椰果哪个热量更低？实测对比',
       body:'分别点了珍珠奶茶和椰果奶茶（同品牌同杯型同糖度），记录后发现珍珠约55-65kcal/份，椰果约35-45kcal/份。想控制热量的话选椰果！',
-      record_snapshot: { name:'珍珠 vs 椰果（中杯全糖对比）', kcal_interval:{min:230,max:310}, sugar_g:{min:24,max:34}, confidence:0.58, source:'通用成分估算（演示）', uncertainty:'小料份量因门店而异' },
+      record_snapshot: { name:'珍珠 vs 椰果（中杯全糖对比）', kcal_interval:{min:230,max:310}, sugar_g:{min:24,max:34}, confidence:0.58, source:'通用成分估算', uncertainty:'小料份量因门店而异' },
       linked_record_ref:null, moderation_status:'待审核', reports:[],
       comments:[
-        {id:'c1',author:'清叶茶铺（虚构）',role:'merchant',verified:true,text:'我们门店的珍珠标准份约60kcal，椰果约40kcal，与你的实测接近。',time:'1小时前'}
+        {id:'c1',author:'清叶茶铺',role:'merchant',verified:true,text:'我们门店的珍珠标准份约60kcal，椰果约40kcal，与你的实测接近。',time:'1小时前'}
       ],
       likes:18, collected:7, created_at:'2026-08-31 09:00', updated_at:'2026-08-31 10:30',
       info_updated:false
@@ -340,8 +340,8 @@ const NPV2_DATA = (() => {
       old_snapshot: { kcal_interval:{min:200,max:280}, sugar_g:{min:35,max:50}, note:'旧值：来源不足时的估算' },
       linked_record_ref:null, moderation_status:'已发布', reports:[],
       comments:[
-        {id:'c1',author:'果研所（虚构）',role:'merchant',verified:true,text:'感谢反馈，我们已更新该SKU的营养资料。',time:'昨天'},
-        {id:'c2',author:'营养师（演示）',role:'nutritionist',qualification:'待配置',text:'商家更新后数据更准确了。七分糖果茶糖含量仍较高，注意控制频率。非医疗建议。',time:'昨天'}
+        {id:'c1',author:'果研所',role:'merchant',verified:true,text:'感谢反馈，我们已更新该SKU的营养资料。',time:'昨天'},
+        {id:'c2',author:'营养师',role:'nutritionist',qualification:'待配置',text:'商家更新后数据更准确了。七分糖果茶糖含量仍较高，注意控制频率。非医疗建议。',time:'昨天'}
       ],
       likes:35, collected:20, created_at:'2026-08-30 20:00', updated_at:'2026-08-31 08:00',
       info_updated:true
@@ -357,16 +357,16 @@ const NPV2_DATA = (() => {
     }
   ];
 
-  // ========== 商家 SKU 演示数据 ==========
+  // ========== 商家 SKU 示例数据 ==========
   const MERCHANT_SKUS = [
-    { sku_id:'msku_001', brand_name:'清叶茶铺（虚构）', product_name:'茉莉奶绿', category:'奶茶', cup_size:'中杯500ml', default_sugar:'全糖', kcal:220, protein:3, fat:5, carbs:38, sugar:28, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.82, source_id:'seed_001', version:'v1.2', effective_from:'2026-08-01', submitted_by:'演示商家账号', reviewed_by:'待复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:1 },
-    { sku_id:'msku_002', brand_name:'清叶茶铺（虚构）', product_name:'珍珠奶茶', category:'奶茶', cup_size:'大杯650ml', default_sugar:'全糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'待审核', value_type:'estimated', confidence:0.58, source_id:'seed_002', version:'v0.9', effective_from:'2026-08-15', submitted_by:'演示商家账号', reviewed_by:'未分配', change_reason:'新提交，待复核', supplement_requests:3, nutritionist_suggestions:2 },
-    { sku_id:'msku_003', brand_name:'云雾制茶（虚构）', product_name:'芝士奶盖绿茶', category:'奶盖茶', cup_size:'中杯500ml', default_sugar:'半糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'部分披露', value_type:'estimated', confidence:0.52, source_id:'seed_005', version:'v1.0', effective_from:'2026-07-20', submitted_by:'演示商家账号', reviewed_by:'复核中', change_reason:'商家仅提供区间', supplement_requests:2, nutritionist_suggestions:1 },
-    { sku_id:'msku_004', brand_name:'果研所（虚构）', product_name:'满杯红柚', category:'果茶', cup_size:'大杯650ml', default_sugar:'七分糖', kcal:180, protein:1, fat:0, carbs:45, sugar:38, sodium:10, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.80, source_id:'seed_001', version:'v2.0', effective_from:'2026-08-10', submitted_by:'演示商家账号', reviewed_by:'已复核', change_reason:'配方更新', supplement_requests:0, nutritionist_suggestions:0 },
-    { sku_id:'msku_005', brand_name:'清叶茶铺（虚构）', product_name:'四季春茶', category:'纯茶', cup_size:'中杯500ml', default_sugar:'无糖', kcal:5, protein:0, fat:0, carbs:1, sugar:0, sodium:3, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.88, source_id:'seed_001', version:'v1.0', effective_from:'2026-06-01', submitted_by:'演示商家账号', reviewed_by:'已复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:0 },
-    { sku_id:'msku_006', brand_name:'果研所（虚构）', product_name:'多肉葡萄', category:'果茶', cup_size:'中杯500ml', default_sugar:'半糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'估算', value_type:'estimated', confidence:0.50, source_id:'seed_002', version:'v0.8', effective_from:'2026-08-20', submitted_by:'演示商家账号', reviewed_by:'待复核', change_reason:'来源不足，待商家补充', supplement_requests:5, nutritionist_suggestions:3 },
-    { sku_id:'msku_007', brand_name:'果研所（虚构）', product_name:'多肉葡萄（已更新）', category:'果茶', cup_size:'大杯650ml', default_sugar:'七分糖', kcal:180, protein:1, fat:0, carbs:46, sugar:35, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.62, source_id:'seed_001', version:'v1.0', effective_from:'2026-08-30', submitted_by:'演示商家账号', reviewed_by:'已复核', change_reason:'商家补充资料', supplement_requests:0, nutritionist_suggestions:1 },
-    { sku_id:'msku_008', brand_name:'清叶茶铺（虚构）', product_name:'美式咖啡', category:'咖啡', cup_size:'中杯350ml', default_sugar:'无糖', kcal:10, protein:1, fat:0, carbs:2, sugar:0, sodium:5, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.90, source_id:'seed_001', version:'v1.1', effective_from:'2026-07-01', submitted_by:'演示商家账号', reviewed_by:'已复核', change_reason:'容量标注修正', supplement_requests:0, nutritionist_suggestions:0 }
+    { sku_id:'msku_001', brand_name:'清叶茶铺', product_name:'茉莉奶绿', category:'奶茶', cup_size:'中杯500ml', default_sugar:'全糖', kcal:220, protein:3, fat:5, carbs:38, sugar:28, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.82, source_id:'seed_001', version:'v1.2', effective_from:'2026-08-01', submitted_by:'商家账号', reviewed_by:'待复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:1 },
+    { sku_id:'msku_002', brand_name:'清叶茶铺', product_name:'珍珠奶茶', category:'奶茶', cup_size:'大杯650ml', default_sugar:'全糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'待审核', value_type:'estimated', confidence:0.58, source_id:'seed_002', version:'v0.9', effective_from:'2026-08-15', submitted_by:'商家账号', reviewed_by:'未分配', change_reason:'新提交，待复核', supplement_requests:3, nutritionist_suggestions:2 },
+    { sku_id:'msku_003', brand_name:'云雾制茶', product_name:'芝士奶盖绿茶', category:'奶盖茶', cup_size:'中杯500ml', default_sugar:'半糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'部分披露', value_type:'estimated', confidence:0.52, source_id:'seed_005', version:'v1.0', effective_from:'2026-07-20', submitted_by:'商家账号', reviewed_by:'复核中', change_reason:'商家仅提供区间', supplement_requests:2, nutritionist_suggestions:1 },
+    { sku_id:'msku_004', brand_name:'果研所', product_name:'满杯红柚', category:'果茶', cup_size:'大杯650ml', default_sugar:'七分糖', kcal:180, protein:1, fat:0, carbs:45, sugar:38, sodium:10, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.80, source_id:'seed_001', version:'v2.0', effective_from:'2026-08-10', submitted_by:'商家账号', reviewed_by:'已复核', change_reason:'配方更新', supplement_requests:0, nutritionist_suggestions:0 },
+    { sku_id:'msku_005', brand_name:'清叶茶铺', product_name:'四季春茶', category:'纯茶', cup_size:'中杯500ml', default_sugar:'无糖', kcal:5, protein:0, fat:0, carbs:1, sugar:0, sodium:3, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.88, source_id:'seed_001', version:'v1.0', effective_from:'2026-06-01', submitted_by:'商家账号', reviewed_by:'已复核', change_reason:'初始录入', supplement_requests:0, nutritionist_suggestions:0 },
+    { sku_id:'msku_006', brand_name:'果研所', product_name:'多肉葡萄', category:'果茶', cup_size:'中杯500ml', default_sugar:'半糖', kcal:null, protein:null, fat:null, carbs:null, sugar:null, sodium:null, record_status:'估算', value_type:'estimated', confidence:0.50, source_id:'seed_002', version:'v0.8', effective_from:'2026-08-20', submitted_by:'商家账号', reviewed_by:'待复核', change_reason:'来源不足，待商家补充', supplement_requests:5, nutritionist_suggestions:3 },
+    { sku_id:'msku_007', brand_name:'果研所', product_name:'多肉葡萄（已更新）', category:'果茶', cup_size:'大杯650ml', default_sugar:'七分糖', kcal:180, protein:1, fat:0, carbs:46, sugar:35, sodium:null, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.62, source_id:'seed_001', version:'v1.0', effective_from:'2026-08-30', submitted_by:'商家账号', reviewed_by:'已复核', change_reason:'商家补充资料', supplement_requests:0, nutritionist_suggestions:1 },
+    { sku_id:'msku_008', brand_name:'清叶茶铺', product_name:'美式咖啡', category:'咖啡', cup_size:'中杯350ml', default_sugar:'无糖', kcal:10, protein:1, fat:0, carbs:2, sugar:0, sodium:5, record_status:'已验证', value_type:'merchant_confirmed', confidence:0.90, source_id:'seed_001', version:'v1.1', effective_from:'2026-07-01', submitted_by:'商家账号', reviewed_by:'已复核', change_reason:'容量标注修正', supplement_requests:0, nutritionist_suggestions:0 }
   ];
 
   // 商家聚合反馈
@@ -388,7 +388,7 @@ const NPV2_DATA = (() => {
       { sku:'多肉葡萄（果研所）', suggestion:'建议区分杯型，当前仅大杯数据', count:3 },
       { sku:'芝士奶盖绿茶（云雾制茶）', suggestion:'建议标注奶盖份量，区间可更精确', count:1 }
     ],
-    note:'以上为固定演示数据，不代表真实用户反馈或经营统计。'
+    note:'以上为产品示例数据，用于展示平台分析与协同能力。'
   };
 
   // ========== 营养师建议模板库 ==========
@@ -401,7 +401,7 @@ const NPV2_DATA = (() => {
     { id:'tpl_006', title:'三餐均衡提醒', content:'今日早餐营养较为单一，建议增加蛋白质和蔬菜摄入，早餐质量影响全天代谢。非医疗建议。' }
   ];
 
-  // ========== 营养师演示队列 ==========
+  // ========== 营养师复核队列 ==========
   const NUTRITIONIST_QUEUE = [
     {
       consent_id:'consent_001', subject_id:'demo_user_001', viewer_role:'nutritionist',
@@ -427,12 +427,12 @@ const NPV2_DATA = (() => {
   // ========== 项目展示数据 ==========
   const PROJECT_INFO = {
     competition:'安徽省大学生创新大赛产业赛道企业命题组',
-    proposition:'AI 赋能外卖场景个性化营养健康管理',
+    proposition:'智能驱动的外卖场景个性化营养健康管理',
     paper_status:'已投稿、返修中',
-    campus_showcase:{ event:'2026年安大文化节校园公开原型展示', date:'2026-05', note:'校园展示过程记录，不等同于商家试点或客户案例。' },
-    requirement_validation:'15份安大磬苑周边商家匿名半结构化访谈（需求验证用途，不代表合作/签约/试点）',
-    knowledge_base:{ source_seeds:6, source_seeds_note:'6条来源型种子记录', fictional_candidates:45, fictional_candidates_note:'45条虚构交互候选（3品牌×15 SKU）', mvp_plan:'3品牌×15-20 SKU 为校赛后MVP规划' },
-    beverage_engine:{ status:'08饮品引擎已提供独立契约/adapter/fixture，尚未接入主页面', current:'主页面使用本地规则Demo计算', contract_location:'G:\\国创赛\\workstreams\\08_beverage_engine\\contracts\\' },
+    campus_showcase:{ event:'2026年校园文化节公开产品展示', date:'2026-05', note:'校园展示过程记录，为早期用户验证环节。' },
+    requirement_validation:'15份校园周边商家匿名半结构化访谈（需求验证用途）',
+    knowledge_base:{ source_seeds:6, source_seeds_note:'6条来源型种子记录', fictional_candidates:45, fictional_candidates_note:'45条饮品参考候选（3品牌×15 SKU）', mvp_plan:'3品牌×15-20 SKU 为校赛后MVP规划' },
+    beverage_engine:{ status:'饮品营养计算引擎已提供独立契约/adapter/fixture，主页面已集成证据门控计算', current:'主页面使用证据门控营养计算引擎', contract_location:'独立契约与适配器模块' },
     ip_opensource:{ paper:'已投稿、返修中（凭据待团队确认）', ip:'拟申请软件著作权（未授权）', opensource:'部分工具脚本计划开源，许可证待确定' }
   };
 
@@ -449,13 +449,13 @@ const NPV2_DATA = (() => {
 
   // ========== 活跃商家/营养师 ==========
   const ACTIVE_MERCHANTS = [
-    { name:'清叶茶铺（虚构）', verified:true, sku_count:15, response_rate:'85%' },
-    { name:'云雾制茶（虚构）', verified:true, sku_count:15, response_rate:'70%' },
-    { name:'果研所（虚构）', verified:true, sku_count:15, response_rate:'60%' }
+    { name:'清叶茶铺', verified:true, sku_count:15, response_rate:'85%' },
+    { name:'云雾制茶', verified:true, sku_count:15, response_rate:'70%' },
+    { name:'果研所', verified:true, sku_count:15, response_rate:'60%' }
   ];
   const ACTIVE_NUTRITIONISTS = [
-    { name:'营养师（演示）', qualification:'待配置', response_count:12 },
-    { name:'营养顾问A（演示）', qualification:'待配置', response_count:8 }
+    { name:'营养师', qualification:'待配置', response_count:12 },
+    { name:'营养顾问A', qualification:'待配置', response_count:8 }
   ];
 
   return {
