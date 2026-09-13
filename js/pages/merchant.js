@@ -6,6 +6,7 @@ const PageMerchant = (() => {
 
   function render() {
     return `
+      ${UI.roleWelcome()}
       <div class="page-header">
         <h1 class="page-title">商家工作台</h1>
         <p class="page-subtitle">SKU维护 · Excel导入 · 审核流 · 聚合反馈</p>
