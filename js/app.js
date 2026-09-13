@@ -6,6 +6,42 @@
 const AppState = (() => {
   const KEYS = { profile: 'npv2_profile', records: 'npv2_records', role: 'npv2_role' };
 
+  function updateUserChip() {
+    const box = document.getElementById('userChip');
+    if (!box) return;
+    const u = (typeof Auth !== 'undefined') ? Auth.current() : null;
+    if (!u) {
+      box.innerHTML = '<a href="#/auth" class="user-chip user-chip-login"><i data-lucide="log-in"></i><span>登录 / 注册</span></a>';
+    } else {
+      const meta = Auth.ROLE_META[u.role] || Auth.ROLE_META.user;
+      const initial = (u.nickname || 'U').slice(0, 1);
+      box.innerHTML =
+        '<div class="user-chip-wrap">' +
+        '<button class="user-chip" onclick="App.toggleChipMenu()">' +
+        '<span class="user-avatar" style="background:' + meta.color + '">' + initial + '</span>' +
+        '<span class="user-meta"><span class="user-name">' + u.nickname + '</span>' +
+        '<span class="user-role-tag" style="color:' + meta.color + '">' + meta.name + '</span></span>' +
+        '<i data-lucide="chevron-down" style="width:14px;height:14px;"></i></button>' +
+        '<div class="user-menu" id="userMenu" style="display:none;">' +
+        '<a href="' + Auth.roleHome(u.role) + '"><i data-lucide="layout-dashboard"></i>我的工作台</a>' +
+        '<a href="#/community"><i data-lucide="message-circle"></i>协同社区</a>' +
+        '<a href="javascript:void(0)" onclick="App.doLogout()"><i data-lucide="log-out"></i>退出登录</a>' +
+        '</div></div>';
+    }
+    if (window.lucide) lucide.createIcons({ root: box });
+  }
+
+  function toggleChipMenu() {
+    const m = document.getElementById('userMenu');
+    if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function doLogout() {
+    Auth.logout();
+    UI.toast('已退出登录', 'info');
+    render();
+  }
+
   function init() {
     if (!localStorage.getItem(KEYS.profile)) {
       localStorage.setItem(KEYS.profile, JSON.stringify(NPV2_DATA.DEFAULT_PROFILE));
@@ -81,6 +117,7 @@ const App = (() => {
     '/nutritionist/articles': PageNutritionistArticles,
     '/nutritionist/stats': PageNutritionistStats,
     '/community': PageCommunity,
+    '/auth': PageAuth,
     '/project': PageProject
   };
 
@@ -117,6 +154,7 @@ const App = (() => {
     }
     updateNavActive();
     updateRoleUI();
+    updateUserChip();
   }
 
   function updateNavActive() {
@@ -175,11 +213,52 @@ const App = (() => {
     }
   }
 
+  function updateUserChip() {
+    const box = document.getElementById('userChip');
+    if (!box) return;
+    const u = (typeof Auth !== 'undefined') ? Auth.current() : null;
+    if (!u) {
+      box.innerHTML = '<a href="#/auth" class="user-chip user-chip-login"><i data-lucide="log-in"></i><span>登录 / 注册</span></a>';
+    } else {
+      const meta = Auth.ROLE_META[u.role] || Auth.ROLE_META.user;
+      const initial = (u.nickname || 'U').slice(0, 1);
+      box.innerHTML =
+        '<div class="user-chip-wrap">' +
+        '<button class="user-chip" onclick="App.toggleChipMenu()">' +
+        '<span class="user-avatar" style="background:' + meta.color + '">' + initial + '</span>' +
+        '<span class="user-meta"><span class="user-name">' + u.nickname + '</span>' +
+        '<span class="user-role-tag" style="color:' + meta.color + '">' + meta.name + '</span></span>' +
+        '<i data-lucide="chevron-down" style="width:14px;height:14px;"></i></button>' +
+        '<div class="user-menu" id="userMenu" style="display:none;">' +
+        '<a href="' + Auth.roleHome(u.role) + '"><i data-lucide="layout-dashboard"></i>我的工作台</a>' +
+        '<a href="#/community"><i data-lucide="message-circle"></i>协同社区</a>' +
+        '<a href="javascript:void(0)" onclick="App.doLogout()"><i data-lucide="log-out"></i>退出登录</a>' +
+        '</div></div>';
+    }
+    if (window.lucide) lucide.createIcons({ root: box });
+  }
+
+  function toggleChipMenu() {
+    const m = document.getElementById('userMenu');
+    if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function doLogout() {
+    Auth.logout();
+    UI.toast('已退出登录', 'info');
+    render();
+  }
+
   function init() {
     AppState.init();
 
     // 路由变化
     window.addEventListener('hashchange', render);
+
+    document.addEventListener('click', (e) => {
+      const m = document.getElementById('userMenu');
+      if (m && !e.target.closest('.user-chip-wrap')) m.style.display = 'none';
+    });
 
     // 角色切换
     document.querySelectorAll('.role-btn').forEach(btn => {
@@ -187,6 +266,7 @@ const App = (() => {
         const role = btn.dataset.role;
         AppState.setRole(role);
         updateRoleUI();
+    updateUserChip();
         const roleNames = { user: '用户', merchant: '商家', nutritionist: '营养师' };
         UI.toast(`已切换到${roleNames[role]}角色`, 'info');
         // 切换角色后导航到对应页面
@@ -231,7 +311,7 @@ const App = (() => {
     console.log('数据存储于本机浏览器，保障隐私安全。');
   }
 
-  return { init, render, rerender, navigate };
+  return { init, render, rerender, navigate, updateUserChip, toggleChipMenu, doLogout };
 })();
 
 // 启动
