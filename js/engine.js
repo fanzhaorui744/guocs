@@ -233,7 +233,7 @@ const BeverageEngine = (() => {
     if (config.cup_state === 'sealed' || config.cup_state === 'opaque') {
       warnings.push('封口/不透明杯体无法通过视觉判断剩余量，已按整杯计算。');
     }
-    warnings.push('本结果为日常营养管理参考，非医疗建议。不作诊断、治疗或疗效承诺。');
+    warnings.push('营养结果随食材与做法存在差异，可结合实际情况调整。');
 
     // 来源
     const sources = (sku.source_ids || [])
