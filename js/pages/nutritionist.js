@@ -7,6 +7,7 @@ const PageNutritionist = (() => {
     const queue = NPV2_DATA.NUTRITIONIST_QUEUE;
 
     return `
+      ${UI.roleWelcome()}
       <div class="page-header">
         <h1 class="page-title">营养师复核</h1>
         <p class="page-subtitle">授权摘要 · 核对清单 · 建议备注 · 审计记录</p>
