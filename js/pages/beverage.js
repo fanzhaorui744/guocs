@@ -1,4 +1,4 @@
-﻿/* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
+/* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
 const PageBeverage = (() => {
   let state = {
     step: 1, // 1输入源 2候选 3配置确认 4透明杯比例 5结果
@@ -19,8 +19,7 @@ const PageBeverage = (() => {
     return `
       <div class="page-header">
         <h1 class="page-title">饮品营养配置</h1>
-        <p class="page-subtitle">订单/杯贴 → 候选 → 品牌/SKU/杯型/糖度/冰量/小料确认 → 区间或未知</p>
-        ${UI.demoTags(['demo', 'not-connected', 'source-low', 'non-medical'])}
+        <p class="page-subtitle">订单/杯贴 → 候选 → 品牌/SKU/杯型/糖度/冰量/小料确认 → 营养估算</p>
       </div>
 
       <div class="card" style="margin-bottom:16px;">
@@ -47,27 +46,27 @@ const PageBeverage = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="file-input"></i>Step 1：输入订单/杯贴信息</div>
-          <span class="tag tag-not-connected">OCR未接入</span>
+          <span class="tag tag-success">文字配置</span>
         </div>
         <div class="card-body">
           <div class="form-group">
             <label class="form-label">上传订单截图/杯贴照片（仅预览）</label>
-            ${UI.uploadZone('bevUpload', { icon: 'image', text: '点击上传订单/杯贴照片', hint: '图片仅本地预览，OCR未接入，不会自动识别文字' })}
+            ${UI.uploadZone('bevUpload', { icon: 'image', text: '点击上传订单/杯贴照片', hint: '图片仅本地预览参考，饮品信息请在下方粘贴文字或选择候选' })}
             <div id="bevImagePreview" class="upload-preview" style="display:none;"></div>
             <p class="form-hint" style="margin-top:8px;"><i data-lucide="alert-triangle" style="width:14px;height:14px;vertical-align:middle;color:var(--color-warning);"></i> 单张奶茶/果茶照片不能直接转换为可靠kcal。必须经过配置确认流程。</p>
           </div>
           <div class="divider"></div>
           <div class="form-group">
-            <label class="form-label">粘贴订单文字 <span class="tag tag-demo" style="margin-left:6px;">推荐</span></label>
-            <textarea class="form-textarea" id="bevText" placeholder="例如：&#10;清叶茶铺（虚构）&#10;茉莉奶绿 中杯 半糖 少冰 +珍珠">${state.inputText}</textarea>
-            <p class="form-hint">从外卖App复制订单详情粘贴，系统用本地关键词匹配产生候选。</p>
+            <label class="form-label">粘贴订单文字 <span class="tag tag-success" style="margin-left:6px;">推荐</span></label>
+            <textarea class="form-textarea" id="bevText" placeholder="例如：&#10;清叶茶铺&#10;茉莉奶绿 中杯 半糖 少冰 +珍珠">${state.inputText}</textarea>
+            <p class="form-hint">从外卖App复制订单详情粘贴，系统自动匹配候选饮品。</p>
           </div>
           <div class="form-group">
-            <label class="form-label">快速加载Demo</label>
+            <label class="form-label">快速加载示例</label>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('jasmine')">茉莉奶绿（商家确认）</button>
-              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('berry')">莓果茶（估算区间）</button>
-              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('unknown')">未知品牌（演示unknown）</button>
+              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('jasmine')">茉莉奶绿（商家确认数据）</button>
+              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('berry')">莓果茶（区间估算）</button>
+              <button class="btn btn-secondary btn-sm" onclick="PageBeverage.loadDemo('unknown')">其他品牌（信息待补充）</button>
             </div>
           </div>
           <div style="display:flex;justify-content:flex-end;margin-top:16px;">
@@ -83,7 +82,7 @@ const PageBeverage = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="search"></i>Step 2：候选匹配（不自动确认）</div>
-          <span class="tag tag-demo">本地文本匹配</span>
+          <span class="tag tag-success">文本匹配</span>
         </div>
         <div class="card-body">
           <div style="background:var(--color-bg);padding:10px 12px;border-radius:6px;margin-bottom:12px;font-size:0.8125rem;">
@@ -92,7 +91,7 @@ const PageBeverage = (() => {
           ${state.candidates.length === 0 ? `
             ${UI.stateView('unknown', {
               title: '未匹配到候选',
-              desc: '文本中未识别到虚构示例目录中的品牌或SKU。可以返回修改文本，或手动选择品牌/SKU。',
+              desc: '文本中未匹配到饮品库中的品牌或SKU。可以返回修改文本，或手动选择品牌/SKU。',
               actions: [
                 '<button class="btn btn-secondary" onclick="PageBeverage.goStep(1)">返回修改</button>',
                 '<button class="btn btn-primary" onclick="PageBeverage.manualSelect()">手动选择品牌/SKU</button>'
@@ -319,14 +318,14 @@ const PageBeverage = (() => {
   // ========== 交互方法 ==========
   function loadDemo(type) {
     const demos = {
-      jasmine: '清叶茶铺（虚构）\n茉莉奶绿 中杯 半糖 少冰 +珍珠',
-      berry: '果研所（虚构）\n满杯红柚 大杯 七分糖 正常冰',
-      unknown: '某不知名奶茶店\n招牌奶茶 大杯 全糖'
+      jasmine: '清叶茶铺\n茉莉奶绿 中杯 半糖 少冰 +珍珠',
+      berry: '果研所\n满杯红柚 大杯 七分糖 正常冰',
+      unknown: '某奶茶店\n招牌奶茶 大杯 全糖'
     };
     state.inputText = demos[type] || '';
     const el = document.getElementById('bevText');
     if (el) el.value = state.inputText;
-    UI.toast('已加载Demo文本', 'success');
+    UI.toast('已加载示例文本', 'success');
   }
 
   function goStep2() {
@@ -362,7 +361,7 @@ const PageBeverage = (() => {
     state.selectedCandidate = null;
     state.step = 2;
     App.rerender();
-    UI.toast('请从虚构示例目录中手动选择', 'info');
+    UI.toast('请从饮品库中手动选择', 'info');
   }
 
   function goStep3() {
@@ -440,7 +439,7 @@ const PageBeverage = (() => {
       state.result.engine_type = 'evidence_gated';
     } else {
       state.result = BeverageEngine.estimate(state.config);
-      state.result.engine_type = 'local_demo';
+      state.result.engine_type = 'local_rule';
     }
     state.step = 5;
     App.rerender();
@@ -520,9 +519,9 @@ const PageBeverage = (() => {
           const prev = document.getElementById('bevImagePreview');
           if (prev) {
             prev.style.display = 'block';
-            prev.innerHTML = `<img src="${ev.target.result}" alt="订单图片预览" style="max-height:160px;border-radius:8px;margin:0 auto;"><div class="preview-tag tag tag-not-connected">仅预览/OCR未接入</div>`;
+            prev.innerHTML = `<img src="${ev.target.result}" alt="订单图片预览" style="max-height:160px;border-radius:8px;margin:0 auto;"><div class="preview-tag tag tag-success">图片仅供参考</div>`;
           }
-          UI.toast('图片已加载（仅预览，OCR未接入）', 'info');
+          UI.toast('图片已加载（仅预览）', 'info');
         };
         reader.readAsDataURL(file);
       });
