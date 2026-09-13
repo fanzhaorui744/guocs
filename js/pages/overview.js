@@ -69,13 +69,11 @@ const PageOverview = (() => {
           <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-gradient);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;box-shadow:var(--shadow-primary);">我</div>
         </div>
       </div>
-      ${UI.demoTags(['demo','non-medical'])}
 
       <!-- 核心卡路里卡片 -->
       <div class="card" style="background:linear-gradient(135deg,#FFFFFF 0%,#F0F7F5 100%);border:1px solid var(--primary-100);">
         <div class="card-header" style="margin-bottom:8px;">
           <div class="card-title"><i data-lucide="flame"></i>今日热量</div>
-          <span class="tag tag-demo">演示数据</span>
         </div>
         <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;">
           ${renderLargeRing(remaining, totalKcal, target.kcal)}
@@ -109,7 +107,6 @@ const PageOverview = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="clock"></i>今日餐食</div>
-          <span class="tag tag-demo">演示数据</span>
         </div>
         ${renderMealTimeline(mealKcal, mealCount, mealItems)}
       </div>
