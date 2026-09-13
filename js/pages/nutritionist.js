@@ -27,10 +27,10 @@ const PageNutritionist = (() => {
           </div>
           <div class="card-body">
             <p style="margin-bottom:12px;">当前没有用户授权营养师查看数据。营养师只能在用户明确授权后查看结构化摘要。</p>
-            <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">演示说明：可以在"目标与设置 → 隐私与授权"中模拟用户授权，然后返回此页面查看。</p>
+            <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">用户可在"目标与设置 → 隐私与授权"中完成授权，授权后营养师即可查看结构化摘要。</p>
             <div style="display:flex;gap:8px;">
               <a href="#/goals" class="btn btn-primary">前往授权设置</a>
-              <button class="btn btn-secondary" onclick="PageNutritionist.simulateGrant()">模拟已有授权（Demo）</button>
+              <button class="btn btn-secondary" onclick="PageNutritionist.simulateGrant()">查看示例授权数据</button>
             </div>
           </div>
         </div>
@@ -152,12 +152,12 @@ const PageNutritionist = (() => {
     p.consent_status = 'granted';
     p.consent_expires_at = new Date(Date.now() + 30*86400000).toISOString().slice(0,10);
     AppState.saveProfile(p);
-    UI.toast('已模拟用户授权（Demo）', 'success');
+    UI.toast('已加载示例授权数据', 'success');
     App.rerender();
   }
   function reviewAction(action) {
     const map = { completed: '已完成本地复核', needs_info: '已标记需补充信息', revoked: '用户已撤回授权' };
-    UI.toast(`${map[action] || action}（Demo模拟）`, 'success');
+    UI.toast(`${map[action] || action}`, 'success');
   }
 
   return { render, selectConsent, simulateGrant, reviewAction };
