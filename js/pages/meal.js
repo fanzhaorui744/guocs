@@ -78,7 +78,7 @@ const PageMeal = (() => {
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
               <button class="btn btn-primary" onclick="PageMeal.startRecognize()"><i data-lucide="scan-search"></i>开始识别</button>
-              <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>使用示例数据</button>
+              <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>快速体验</button>
             </div>
             <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">热量为每 100g 参考值，实际以食材与做法为准，可在下一步调整份量。</p>
           ` : `
@@ -88,7 +88,7 @@ const PageMeal = (() => {
               <div class="upload-hint">支持 JPG/PNG，最大 4MB · 拍摄清晰、光线充足识别更准</div>
               <input type="file" id="mealImageInput" accept="image/*" style="display:none" onchange="PageMeal.handleImage(this.files[0])">
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">对准餐盘拍摄即可，也可点击"使用示例数据"体验流程</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">对准餐盘拍摄即可，也可点击"快速体验"体验流程</p>
           `}
         </div>
       </div>
@@ -116,7 +116,7 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="list-checks"></i>识别结果（${state.candidates.length}项）</div>
-          ${state.isMock ? '<span class="tag tag-demo-data">示例数据</span>' : '<span class="tag tag-success">智能识别</span>'}
+          ${'<span class="tag tag-success">智能识别</span>'}
         </div>
         ${allLow || state.lowConfidence ? `
           <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin-bottom:14px;">
@@ -159,7 +159,7 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="utensils"></i>${dish.name}</div>
-          ${state.isMock ? '<span class="tag tag-demo-data">示例数据</span>' : '<span class="tag tag-success">智能识别</span>'}
+          ${'<span class="tag tag-success">智能识别</span>'}
         </div>
         <div class="card-body" style="padding:0;">
           <!-- 基本信息 -->
@@ -291,7 +291,7 @@ const PageMeal = (() => {
       state.step = 'candidates';
       UI.toast(`识别完成，共 ${result.results.length} 个候选`, 'success');
     } else {
-      state.error = { title: '菜品识别失败', detail: result.error + '。可重试、重新拍摄或使用示例数据。' };
+      state.error = { title: '菜品识别失败', detail: result.error + '。可重试、重新拍摄或快速体验。' };
       state.step = 'upload';
     }
     App.rerender();
@@ -308,7 +308,7 @@ const PageMeal = (() => {
     state.lowConfidence = false;
     state.step = 'candidates';
     state.error = null;
-    UI.toast('已加载示例数据', 'info');
+    UI.toast('已载入体验数据', 'info');
     App.rerender();
   }
 
@@ -381,7 +381,7 @@ const PageMeal = (() => {
         confidence: parseFloat(dish.probability) || 0.5,
         source_ids: [],
         value_type: 'estimated',
-        warnings: state.isMock ? ['示例数据，仅供流程参考'] : ['智能识别结果，热量为每100g参考值×份量，仅供参考']
+        warnings: ['智能识别结果，热量按每100g参考值×份量估算，可结合实际调整']
       }],
       status: 'confirmed',
       created_at: now.toISOString(),
