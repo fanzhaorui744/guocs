@@ -59,6 +59,7 @@ const PageOverview = (() => {
 
     return `
       <div class="page-content">
+      ${UI.roleWelcome()}
       <!-- 顶部问候区 -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div>
