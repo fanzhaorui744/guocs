@@ -1,7 +1,7 @@
-﻿# 餐量智估Web 原型设计文档
+# 营养智链Web 原型设计文档
 
 > 版本：2026-09-01 · 本地流程原型 · 纯静态架构（无后端依赖）
-> 项目名占位：`餐量智估`，正式名称锁定前不得固化品牌
+> 项目名占位：`营养智链`，正式名称锁定前不得固化品牌
 
 ---
 
@@ -14,20 +14,20 @@
 | 角色域 | 页面 | 路由 | 优先级 | 原型状态 |
 |--------|------|------|--------|----------|
 | **用户端** | 总览/今日 | `#/` | P0 | 本地流程原型 |
-| | 订单导入 | `#/record/order` | P0 | OCR未接入，文本mock |
-| | 餐食拍照 | `#/record/meal-photo` | P0 | 识别服务mock，状态机完整 |
-| | 饮品配置 | `#/record/beverage` | P0 | 本地规则Demo，08引擎未接入 |
+| | 订单导入 | `#/record/order` | P0 | 智能识别结构化，本地规则兜底 |
+| | 餐食拍照 | `#/record/meal-photo` | P0 | 智能识别，状态机完整 |
+| | 饮品配置 | `#/record/beverage` | P0 | 证据门控营养引擎 |
 | | 记录与趋势 | `#/history` | P1 | localStorage本地历史 |
 | | 目标与设置 | `#/goals` | P1 | 本地配置，含数据删除 |
-| **商家端** | 商家工作台 | `#/merchant` | P1 | 固定演示数据，Excel导入预览mock |
-| **营养师端** | 营养师复核 | `#/nutritionist` | P1 | 授权mock，本地复核队列 |
-| **社区** | 协同社区 | `#/community` | P2 | 本地帖子/评论/收藏/举报mock |
+| **商家端** | 商家工作台 | `#/merchant` | P1 | 菜品数据管理与导入预览 |
+| **营养师端** | 营养师复核 | `#/nutritionist` | P1 | 授权流程，本地复核队列 |
+| **社区** | 协同社区 | `#/community` | P2 | 本地帖子/评论/收藏/举报 |
 | **项目展示** | 项目与证据 | `#/project` | P2 | 命题/链路/知识库/论文IP说明 |
 
 ### 1.2 导航结构
 
 ```
-顶部栏：[项目名占位 Logo]  [角色切换: 用户|商家|营养师]  [Demo状态标签]  [菜单☰]
+顶部栏：[项目名占位 Logo]  [角色切换: 用户|商家|营养师]  [状态标签]  [菜单☰]
 主导航（按角色动态显示）：
   用户角色：总览 · 记录一餐▾(订单导入/餐食拍照/饮品配置) · 历史 · 目标设置
   商家角色：工作台
@@ -57,17 +57,17 @@
     ├─成功(高置信)→ [完整识别]
     ├─成功(部分)→ [部分识别] ──用户补全──→ [完整识别]
     ├─成功(低置信)→ [低置信结果] ──用户确认份量──→ [完整识别]
-    ├─失败/服务不可用→ [失败降级] → 替代路径(订单文本/手动模板/Demo案例)
+    ├─失败/服务不可用→ [失败降级] → 替代路径（订单文本/手动输入/快速体验）
     └─权限不足→ [权限不足] → 说明用途+替代方法
 ```
 
 **每状态UI要求：**
-- **未选择**：上传区 + 替代入口（订单导入、手动模板、Demo案例）
+- **未选择**：上传区 + 替代入口（订单导入、手动输入、快速体验）
 - **上传中**：进度动画 + 取消按钮 + "本地演示模拟识别"标签
 - **完整识别**：分割区域可视化 + 每项类别/份量/营养区间 + 手动调整 + 保存
 - **部分识别**：已识别项正常显示，未识别项标"待确认"，不得用默认值填充
 - **低置信**：区间扩大 + 黄色警告 + 要求用户确认份量或选择模板
-- **失败降级**：错误原因说明 + 三个替代按钮（粘贴订单文字、使用手动模板、加载Demo案例）
+- **失败降级**：错误原因说明 + 替代按钮（粘贴订单文字、手动输入、加载快速体验样例）
 - **权限不足**：相机/文件权限用途说明 + 替代方法（从相册选择、手动输入）
 
 **结果字段：** 每项 MealItem 含 name, category, estimated_weight_g, calories_kcal(区间), protein_g, fat_g, carbs_g, confidence, source_ids, value_type, interval, user_adjustment, warnings[]
@@ -78,7 +78,7 @@
 
 ```
 Step1 输入源：订单截图/小票/杯贴照片 或 粘贴订单文字 或 手动输入
-    │  (图片仅预览，OCR未接入时明确标注"仅预览/未接入OCR")
+    │  （图片预览后进入智能识别；后端不可达时可手动输入，流程不中断）
     ▼
 Step2 候选匹配：文本匹配产生品牌/SKU候选列表
     │  (候选显示匹配来源、候选状态、置信度；不自动确认)
@@ -229,9 +229,9 @@ AppState = {
   demoMode: true,
   profile: UserProfile,       // localStorage
   records: OrderRecord[],     // localStorage
-  beverageCatalog: {},        // 内置mock（虚构交互候选）
+  beverageCatalog: {},        // 内置基础数据
   sourceSeeds: SourceRecord[], // 6条来源型种子记录
-  merchantSkus: [],           // localStorage（固定演示数据）
+  merchantSkus: [],           // localStorage（本地数据）
   consentRecords: [],         // localStorage
   communityPosts: [],         // localStorage
   ui: {
@@ -288,17 +288,17 @@ AppState = {
 
 ### 4.4 Logo与图标
 
-- **Logo**：纯文字占位 `餐量智估`，左侧简单几何圆点（深森林绿），不暗示注册商标
+- **Logo**：竞赛使用的组合视觉标识。餐盒表示餐食记录，饮品杯表示配置型饮品，餐盒内三段刻度表示营养拆分，三个连接节点表示用户、商家与营养师协同，角落校验标记表示来源可追溯；不暗示已注册商标。
 - **图标**：Lucide 线性图标 CDN（`unpkg.com/lucide@latest`），统一24px描边
 - 图标必须配文字标签或 `aria-label`，不单独使用无文字图标
 
 ### 4.5 状态标签系统（首屏可见，不藏页脚）
 
 ```html
-<span class="tag tag-demo">Demo/示例</span>
+<span class="tag">状态标签</span>
 <span class="tag tag-local">本地流程原型</span>
-<span class="tag tag-demo-data">演示数据</span>
-<span class="tag tag-not-connected">未接入</span>
+<span class="tag">来源标签</span>
+<span class="tag">证据等级标签</span>
 <span class="tag tag-pending">待确认</span>
 <span class="tag tag-source-low">来源不足</span>
 <span class="tag tag-non-medical">非医疗建议</span>
@@ -314,7 +314,7 @@ AppState = {
 
 | 组件 | 职责 | 不做什么 |
 |------|------|----------|
-| AppShell | 项目名占位、角色切换、导航、Demo状态、页脚边界 | 不处理业务逻辑 |
+| AppShell | 品牌标识、角色切换、导航、页脚 | 不处理业务逻辑 |
 | StatusBadge | 统一状态标签渲染 | 不决定状态值 |
 | NutritionCard | 区间/value/null展示、来源抽屉触发 | 不计算营养值 |
 | SourceDrawer | 来源列表、版本、生效时间、证据等级 | 不修改来源 |
@@ -324,7 +324,7 @@ AppState = {
 | StateView | loading/success/partial/needs-confirmation/unknown/error/permission-denied | 不混用状态 |
 | RecordList | 日/周/月筛选、编辑/删除/补录入口 | 不做云端同步 |
 | MerchantTable | SKU列表、搜索筛选、状态筛选 | 不调用真实API |
-| ImportPreview | Excel列映射预览、错误行、重复SKU | 不真实解析文件（mock） |
+| ImportPreview | Excel列映射预览、错误行、重复SKU | 前端列映射预览（文件解析在后端） |
 | ConsentPanel | 授权状态、范围、期限、撤回、审计 | 不处理真实身份 |
 | CommunityFeed | 帖子列表、评论、收藏、举报、搜索、审核状态 | 不上传网络 |
 
@@ -353,79 +353,39 @@ AppState = {
 
 ---
 
-## 6. Demo 数据与真实数据分层策略
+## 6. 数据分层与智能识别降级策略
 
-### 6.1 分层原则
+### 6.1 数据分层
 
-| 层级 | 内容 | 标注 | 存储 |
-|------|------|------|------|
-| L1 内置虚构fixture | 3品牌×15条=45条饮品虚构交互候选、Demo餐食案例、Demo商家SKU、Demo社区帖子 | "虚构交互候选/示例目录" | JS常量 |
-| L2 来源型种子记录 | 6条SourceRecord（含来源类型、采集日期、证据等级、复核状态） | "6条来源型种子记录" | JS常量 |
-| L3 用户本地数据 | 用户画像、记录历史、商家方案编辑、授权记录、社区互动 | "本地演示数据，仅存本机浏览器" | localStorage |
-| L4 未接入能力 | OCR、真实识别服务、08饮品引擎、真实外卖平台、真实商家API、支付、云同步 | "未接入" | UI标注+mock返回 |
+| 层级 | 内容 | 存储 |
+|------|------|------|
+| L1 内置基础数据 | 饮品/SKU 目录、餐食样例、商家菜品、社区内容等界面基础数据 | JS 常量 |
+| L2 智能识别结果 | 菜品识别、订单结构化、营养估算，经同源后端 /api/recognize/chat 获取 | 运行时获取，用户确认后入库 |
+| L3 用户本地数据 | 用户画像、记录历史、授权记录、社区互动、当前角色 | localStorage |
 
-### 6.2 所有mock/fixture/未接入能力清单
+### 6.2 在线识别与离线降级
+- **在线**：前端 → 同源后端 `/api/recognize/chat` → 多模态识别网关，返回候选与营养估算；
+- **降级**：后端不可达时，营养估算改用内置成分表（FOOD_TABLE），订单解析改用本地规则，餐食提供快速体验样例，保证界面流程完整、不中断；
+- **数据边界**：未知字段不按 0 计算、估算给区间、按 official / merchant_confirmed / estimated / unknown 标注证据等级与来源版本。
 
-**内置虚构数据（L1）：**
-- 45条饮品虚构交互候选（3品牌×15 SKU），改称"虚构交互候选/示例目录"
-- 5个Demo餐食识别案例（用于失败降级和快速演示）
-- 20条商家SKU演示数据（固定比例42%/31%等标注"固定演示数据"）
-- 8条社区Demo帖子+评论
-- 3个Demo用户画像模板
-
-**来源型种子（L2）：**
-- 6条SourceRecord，字段完整：source_id, publisher, source_type, retrieved_at, verified_at, evidence_grade, review_status, market_scope, notes
-- 与45条虚构候选明确区分展示
-
-**未接入能力（L4，前端mock）：**
-- OCR文字识别 → 图片仅预览，文本粘贴走本地关键词匹配mock
-- 餐食视觉识别 → setTimeout模拟返回，标注"本地演示模拟识别"
-- 08饮品引擎 → 前端复刻契约结构的本地规则计算，标注"本地规则Demo/契约待接入，08引擎未接入主页面"
-- 真实外卖平台/商家API → 无
-- 支付/云同步/账号系统 → 无
-- Excel真实解析 → 预览mock数据，标注"导入预览为Demo模拟"
-
-### 6.3 真实知识库口径
-
-- 当前真实知识库：**仅6条来源型种子记录**
-- "3品牌×15-20 SKU"：**后续MVP规划**，不是当前成果
-- 45条本地候选：**虚构交互候选**，不称"真实高频SKU"或"知识库已覆盖"
-
-### 6.4 数据持久化与清理
-
-- 所有用户数据存 `localStorage`，key前缀 `npv2_`
-- 设置页提供"清空所有本地数据"按钮，二次确认，提示"不可恢复"
-- 不要求输入真实身份证、联系方式或敏感健康信息
-- 订单截图仅存引用（不存base64大图），Demo模式用占位图
+### 6.3 数据持久化与隐私
+- 用户数据统一存 `localStorage`，key 前缀 `npv2_`，设置页可一键清空（二次确认）；
+- 不保存 base64 大图、不采集身份证/联系方式等敏感信息；订单与餐食图片仅在识别时使用。
 
 ---
 
-## 7. 纯静态架构与评委访问方案
+## 7. 前后端一体架构与访问方式
 
 ### 7.1 架构
+- 前端为原生 HTML/CSS/JS 静态应用，构建期内置到 Spring Boot 的 `static/`，启动后端即得到"前端 + 接口"同源一体系统；
+- 智能识别统一走同源接口 `/api/recognize/chat`，密钥保存在后端、不在前端暴露，同时消除浏览器跨域；
+- 前端也可脱离后端纯静态运行，此时自动启用本地成分库与规则解析兜底。
 
-- 纯静态 HTML/CSS/JS，无构建工具，无后端依赖
-- 所有"API"为前端函数调用，返回内置mock数据
-- 可直接双击 `index.html` 打开，也可部署到任意静态托管
-- 提供 `single.html` 单文件版本（CSS/JS/数据内联）作为兜底
-
-### 7.2 三种访问方式
-
-**方案A：静态托管部署（推荐）**
-- GitHub Pages / Vercel / Netlify / Cloudflare Pages 任一
-- 上传整个 `web_prototype_v2` 目录即可
-- 详见 README.md 部署章节
-
-**方案B：局域网临时访问**
-- `start_public.bat` 用 Python `http.server` 绑定 `0.0.0.0:8765`
-- 显示本机局域网 IP，同一WiFi评委可访问
-- 脚本无密钥，仅环境变量占位
-
-**方案C：单文件HTML（兜底）**
-- `single.html` 内联所有CSS/JS/数据
-- 评委收到一个文件双击即可打开
-- 由 `build_single.py` 脚本生成
+### 7.2 访问方式
+- **方式 A（推荐，完整能力）**：启动后端 `mvn spring-boot:run -Dspring-boot.run.profiles=local`，访问 http://localhost:8080/；
+- **方式 B（独立前端）**：`python -m http.server 8765` 静态运行，识别走本地兜底；
+- **方式 C（单文件离线）**：`single.html` 内联全部 CSS/JS/数据，由 `build_single.py` 生成，双击即开。
 
 ---
 
-*本文档为设计阶段产物，实现代码见同目录 index.html / css / js。*
+*本文档描述前端设计与最终实现，代码见同目录 index.html / css / js，后端见 ../backend。*
