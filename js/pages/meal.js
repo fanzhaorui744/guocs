@@ -1,4 +1,4 @@
-/* 餐食拍照页 v2.0 - 百度菜品识别 API + DeepSeek 营养补充 */
+/* 餐食拍照页 - 拍照识别菜品 + 营养分析 */
 const PageMeal = (() => {
   let state = {
     step: 'upload', // upload | recognizing | candidates | detail | saving | saved
@@ -27,8 +27,7 @@ const PageMeal = (() => {
       <div class="page-content">
       <div class="page-header">
         <h1 class="page-title">餐食拍照识别</h1>
-        <p class="page-subtitle">上传餐食照片 → 百度菜品识别 → 份量确认 → 营养估算 → 保存记录</p>
-        ${UI.demoTags(['demo', 'not-connected'])}
+        <p class="page-subtitle">上传餐食照片 → 智能识别 → 份量确认 → 营养分析 → 保存记录</p>
       </div>
 
       ${state.step === 'upload' ? renderUpload() : ''}
@@ -69,7 +68,7 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="camera"></i>上传餐食照片</div>
-          <span class="tag tag-demo">百度菜品识别</span>
+          <span class="tag tag-success">智能识别</span>
         </div>
         <div class="card-body" style="padding:0;">
           ${state.previewImage ? `
@@ -78,18 +77,18 @@ const PageMeal = (() => {
               <button class="btn btn-danger btn-sm" style="position:absolute;top:10px;right:10px;" onclick="PageMeal.clearImage()"><i data-lucide="x"></i>移除</button>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="PageMeal.startRecognize()"><i data-lucide="scan-search"></i>开始菜品识别</button>
-              <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>使用演示数据</button>
+              <button class="btn btn-primary" onclick="PageMeal.startRecognize()"><i data-lucide="scan-search"></i>开始识别</button>
+              <button class="btn btn-secondary" onclick="PageMeal.useMockData()"><i data-lucide="play-circle"></i>使用示例数据</button>
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">识别结果由百度智能云菜品识别 API 提供，卡路里为每100g参考值。已使用默认 API 配置，可在设置页更换。</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">热量为每 100g 参考值，实际以食材与做法为准，可在下一步调整份量。</p>
           ` : `
             <div class="upload-zone" id="mealUploadZone" onclick="document.getElementById('mealImageInput').click()" tabindex="0" role="button" aria-label="上传餐食照片">
               <div class="upload-icon"><i data-lucide="camera"></i></div>
               <div class="upload-text">点击或拖拽上传餐食照片</div>
-              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 图片仅本地处理后调用 API</div>
+              <div class="upload-hint">支持 JPG/PNG，最大 4MB · 拍摄清晰、光线充足识别更准</div>
               <input type="file" id="mealImageInput" accept="image/*" style="display:none" onchange="PageMeal.handleImage(this.files[0])">
             </div>
-            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">已使用默认 API 配置，可在设置页更换；也可点击"使用演示数据"体验流程</p>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;text-align:center;">对准餐盘拍摄即可，也可点击"使用示例数据"体验流程</p>
           `}
         </div>
       </div>
@@ -101,8 +100,8 @@ const PageMeal = (() => {
       <div class="card">
         <div class="state-view">
           <div class="loading-spinner" style="width:48px;height:48px;border-width:3px;"></div>
-          <div class="state-title">菜品识别中...</div>
-          <div class="state-desc">正在调用百度智能云菜品识别 API，请稍候</div>
+          <div class="state-title">正在识别菜品...</div>
+          <div class="state-desc">正在分析照片中的食物与营养信息，请稍候</div>
           <div class="state-actions">
             <button class="btn btn-secondary" onclick="PageMeal.cancelRecognize()"><i data-lucide="x"></i>取消</button>
           </div>
@@ -117,7 +116,7 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="list-checks"></i>识别结果（${state.candidates.length}项）</div>
-          <span class="tag ${state.isMock ? 'tag-demo-data' : 'tag-demo'}">${state.isMock ? '演示数据' : '百度识别'}</span>
+          ${state.isMock ? '<span class="tag tag-demo-data">示例数据</span>' : '<span class="tag tag-success">智能识别</span>'}
         </div>
         ${allLow || state.lowConfidence ? `
           <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin-bottom:14px;">
@@ -160,12 +159,12 @@ const PageMeal = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="utensils"></i>${dish.name}</div>
-          <span class="tag ${state.isMock ? 'tag-demo-data' : 'tag-demo'}">${state.isMock ? '演示数据' : '百度识别'}</span>
+          ${state.isMock ? '<span class="tag tag-demo-data">示例数据</span>' : '<span class="tag tag-success">智能识别</span>'}
         </div>
         <div class="card-body" style="padding:0;">
           <!-- 基本信息 -->
           <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding:14px;background:var(--bg-alt);border-radius:var(--radius-md);">
-            <div><span style="font-size:0.75rem;color:var(--text-muted);">每100g热量</span><div style="font-size:1.25rem;font-weight:800;">${calorie100g} kcal</div></div>
+            <div><span style="font-size:0.75rem;color:var(--text-muted);">每100g热量</span><div style="font-size:1.25rem;font-weight:800;">${calorie100g || '—'} kcal</div></div>
             <div><span style="font-size:0.75rem;color:var(--text-muted);">置信度</span><div style="font-size:1.25rem;font-weight:800;color:var(--primary);">${Math.round(parseFloat(dish.probability)*100)}%</div></div>
             <div><span style="font-size:0.75rem;color:var(--text-muted);">份量</span><div style="font-size:1.25rem;font-weight:800;">${state.weight}g</div></div>
             <div><span style="font-size:0.75rem;color:var(--text-muted);">总热量</span><div style="font-size:1.75rem;font-weight:800;color:var(--primary);letter-spacing:-0.02em;">${totalKcal}<span style="font-size:0.875rem;font-weight:500;color:var(--text-muted);"> kcal</span></div></div>
@@ -191,7 +190,7 @@ const PageMeal = (() => {
             ${state.nutritionLoading ? `
               <div style="padding:20px;text-align:center;">
                 <div class="loading-spinner" style="width:32px;height:32px;border-width:2px;margin:0 auto 10px;"></div>
-                <div style="font-size:0.8125rem;color:var(--text-secondary);">AI 正在估算营养成分...</div>
+                <div style="font-size:0.8125rem;color:var(--text-secondary);">正在分析营养成分...</div>
               </div>
             ` : nut ? `
               <div class="nutrition-grid">
@@ -200,14 +199,14 @@ const PageMeal = (() => {
                 <div class="nutrition-item"><div class="nutrition-label">碳水</div><div class="nutrition-value">${(nut.carbs_g * state.weight / 100).toFixed(1)}<span class="nutrition-unit">g</span></div></div>
                 <div class="nutrition-item"><div class="nutrition-label">糖</div><div class="nutrition-value">${nut.sugar_g ? (nut.sugar_g * state.weight / 100).toFixed(1) : '未知'}${nut.sugar_g?'<span class="nutrition-unit">g</span>':''}</div></div>
                 <div class="nutrition-item"><div class="nutrition-label">钠</div><div class="nutrition-value">${nut.sodium_mg ? Math.round(nut.sodium_mg * state.weight / 100) : '未知'}${nut.sodium_mg?'<span class="nutrition-unit">mg</span>':''}</div></div>
-                <div class="nutrition-item"><div class="nutrition-label">估算置信度</div><div class="nutrition-value" style="font-size:0.9375rem;">${Math.round((nut.confidence||0.5)*100)}%</div></div>
+                <div class="nutrition-item"><div class="nutrition-label">分析置信度</div><div class="nutrition-value" style="font-size:0.9375rem;">${Math.round((nut.confidence||0.5)*100)}%</div></div>
               </div>
               ${nut.note ? `<p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">${nut.note}</p>` : ''}
-              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">AI 估算，仅供参考。每100g基准值 × 份量比例。</p>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">营养成分为参考估算，按每 100g 基准值 × 份量比例计算。</p>
             ` : `
               <div style="padding:14px;background:var(--bg-alt);border-radius:var(--radius-md);text-align:center;">
-                <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:8px;">营养成分未知（未配置 AI 服务）</p>
-                <a href="#/goals" class="btn btn-secondary btn-sm"><i data-lucide="settings"></i>去配置 AI 服务</a>
+                <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:8px;">营养成分暂未获取</p>
+                <button class="btn btn-secondary btn-sm" onclick="PageMeal.retryNutrition()"><i data-lucide="refresh-cw"></i>重新分析</button>
               </div>
             `}
           </div>
@@ -279,85 +278,20 @@ const PageMeal = (() => {
     App.rerender();
   }
 
-  // 百度菜品识别（百度API原生支持CORS，直接调用；硬编码token兜底）
-  const DEFAULT_BAIDU_API_KEY = 'bxEEs5XPPC54ucEly0xC9vFy';
-  const DEFAULT_BAIDU_SECRET_KEY = '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA';
-  const DEFAULT_BAIDU_ACCESS_TOKEN = '24.91704538a56fffd63509a17941f797f2.2592000.1790874581.282335-124232407';
-
-  async function fetchWithRetry(url, options, retries = 2) {
-    for (let i = 0; i <= retries; i++) {
-      try {
-        const response = await fetch(url, options);
-        return await response.json();
-      } catch (error) {
-        if (i < retries) await new Promise(r => setTimeout(r, 1000));
-        else throw error;
-      }
-    }
-  }
-
-  async function getBaiduAccessToken() {
-    const cached = localStorage.getItem('baidu_access_token');
-    const cachedTime = localStorage.getItem('baidu_token_time');
-    if (cached && cachedTime && (Date.now() - parseInt(cachedTime) < 25*24*60*60*1000)) {
-      return cached;
-    }
-    if (typeof DEFAULT_BAIDU_ACCESS_TOKEN !== 'undefined' && DEFAULT_BAIDU_ACCESS_TOKEN) {
-      localStorage.setItem('baidu_access_token', DEFAULT_BAIDU_ACCESS_TOKEN);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return DEFAULT_BAIDU_ACCESS_TOKEN;
-    }
-    const apiKey = localStorage.getItem('baidu_ocr_api_key') || DEFAULT_BAIDU_API_KEY;
-    const secretKey = localStorage.getItem('baidu_ocr_secret_key') || DEFAULT_BAIDU_SECRET_KEY;
-    const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
-    const data = await fetchWithRetry(tokenUrl);
-    if (data.access_token) {
-      localStorage.setItem('baidu_access_token', data.access_token);
-      localStorage.setItem('baidu_token_time', Date.now().toString());
-      return data.access_token;
-    }
-    throw new Error(data.error_description || '获取 token 失败');
-  }
-
-  async function recognizeDish(imageBase64) {
-    try {
-      const accessToken = await getBaiduAccessToken();
-      const apiUrl = `https://aip.baidubce.com/rest/2.0/image-classify/v2/dish?access_token=${accessToken}`;
-      const formData = new URLSearchParams();
-      formData.append('image', imageBase64);
-      formData.append('top_num', '5');
-      const data = await fetchWithRetry(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString()
-      });
-      if (data.result && data.result.length > 0) {
-        return { success: true, results: data.result };
-      } else if (data.error_msg) {
-        return { success: false, error: data.error_msg };
-      } else {
-        return { success: false, error: '未识别到菜品' };
-      }
-    } catch (error) {
-      return { success: false, error: '网络请求失败，请重试，或使用演示数据体验流程' };
-    }
-  }
-
   async function startRecognize() {
     if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
     state.error = null;
     state.step = 'recognizing';
-    state.error = null;
     state.isMock = false;
     App.rerender();
-    const result = await recognizeDish(state.compressedBase64);
+    const result = await Recognize.dish(state.compressedBase64);
     if (result.success) {
       state.candidates = result.results;
       state.lowConfidence = result.results.every(c => parseFloat(c.probability) < 0.3);
       state.step = 'candidates';
       UI.toast(`识别完成，共 ${result.results.length} 个候选`, 'success');
     } else {
-      state.error = { title: '菜品识别失败', detail: result.error + '。可重试或使用演示数据。' };
+      state.error = { title: '菜品识别失败', detail: result.error + '。可重试、重新拍摄或使用示例数据。' };
       state.step = 'upload';
     }
     App.rerender();
@@ -374,52 +308,30 @@ const PageMeal = (() => {
     state.lowConfidence = false;
     state.step = 'candidates';
     state.error = null;
-    UI.toast('已加载演示数据', 'info');
+    UI.toast('已加载示例数据', 'info');
     App.rerender();
   }
 
-  // DeepSeek 营养补充
-  const DEFAULT_DEEPSEEK_KEY = 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3';
-  async function estimateNutrition(dishName) {
-    const apiKey = localStorage.getItem('deepseek_api_key') || DEFAULT_DEEPSEEK_KEY;
-    const apiBase = localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com';
-    const model = localStorage.getItem('deepseek_model') || 'deepseek-chat';
-    try {
-      const response = await fetch(`${apiBase}/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: 'system', content: '你是一个营养数据助手。根据菜品名称估算每100g的营养成分，返回严格的JSON格式，不要输出其他文字。JSON格式：{"protein_g":数字,"fat_g":数字,"carbs_g":数字,"sugar_g":数字,"sodium_mg":数字,"confidence":0-1,"note":"简要说明"}' },
-            { role: 'user', content: dishName }
-          ],
-          temperature: 0.2,
-          response_format: { type: 'json_object' }
-        })
-      });
-      const result = await response.json();
-      return { success: true, data: JSON.parse(result.choices[0].message.content) };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+  async function loadNutrition(dishName) {
+    state.nutritionLoading = true;
+    App.rerender();
+    const result = await Recognize.nutrition(dishName);
+    if (result.success) state.nutrition = result.data;
+    state.nutritionLoading = false;
+    App.rerender();
   }
 
-  async function selectDish(index) {
+  function selectDish(index) {
     state.selectedDish = state.candidates[index];
     state.weight = 250;
     state.nutrition = null;
     state.step = 'detail';
     App.rerender();
-    // 自动调用 DeepSeek 营养补充（使用默认或已配置的密钥）
-    state.nutritionLoading = true;
-    App.rerender();
-    const result = await estimateNutrition(state.selectedDish.name);
-    if (result.success) {
-      state.nutrition = result.data;
-    }
-    state.nutritionLoading = false;
-    App.rerender();
+    loadNutrition(state.selectedDish.name);
+  }
+
+  function retryNutrition() {
+    if (state.selectedDish) loadNutrition(state.selectedDish.name);
   }
 
   function setWeight(w) {
@@ -436,13 +348,7 @@ const PageMeal = (() => {
       state.nutrition = null;
       state.step = 'detail';
       App.rerender();
-      state.nutritionLoading = true;
-      App.rerender();
-      estimateNutrition(name.trim()).then(result => {
-        if (result.success) state.nutrition = result.data;
-        state.nutritionLoading = false;
-        App.rerender();
-      });
+      loadNutrition(name.trim());
     }
   }
 
@@ -457,7 +363,7 @@ const PageMeal = (() => {
     const nut = state.nutrition;
     const record = {
       id: 'meal_' + Date.now(),
-      source_type: state.isMock ? 'demo_mock' : 'baidu_dish',
+      source_type: state.isMock ? 'demo_mock' : 'smart_recognize',
       merchant_label: dish.name,
       meal_period: period,
       items: [{
@@ -475,7 +381,7 @@ const PageMeal = (() => {
         confidence: parseFloat(dish.probability) || 0.5,
         source_ids: [],
         value_type: 'estimated',
-        warnings: state.isMock ? ['演示数据，非真实识别结果'] : ['百度菜品识别结果，卡路里为每100g参考值×份量']
+        warnings: state.isMock ? ['示例数据，仅供流程参考'] : ['智能识别结果，热量为每100g参考值×份量，仅供参考']
       }],
       status: 'confirmed',
       created_at: now.toISOString(),
@@ -494,5 +400,5 @@ const PageMeal = (() => {
     App.rerender();
   }
 
-  return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, setWeight, manualInput, saveRecord, reset, backToUpload };
+  return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, retryNutrition, setWeight, manualInput, saveRecord, reset, backToUpload };
 })();
