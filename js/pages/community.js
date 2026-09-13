@@ -1,4 +1,4 @@
-﻿/* 协同社区 v2.0 - 饮食记录协同社区 */
+/* 协同社区 v2.0 - 饮食记录协同社区 */
 const PageCommunity = (() => {
   let posts = [];
   let searchQuery = '';
@@ -40,7 +40,6 @@ const PageCommunity = (() => {
       <div class="page-header">
         <h1 class="page-title">饮食记录协同社区</h1>
         <p class="page-subtitle">记录即帖子 · 用户/商家/营养师三方协同 · 营养信息可追溯</p>
-        ${UI.demoTags(['demo','demo-data'])}
       </div>
 
       <div class="card" style="margin-bottom:16px;padding:12px 16px;">
@@ -149,7 +148,7 @@ const PageCommunity = (() => {
     posts[idx].collected = (posts[idx].collected||0) + 1;
     collected.meals.push(posts[idx].id);
     save(); App.rerender();
-    UI.toast('已收藏到"我的餐单"（本地演示）', 'success');
+    UI.toast('已收藏到"我的餐单"', 'success');
   }
   function toggleComments(idx) {
     const el = document.getElementById(`comments_${idx}`);
@@ -160,9 +159,9 @@ const PageCommunity = (() => {
     const text = input?.value?.trim();
     if (!text) { UI.toast('请输入评论内容', 'warning'); return; }
     posts[idx].comments = posts[idx].comments || [];
-    posts[idx].comments.push({ author:'我（演示用户）', role:'user', text, time:'刚刚' });
+    posts[idx].comments.push({ author:'我', role:'user', text, time:'刚刚' });
     save(); App.rerender();
-    UI.toast('评论已发布（本地演示）', 'success');
+    UI.toast('评论已发布', 'success');
   }
 
   function report(idx) {
@@ -185,7 +184,7 @@ const PageCommunity = (() => {
     posts[idx].reports.push({ reason, count:1, time:new Date().toISOString() });
     posts[idx].moderation_status = '被举报';
     save(); document.querySelector('.modal-overlay')?.remove();
-    UI.toast('举报已提交，等待审核（本地演示）', 'success');
+    UI.toast('举报已提交，等待审核', 'success');
     App.rerender();
   }
 
@@ -251,20 +250,20 @@ const PageCommunity = (() => {
     const linkRecord = document.getElementById('linkRecord')?.checked;
     if (!title || !body) { UI.toast('请填写标题和内容', 'warning'); return; }
     const newPost = {
-      id:'post_'+Date.now(), author_role:'user', author_name:'我（演示用户）', verification_badge:null,
+      id:'post_'+Date.now(), author_role:'user', author_name:'我', verification_badge:null,
       topic_tags:tags, title, body,
-      record_snapshot: linkRecord ? { name:'今日午餐（演示）', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录（演示）', uncertainty:'估算区间' } : null,
+      record_snapshot: linkRecord ? { name:'今日午餐', kcal_interval:{min:550,max:680}, protein_g:{min:22,max:32}, sugar_g:{min:5,max:10}, confidence:0.65, source:'用户记录聚合', uncertainty:'估算区间' } : null,
       linked_record_ref:null, moderation_status:'待审核', reports:[], comments:[],
       likes:0, collected:0, created_at:new Date().toISOString(), updated_at:new Date().toISOString(), info_updated:false
     };
     posts.unshift(newPost); save();
     document.querySelector('.modal-overlay')?.remove();
-    UI.toast('帖子已发布，待审核（本地演示）', 'success');
+    UI.toast('帖子已发布，待审核', 'success');
     App.rerender();
   }
 
   function showCollected(type) {
-    UI.toast(`收藏分类"${type==='meals'?'我的餐单':'营养知识'}"：${collected[type].length}条（本地演示）`, 'info');
+    UI.toast(`收藏分类"${type==='meals'?'我的餐单':'营养知识'}"：${collected[type].length}条`, 'info');
   }
 
   return { render, search, filterTopic, setSort, like, toggleCollect, toggleComments, addComment, report, confirmReport, viewPost, newPost, confirmNewPost, showCollected };
