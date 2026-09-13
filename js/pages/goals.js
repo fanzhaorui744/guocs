@@ -25,7 +25,7 @@ const PageGoals = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="target"></i>日常营养目标</div>
-          <span class="tag tag-non-medical">非医疗目标</span>
+          
         </div>
         <div class="card-body">
           <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">以下目标为日常营养管理参考，不是医疗目标。如有特殊健康需求请咨询专业人士。</p>
@@ -112,7 +112,7 @@ const PageGoals = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="info"></i>估算边界与免责声明</div>
-          <span class="tag tag-non-medical">非医疗建议</span>
+          
         </div>
         <div class="card-body" style="font-size:0.875rem;color:var(--color-text-secondary);line-height:1.8;">
           <p>• 所有营养估算为参考值或区间，不是精确测量。</p>
