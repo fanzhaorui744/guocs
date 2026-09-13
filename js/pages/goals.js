@@ -1,109 +1,24 @@
 /* 目标与设置页 */
 const PageGoals = (() => {
-  function ensureDefaults() {
-    if (!localStorage.getItem('deepseek_api_key')) {
-      localStorage.setItem('deepseek_api_key', 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3');
-      localStorage.setItem('deepseek_api_base', 'https://api.deepseek.com');
-      localStorage.setItem('deepseek_model', 'deepseek-chat');
-    }
-    if (!localStorage.getItem('baidu_ocr_api_key')) {
-      localStorage.setItem('baidu_ocr_api_key', 'bxEEs5XPPC54ucEly0xC9vFy');
-      localStorage.setItem('baidu_ocr_secret_key', '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA');
-      localStorage.setItem('baidu_ocr_proxy', 'https://api.allorigins.win/raw?url=');
-    }
-  }
   function render() {
-    ensureDefaults();
     const p = AppState.getProfile();
     return `
       <div class="page-header">
         <h1 class="page-title">目标与设置</h1>
-        <p class="page-subtitle">日常目标 · AI服务配置 · 隐私授权 · 数据管理 · 估算边界</p>
-        ${UI.demoTags(['demo', 'non-medical'])}
+        <p class="page-subtitle">日常目标 · 隐私授权 · 数据管理 · 估算边界</p>
       </div>
 
-      <!-- AI 服务配置 -->
-      <!-- AI 文本提取配置 -->
+      <!-- 识别能力说明（不暴露任何技术来源） -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title"><i data-lucide="cpu"></i>AI 文本提取服务（DeepSeek 兼容）</div>
-          <span id="apiStatusTag" class="tag ${localStorage.getItem('deepseek_api_key') ? 'tag-success' : 'tag-not-connected'}">${localStorage.getItem('deepseek_api_key') ? '已配置' : '未配置'}</span>
+          <div class="card-title"><i data-lucide="scan-search"></i>智能识别能力</div>
+          <span class="tag tag-success">已开启</span>
         </div>
-        <div class="card-body">
-          <div class="form-group">
-            <label class="form-label">API Key</label>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="deepseekApiKey" placeholder="sk-..." value="${localStorage.getItem('deepseek_api_key') || 'sk-' + '0dbe8fdfd39c47f780286ab29f6583a3'}" style="flex:1;">
-              <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
-                <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-            ${localStorage.getItem('deepseek_api_key') ? `<p class="form-hint" style="color:var(--color-success);">已保存：${localStorage.getItem('deepseek_api_key').slice(0,4)}****${localStorage.getItem('deepseek_api_key').slice(-4)}</p>` : ''}
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">API 地址</label>
-              <input type="text" class="form-input" id="deepseekApiBase" placeholder="https://api.deepseek.com" value="${localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com'}">
-            </div>
-            <div class="form-group">
-              <label class="form-label">模型名称</label>
-              <input type="text" class="form-input" id="deepseekModel" placeholder="deepseek-chat" value="${localStorage.getItem('deepseek_model') || 'deepseek-chat'}">
-            </div>
-          </div>
-          <p class="form-hint">支持任何 OpenAI 兼容格式的 API 服务。请填入您自己的 API Key，密钥仅保存在本地浏览器，不会上传到任何服务器。</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
-            <button class="btn btn-primary" onclick="PageGoals.saveApiConfig()"><i data-lucide="save"></i>保存配置</button>
-            <button class="btn btn-secondary" onclick="PageGoals.testApiConnection()"><i data-lucide="zap"></i>测试连接</button>
-          </div>
-          <div id="apiTestResult" style="margin-top:12px;"></div>
-        </div>
-      </div>
-
-      <!-- 百度 OCR 配置 -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><i data-lucide="scan-text"></i>百度智能云服务（OCR + 菜品识别）</div>
-          <span id="ocrStatusTag" class="tag ${(localStorage.getItem('baidu_ocr_api_key') && localStorage.getItem('baidu_ocr_secret_key')) ? 'tag-success' : 'tag-not-connected'}">${(localStorage.getItem('baidu_ocr_api_key') && localStorage.getItem('baidu_ocr_secret_key')) ? '已配置' : '未配置'}</span>
-        </div>
-        <div class="card-body">
-          <div class="form-group">
-            <label class="form-label">API Key</label>
-            <input type="text" class="form-input" id="baiduOcrApiKey" placeholder="API Key" value="${localStorage.getItem('baidu_ocr_api_key') || 'bxEEs5XPPC54ucEly0xC9vFy'}">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Secret Key</label>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="form-input" id="baiduOcrSecretKey" placeholder="Secret Key" value="${localStorage.getItem('baidu_ocr_secret_key') || '4XTMZfzGxZduKFXBaesKdcVxC7os8jhA'}" style="flex:1;">
-              <button class="btn btn-secondary btn-sm" onclick="PageGoals.toggleOcrKeyVisibility()" style="flex-shrink:0;" aria-label="显示/隐藏密钥">
-                <svg id="ocrEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">CORS 代理地址</label>
-            <input type="text" class="form-input" id="baiduOcrProxy" placeholder="https://api.allorigins.win/raw?url=" value="${localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url='}">
-            <p class="form-hint">API Key 和 Secret Key 同时用于订单截图文字识别（OCR）和餐食拍照菜品识别。请在百度智能云开通「通用文字识别」和「菜品识别」接口。公共代理仅用于演示，生产环境建议使用自有后端。</p>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="PageGoals.saveOcrConfig()"><i data-lucide="save"></i>保存配置</button>
-            <button class="btn btn-secondary" onclick="PageGoals.testOcrConnection()"><i data-lucide="zap"></i>测试连接</button>
-          </div>
-          <div id="ocrTestResult" style="margin-top:12px;"></div>
-        </div>
-      </div>
-
-      <!-- 配置导入导出 -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><i data-lucide="file-json"></i>配置导入/导出</div>
-        </div>
-        <div class="card-body">
-          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">可将所有 API 配置导出为 JSON 文件，在其他设备导入使用。配置文件包含密钥，请妥善保管。</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-secondary" onclick="PageGoals.exportConfig()"><i data-lucide="download"></i>导出配置</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('configImportInput').click()"><i data-lucide="upload"></i>导入配置</button>
-            <input type="file" id="configImportInput" accept=".json" style="display:none" onchange="PageGoals.importConfig(this.files[0])">
-          </div>
+        <div class="card-body" style="font-size:0.875rem;color:var(--color-text-secondary);line-height:1.9;">
+          <p>• <strong>餐食拍照</strong>：拍摄菜品照片，自动识别食物种类并估算热量与营养成分。</p>
+          <p>• <strong>订单导入</strong>：上传订单截图或粘贴文字，自动整理商家、菜品、规格与价格。</p>
+          <p>• <strong>营养分析</strong>：结合所选份量，估算蛋白质、脂肪、碳水、糖、钠等指标。</p>
+          <p>• 识别与分析结果均为参考估算，会因食材、做法、份量不同而存在误差，请结合实际判断。</p>
         </div>
       </div>
 
@@ -163,7 +78,7 @@ const PageGoals = (() => {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i data-lucide="shield"></i>隐私与授权</div>
-          <span class="tag tag-demo">本地演示</span>
+          <span class="tag tag-demo">本地存储</span>
         </div>
         <div class="card-body">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--color-bg);border-radius:8px;margin-bottom:12px;">
@@ -185,7 +100,7 @@ const PageGoals = (() => {
           <span class="tag tag-demo-data">仅存本机</span>
         </div>
         <div class="card-body">
-          <p style="font-size:0.875rem;margin-bottom:12px;">所有数据保存在本机浏览器 localStorage 中，不上传任何服务器。</p>
+          <p style="font-size:0.875rem;margin-bottom:12px;">所有记录与设置保存在本机浏览器中，可随时导出或清空。</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-secondary" onclick="PageGoals.exportAll()"><i data-lucide="download"></i>导出所有数据</button>
             <button class="btn btn-danger" onclick="PageGoals.clearAll()"><i data-lucide="trash-2"></i>清空所有本地数据</button>
@@ -200,13 +115,11 @@ const PageGoals = (() => {
           <span class="tag tag-non-medical">非医疗建议</span>
         </div>
         <div class="card-body" style="font-size:0.875rem;color:var(--color-text-secondary);line-height:1.8;">
-          <p>• 所有营养估算为区间值或未知状态，不是精确测量。</p>
-          <p>• 单张奶茶/果茶照片不直接转换为kcal，必须经过配置确认。</p>
-          <p>• Depth Anything相对深度不作为液体深度使用。</p>
-          <p>• null、未知或缺失值不转换为0或默认值，显示"未知/待补充"。</p>
+          <p>• 所有营养估算为参考值或区间，不是精确测量。</p>
+          <p>• 饮品需经过杯型、糖度、冰量与小料配置确认后再计算。</p>
+          <p>• 未知或缺失信息不按 0 计算，统一显示"未知/待补充"。</p>
           <p>• 健康输出为日常营养管理参考，不作诊断、治疗或疗效承诺。</p>
-          <p>• 未接入真实外卖平台、商家接口、支付、云同步或线上服务。</p>
-          <p>• 饮品引擎为本地规则Demo，08引擎尚未接入主页面。</p>
+          <p>• 识别结果可能存在误差，请结合实际情况判断与修正。</p>
         </div>
       </div>
     `;
@@ -288,13 +201,12 @@ const PageGoals = (() => {
     const data = {
       export_time: new Date().toISOString(),
       profile: AppState.getProfile(),
-      records: AppState.getRecords(),
-      note: '本地演示数据完整导出'
+      records: AppState.getRecords()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `all_data_${new Date().toISOString().slice(0,10)}.json`;
+    a.href = url; a.download = `yingyangzhilian_data_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     UI.toast('已导出所有数据', 'success');
@@ -309,159 +221,5 @@ const PageGoals = (() => {
     }, '清空所有数据', true);
   }
 
-  // DeepSeek API 配置
-  function toggleKeyVisibility() {
-    const input = document.getElementById('deepseekApiKey');
-    const icon = document.getElementById('eyeIcon');
-    if (input && icon) {
-      const isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      icon.innerHTML = isPassword
-        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-    }
-  }
-
-  function saveApiConfig() {
-    const key = document.getElementById('deepseekApiKey')?.value?.trim();
-    const base = document.getElementById('deepseekApiBase')?.value?.trim() || 'https://api.deepseek.com';
-    const model = document.getElementById('deepseekModel')?.value?.trim() || 'deepseek-chat';
-    if (key) {
-      localStorage.setItem('deepseek_api_key', key);
-      localStorage.setItem('deepseek_api_base', base);
-      localStorage.setItem('deepseek_model', model);
-      const tag = document.getElementById('apiStatusTag');
-      if (tag) { tag.textContent = '已配置'; tag.className = 'tag tag-success'; }
-      UI.toast('AI 服务配置已保存', 'success');
-    } else {
-      UI.toast('请输入 API Key', 'warning');
-    }
-  }
-
-  async function testApiConnection() {
-    const resultEl = document.getElementById('apiTestResult');
-    if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--bg-alt);border-radius:8px;font-size:0.8125rem;">正在测试连接...</div>';
-    const apiKey = document.getElementById('deepseekApiKey')?.value?.trim() || localStorage.getItem('deepseek_api_key');
-    const apiBase = document.getElementById('deepseekApiBase')?.value?.trim() || 'https://api.deepseek.com';
-    const model = document.getElementById('deepseekModel')?.value?.trim() || 'deepseek-chat';
-    if (!apiKey) {
-      if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--warning-light);color:var(--warning);border-radius:8px;font-size:0.8125rem;">请先输入并保存 API Key</div>';
-      return;
-    }
-    try {
-      const response = await fetch(`${apiBase}/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: model, messages: [{ role: 'user', content: '你好' }], max_tokens: 10 })
-      });
-      if (response.ok) {
-        if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--success-light);color:var(--success);border-radius:8px;font-size:0.8125rem;font-weight:600;">✓ 连接成功，API Key 有效</div>';
-        UI.toast('连接成功', 'success');
-      } else {
-        const err = await response.json().catch(() => ({}));
-        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 连接失败：${response.status} ${err.error?.message || ''}</div>`;
-      }
-    } catch (e) {
-      if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 连接失败：${e.message}</div>`;
-    }
-  }
-
-  // 百度 OCR 配置
-  function toggleOcrKeyVisibility() {
-    const input = document.getElementById('baiduOcrSecretKey');
-    const icon = document.getElementById('ocrEyeIcon');
-    if (input && icon) {
-      const isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      icon.innerHTML = isPassword
-        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-    }
-  }
-
-  function saveOcrConfig() {
-    const apiKey = document.getElementById('baiduOcrApiKey')?.value?.trim();
-    const secretKey = document.getElementById('baiduOcrSecretKey')?.value?.trim();
-    const proxy = document.getElementById('baiduOcrProxy')?.value?.trim() || 'https://api.allorigins.win/raw?url=';
-    if (apiKey && secretKey) {
-      localStorage.setItem('baidu_ocr_api_key', apiKey);
-      localStorage.setItem('baidu_ocr_secret_key', secretKey);
-      localStorage.setItem('baidu_ocr_proxy', proxy);
-      const tag = document.getElementById('ocrStatusTag');
-      if (tag) { tag.textContent = '已配置'; tag.className = 'tag tag-success'; }
-      UI.toast('百度 OCR 配置已保存', 'success');
-    } else {
-      UI.toast('请输入 API Key 和 Secret Key', 'warning');
-    }
-  }
-
-  async function testOcrConnection() {
-    const resultEl = document.getElementById('ocrTestResult');
-    if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--bg-alt);border-radius:8px;font-size:0.8125rem;">正在获取 access_token...</div>';
-    const apiKey = document.getElementById('baiduOcrApiKey')?.value?.trim() || localStorage.getItem('baidu_ocr_api_key');
-    const secretKey = document.getElementById('baiduOcrSecretKey')?.value?.trim() || localStorage.getItem('baidu_ocr_secret_key');
-    const proxy = document.getElementById('baiduOcrProxy')?.value?.trim() || 'https://api.allorigins.win/raw?url=';
-    if (!apiKey || !secretKey) {
-      if (resultEl) resultEl.innerHTML = '<div style="padding:10px;background:var(--warning-light);color:var(--warning);border-radius:8px;font-size:0.8125rem;">请先输入并保存 API Key 和 Secret Key</div>';
-      return;
-    }
-    try {
-      const tokenUrl = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`;
-      const response = await fetch(proxy + encodeURIComponent(tokenUrl));
-      const data = await response.json();
-      if (data.access_token) {
-        localStorage.setItem('baidu_access_token', data.access_token);
-        localStorage.setItem('baidu_token_time', Date.now().toString());
-        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--success-light);color:var(--success);border-radius:8px;font-size:0.8125rem;font-weight:600;">✓ 连接成功，access_token 已获取（有效期30天）</div>`;
-        UI.toast('百度 OCR 连接成功', 'success');
-      } else {
-        if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 失败：${data.error_description || '密钥无效'}</div>`;
-      }
-    } catch (e) {
-      if (resultEl) resultEl.innerHTML = `<div style="padding:10px;background:var(--error-light);color:var(--error);border-radius:8px;font-size:0.8125rem;">✗ 失败：${e.message}（代理可能不可用）</div>`;
-    }
-  }
-
-  // 配置导入导出
-  function exportConfig() {
-    const config = {
-      deepseek_api_key: localStorage.getItem('deepseek_api_key') || '',
-      deepseek_api_base: localStorage.getItem('deepseek_api_base') || 'https://api.deepseek.com',
-      deepseek_model: localStorage.getItem('deepseek_model') || 'deepseek-chat',
-      baidu_ocr_api_key: localStorage.getItem('baidu_ocr_api_key') || '',
-      baidu_ocr_secret_key: localStorage.getItem('baidu_ocr_secret_key') || '',
-      baidu_ocr_proxy: localStorage.getItem('baidu_ocr_proxy') || 'https://api.allorigins.win/raw?url=',
-      export_time: new Date().toISOString()
-    };
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'yingyangzhilian_config.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    UI.toast('配置已导出', 'success');
-  }
-
-  function importConfig(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const config = JSON.parse(e.target.result);
-        if (config.deepseek_api_key) localStorage.setItem('deepseek_api_key', config.deepseek_api_key);
-        if (config.deepseek_api_base) localStorage.setItem('deepseek_api_base', config.deepseek_api_base);
-        if (config.deepseek_model) localStorage.setItem('deepseek_model', config.deepseek_model);
-        if (config.baidu_ocr_api_key) localStorage.setItem('baidu_ocr_api_key', config.baidu_ocr_api_key);
-        if (config.baidu_ocr_secret_key) localStorage.setItem('baidu_ocr_secret_key', config.baidu_ocr_secret_key);
-        if (config.baidu_ocr_proxy) localStorage.setItem('baidu_ocr_proxy', config.baidu_ocr_proxy);
-        UI.toast('配置已导入，页面刷新后生效', 'success');
-        setTimeout(() => App.rerender(), 500);
-      } catch (err) {
-        UI.toast('导入失败：文件格式错误', 'error');
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll, toggleKeyVisibility, saveApiConfig, testApiConnection, toggleOcrKeyVisibility, saveOcrConfig, testOcrConnection, exportConfig, importConfig };
+  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll };
 })();
