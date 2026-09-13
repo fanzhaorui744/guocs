@@ -19,7 +19,10 @@ const Recognize = (() => {
   function _backendBases() {
     try {
       const p = location.protocol, h = location.hostname;
-      if (p === 'http:' && /^(localhost|127\.|0\.0\.0\.0|192\.168\.|10\.|172\.)/.test(h)) return [''];
+      if (p === 'http:' && /^(localhost|127\.|0\.0\.0\.0|192\.168\.|10\.|172\.)/.test(h)) {
+        // 同源（后端直接托管前端）优先，再显式回退到本地后端端口（前端独立端口时）
+        return ['', 'http://localhost:8080', 'http://127.0.0.1:8080'];
+      }
       if (p === 'file:') return ['http://localhost:8080', 'http://127.0.0.1:8080'];
       return []; // https 线上页面不回连 http 本地（浏览器会拦截混合内容）
     } catch (e) { return []; }
