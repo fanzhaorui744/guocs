@@ -51,7 +51,7 @@ ul,ol{list-style:none}
 :focus-visible{outline:2px solid var(--primary-light);outline-offset:2px;border-radius:var(--radius-xs)}
 ::selection{background:var(--primary-100);color:var(--primary-dark)}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.page-content{animation:fadeInUp .35s cubic-bezier(.4,0,.2,1)}
+.page-content{opacity:1;animation:fadeInUp .35s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes modalIn{from{transform:translateY(20px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
@@ -6387,6 +6387,8 @@ const App = (() => {
       // 滚动到顶部
       main.scrollTop = 0;
       window.scrollTo(0, 0);
+      const _pc = main.querySelector(".page-content");
+      if (_pc) setTimeout(() => { _pc.style.opacity = "1"; _pc.style.transform = "none"; }, 400);
     }
     updateNavActive();
     updateRoleUI();
