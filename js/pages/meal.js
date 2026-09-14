@@ -119,16 +119,16 @@ const PageMeal = (() => {
     const allLow = state.candidates.every(c => parseFloat(c.probability) < 0.3);
     const selCount = state.selectedIndices.length;
     const allSelected = selCount === state.candidates.length;
-    // 计算选中项的总重量和总热量
+    // 计算选中项的总重量和总热量（适配 recognizeMeal 返回的扁平结构）
     let totalMass = 0, totalKcalMin = 0, totalKcalMax = 0;
     state.selectedIndices.forEach(idx => {
       const c = state.candidates[idx];
-      const w = state.candidateWeights[idx] != null ? state.candidateWeights[idx] : (c.measure ? c.measure.massG : 150);
+      const w = state.candidateWeights[idx] != null ? state.candidateWeights[idx] : (c.mass_g || 150);
       totalMass += w;
-      const cal100 = parseFloat(c.calorie) || 0;
-      if (c.measure && c.measure.kcalRange) {
-        totalKcalMin += Math.round(cal100 * c.measure.kcalRange[0] / Math.max(c.measure.kcal, 1) * w / 100);
-        totalKcalMax += Math.round(cal100 * w / 100);
+      const cal100 = c.calorie_per_100g || parseFloat(c.calorie) || 0;
+      if (c.kcal_range) {
+        totalKcalMin += c.kcal_range[0];
+        totalKcalMax += c.kcal_range[1];
       } else {
         totalKcalMin += Math.round(cal100 * w / 100);
         totalKcalMax += Math.round(cal100 * w / 100);
@@ -142,7 +142,7 @@ const PageMeal = (() => {
         </div>
         ${state.measureSummary ? `
           <div style="padding:10px 14px;background:var(--primary-50,#eef6f5);border-radius:var(--radius-md);margin:12px 14px 0;font-size:0.75rem;color:var(--text-secondary);display:flex;gap:14px;flex-wrap:wrap;">
-            <span>📐 尺度标定：${refLabel(state.measureSummary.reference_type)}</span>
+            <span>📐 尺度标定：${state.measureSummary.ref_object || '1cm 标定网格'}</span>
             <span>🍱 食物数：${state.measureSummary.food_count}（逐块分割）</span>
             <span>📏 透视高度估计</span>
             <span>⚖️ 视觉总估重：约 <b>${state.measureSummary.total_mass_g} g</b></span>
@@ -163,11 +163,11 @@ const PageMeal = (() => {
         </div>
         <div class="candidate-list">
           ${state.candidates.map((c, i) => {
-            const prob = parseFloat(c.probability);
+            const prob = c.confidence ? c.confidence / 100 : parseFloat(c.probability);
             const probColor = prob >= 0.7 ? 'var(--success)' : prob >= 0.4 ? 'var(--accent-gold)' : 'var(--accent-coral)';
-            const m = c.measure;
             const isSelected = state.selectedIndices.includes(i);
-            const w = state.candidateWeights[i] != null ? state.candidateWeights[i] : (m ? m.massG : 150);
+            const w = state.candidateWeights[i] != null ? state.candidateWeights[i] : (c.mass_g || 150);
+            const cal100 = c.calorie_per_100g || parseFloat(c.calorie) || 0;
             return `
               <div class="candidate-item" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px;${isSelected ? '' : 'opacity:0.55;'}">
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -176,7 +176,7 @@ const PageMeal = (() => {
                     <div class="candidate-name">${c.name}</div>
                     <div class="candidate-meta">
                       <span style="color:${probColor};font-weight:700;">置信度 ${Math.round(prob * 100)}%</span>
-                      ${c.calorie ? ` · ${c.calorie} kcal/100g` : ''}
+                      ${cal100 ? ` · ${cal100} kcal/100g` : ''}
                     </div>
                   </div>
                   <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
@@ -184,14 +184,14 @@ const PageMeal = (() => {
                     <span style="font-size:0.7rem;color:var(--text-muted);">g</span>
                   </div>
                 </div>
-                ${m ? `
+                ${c.area_cm2 ? `
                   <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:0.7rem;padding-left:28px;">
-                    <span class="tag" style="background:var(--bg-alt);">占地 ${m.areaCm2}cm²</span>
-                    <span class="tag" style="background:var(--bg-alt);">厚 ${m.thicknessCm}cm</span>
-                    <span class="tag" style="background:var(--bg-alt);">体积 ${m.volumeCm3}cm³</span>
-                    <span class="tag" style="background:var(--bg-alt);">密度 ${m.density}</span>
-                    <span class="tag tag-success">估重 ${m.massG}g</span>
-                    <span class="tag tag-demo-data">${m.kcalRange ? m.kcalRange[0]+'~'+m.kcalRange[1] : m.kcal} kcal</span>
+                    <span class="tag" style="background:var(--bg-alt);">占地 ${c.area_cm2}cm²</span>
+                    <span class="tag" style="background:var(--bg-alt);">厚 ${c.thickness_cm}cm</span>
+                    <span class="tag" style="background:var(--bg-alt);">体积 ${c.volume_ml}ml</span>
+                    <span class="tag" style="background:var(--bg-alt);">密度 ${c.density}</span>
+                    <span class="tag tag-success">估重 ${c.mass_g}g</span>
+                    <span class="tag tag-demo-data">${c.kcal_range ? c.kcal_range[0]+'~'+c.kcal_range[1] : c.kcal} kcal</span>
                   </div>` : ''}
               </div>
             `;
@@ -384,22 +384,27 @@ const PageMeal = (() => {
     state.error = null; state.step = 'recognizing'; state.isMock = false;
     App.rerender();
 
-    // 视觉定量：多模态模型一次完成实例分割、1cm网格标定、透视相对高度估计，再由本地几何内核算体积/质量/热量
-    const mr = await Recognize.measure(state.compressedBase64, state.imgSize.w, state.imgSize.h, null);
+    // APP 端 recognizeMeal：一次 API 调用完成"类型→分割→标定→深度厚度→体积质量→营养"全链路
+    const mr = await Recognize.recognizeMeal(state.compressedBase64);
     if (mr.success) {
-      state.candidates = mapMeasure(mr.data);
-      state.measureSummary = mr.data;
-      state.lowConfidence = state.candidates.every(c => parseFloat(c.probability) < 0.3);
-      state.selectedIndices = state.candidates.map((_, i) => i); // 默认全选
+      state.candidates = mr.items;
+      state.measureSummary = {
+        food_count: mr.food_count,
+        total_mass_g: mr.total_mass_g,
+        total_kcal: mr.total_kcal,
+        total_kcal_range: mr.total_kcal_range,
+        ref_object: mr.ref_object
+      };
+      state.lowConfidence = mr.items.every(c => c.confidence < 30);
+      state.selectedIndices = mr.items.map((_, i) => i);
       state.candidateWeights = {};
       state.step = 'candidates';
-      UI.toast(`定量分析完成：${mr.data.food_count} 项食物，估重约 ${mr.data.total_mass_g}g`, 'success');
+      UI.toast(`识别完成：${mr.food_count} 项食物，估重约 ${mr.total_mass_g}g，约 ${mr.total_kcal} kcal`, 'success');
       App.rerender();
       return;
     }
-    // measure 失败时显示错误信息（调试用）
-    console.error('[measure failed]', mr.error);
-    UI.toast(`定量分析暂不可用（${mr.error}），已降级为类型识别`, 'warning');
+    console.error('[recognizeMeal failed]', mr.error);
+    UI.toast(`识别暂不可用（${mr.error}），已降级为类型识别`, 'warning');
     // 兜底：仅类型识别（用户手动给克重）
     const dr = await Recognize.dish(state.compressedBase64);
     if (dr.success) {
@@ -448,33 +453,33 @@ const PageMeal = (() => {
     let totalKcal = 0, totalMass = 0, savedNames = [];
     state.selectedIndices.forEach(idx => {
       const c = state.candidates[idx];
-      const w = state.candidateWeights[idx] != null ? state.candidateWeights[idx] : (c.measure ? c.measure.massG : 150);
-      const cal100 = parseFloat(c.calorie) || 0;
+      const w = state.candidateWeights[idx] != null ? state.candidateWeights[idx] : (c.mass_g || 150);
+      const cal100 = c.calorie_per_100g || parseFloat(c.calorie) || 0;
       const kcal = Math.round(cal100 * w / 100);
       totalKcal += kcal; totalMass += w; savedNames.push(c.name);
-      const m = c.measure;
+      const nut = c.nutrition || {};
       records.push({
         id: 'meal_' + Date.now() + '_' + idx,
         source_type: state.isMock ? 'demo_mock' : 'smart_recognize',
         merchant_label: c.name,
         meal_period: period,
-        visual_measure: m ? {
-          area_cm2: m.areaCm2, thickness_cm: m.thicknessCm, volume_cm3: m.volumeCm3,
-          density_g_cm3: m.density, mass_g: m.massG, shape: m.shape
+        visual_measure: c.area_cm2 ? {
+          area_cm2: c.area_cm2, thickness_cm: c.thickness_cm, volume_ml: c.volume_ml,
+          density_g_ml: c.density, mass_g: c.mass_g, shape: c.shape
         } : null,
         items: [{
           id: 'item_' + Math.random().toString(36).slice(2),
           name: c.name, category: 'meal',
           estimated_weight_g: w, consumed_ratio: 1,
           calories_kcal: { value: kcal, interval: null, value_type: 'estimated' },
-          protein_g: { value: null, interval: null, value_type: 'unknown' },
-          fat_g: { value: null, interval: null, value_type: 'unknown' },
-          carbs_g: { value: null, interval: null, value_type: 'unknown' },
-          sugar_g: { value: null, interval: null, value_type: 'unknown' },
-          sodium_mg: { value: null, interval: null, value_type: 'unknown' },
-          confidence: parseFloat(c.probability) || 0.5,
+          protein_g: { value: nut.protein_g ? Math.round(nut.protein_g * w / 100 * 10) / 10 : null, interval: null, value_type: nut.protein_g ? 'estimated' : 'unknown' },
+          fat_g: { value: nut.fat_g ? Math.round(nut.fat_g * w / 100 * 10) / 10 : null, interval: null, value_type: nut.fat_g ? 'estimated' : 'unknown' },
+          carbs_g: { value: nut.carbs_g ? Math.round(nut.carbs_g * w / 100 * 10) / 10 : null, interval: null, value_type: nut.carbs_g ? 'estimated' : 'unknown' },
+          sugar_g: { value: nut.sugar_g ? Math.round(nut.sugar_g * w / 100 * 10) / 10 : null, interval: null, value_type: nut.sugar_g ? 'estimated' : 'unknown' },
+          sodium_mg: { value: nut.sodium_mg ? Math.round(nut.sodium_mg * w / 100) : null, interval: null, value_type: nut.sodium_mg ? 'estimated' : 'unknown' },
+          confidence: c.confidence ? c.confidence / 100 : (parseFloat(c.probability) || 0.5),
           source_ids: [], value_type: 'estimated',
-          warnings: [m ? '视觉定量估算：分割标定→透视高度→体积→估重，结果可手动修正' : '智能识别结果，按每100g参考值×份量估算']
+          warnings: [c.area_cm2 ? '视觉定量估算：分割标定→透视高度→体积→估重，结果可手动修正' : '智能识别结果，按每100g参考值×份量估算']
         }],
         status: 'confirmed',
         created_at: now.toISOString(), updated_at: now.toISOString()
