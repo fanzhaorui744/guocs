@@ -45,20 +45,33 @@ const Volume = (() => {
    */
   function calibrate(reference, imgW, imgH) {
     const r = reference || {};
-    const pts = Array.isArray(r.px_points) ? r.px_points : [];
     const ar = (imgW && imgH) ? imgW / imgH : 1; // 像素宽高比，用于 y 方向校正
-    // 1) 网格四角：非等比
-    if (r.type === 'grid1cm' && pts.length >= 4 && Number(r.known_cm) > 0) {
-      const ex = Math.max(dist(pts[0], pts[1]), 1e-6); // 上边宽
-      const ey = Math.max(dist(pts[0], pts[3]), 1e-6); // 左边高
-      return { ux: r.known_cm / ex, uy: r.known_cm / ey, reliable: true, type: r.type };
+    if (r.type === 'grid1cm') {
+      const kcm = Number(r.known_cm) > 0 ? Number(r.known_cm) : 1.0;
+      // 1) 整网格纸外边框 + 行列格数平均法：单格边长 = 整纸跨度 / 格数（最稳）
+      const gp = Array.isArray(r.grid_pts) ? r.grid_pts : [];
+      const cols = Number(r.grid_cols) || 0, rows = Number(r.grid_rows) || 0;
+      if (gp.length >= 4 && cols >= 1) {
+        const gx = Math.max(dist(gp[0], gp[1]), 1e-6); // 整纸上边宽
+        const ex = gx / cols;
+        let ey = ex;
+        if (rows >= 1) { const gy = Math.max(dist(gp[0], gp[3]), 1e-6); ey = gy / rows; }
+        return { ux: kcm / ex, uy: kcm / ey, reliable: true, type: r.type };
+      }
+      // 2) 单个最小格四角
+      const pts = Array.isArray(r.px_points) ? r.px_points : [];
+      if (pts.length >= 4) {
+        const ex = Math.max(dist(pts[0], pts[1]), 1e-6); // 上边宽
+        const ey = Math.max(dist(pts[0], pts[3]), 1e-6); // 左边高
+        return { ux: kcm / ex, uy: kcm / ey, reliable: true, type: r.type };
+      }
     }
-    // 2) 已知标定边长度
+    // 3) 已知标定边长度
     if (Number(r.px_length) > 1 && Number(r.known_cm) > 0) {
       const u = r.known_cm / r.px_length;
       return { ux: u, uy: u / ar * ar, reliable: r.scale_reliable !== false, type: r.type || 'ref' };
     }
-    // 3) 经验兜底：归一化 999 宽度 ≈ 25cm 视场
+    // 4) 经验兜底：归一化 999 宽度 ≈ 25cm 视场
     const ux = 25 / 999;
     return { ux, uy: ux, reliable: false, type: 'none' };
   }
@@ -118,10 +131,8 @@ const Volume = (() => {
     let volumeCm3;
     if (food.shape === 'ellipsoid') {
       volumeCm3 = ellipsoidVolume(food.bbox, scale, h) || shapeVolume(areaCm2, h, food.shape, food.dome_ratio, food.fill_ratio);
-    } else if (useDepth) {
-      // 有真实高度场平均高度时按柱体×形状系数积分
-      volumeCm3 = shapeVolume(areaCm2, h, food.shape === 'dome' ? 'prism' : food.shape, 1, food.fill_ratio);
     } else {
+      // 无论厚度来自语义估计还是深度场，都使用同一套形状系数，保证两条口径自洽
       volumeCm3 = shapeVolume(areaCm2, h, food.shape, food.dome_ratio, food.fill_ratio);
     }
     const density = densityOf(food.name, food.density_g_cm3);
@@ -197,7 +208,9 @@ const Volume = (() => {
       if (n > 0 && maxD > edgeD) {
         const seed = Number(food.thickness_cm_est) || 2; // 语义厚度锚定绝对量级
         const avgRel = sumD / n;
-        const h = Math.max(0.2, (avgRel - edgeD) / (maxD - edgeD) * seed * 1.4);
+        // 以语义平均厚度为锚，深度相对形态做 ±25% 温和校正，避免相对深度整体抬升厚度
+        const r = (avgRel - edgeD) / (maxD - edgeD);
+        const h = Math.max(0.2, seed * (0.75 + 0.25 * r));
         out[i] = round2(h);
       }
     });
