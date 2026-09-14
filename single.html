@@ -2237,7 +2237,7 @@ const Recognize = (() => {
   async function _chat(messages, needJson, maxTokens) {
     const payload = {
       model: _engine(),
-      reasoning_effort: 'medium',
+      reasoning_effort: 'low',
       temperature: 0.15,
       messages,
       ...(needJson ? { response_format: { type: 'json_object' } } : {}),
@@ -2564,13 +2564,14 @@ const Recognize = (() => {
       + '(3)优先寻找画面中的平面标定参照：一张外轮廓为25cm×25cm的正方形标定板，板内被等分为最小的1cm×1cm方格；先锁定25cm大正方形外轮廓，再以其内部最小的1cm方格作为像素尺度基准，完成透视视角矫正后逐格统计食物覆盖的最小方格数 grid_cells，即食物俯视真实占地面积，单位cm²；若画面没有标定板，再降级参照常见物体真实尺度(标准餐盘直径约22cm、一次性方形餐盒边长约17.5cm、筷子长约22cm、成年人手指宽约2cm)完成同等标定；'
       + '(4)从图像中直接判断该食物的立体起伏与相对深度（中心隆起程度、边缘厚度、堆叠层数、汤汁液面高度），结合第(3)步的1cm方格像素尺度，换算出该食物的物理平均厚度 thickness_cm，单位cm；厚度须与实际形态相符（薄片0.3-1.5cm、半球堆2-6cm、规则块1-4cm、圆柱2-5cm、碗装3-8cm）；'
       + '(5)判断立体形状 shape(只能取 flat薄片/hemisphere半球堆/block规则块/cylinder圆柱/bowl碗装之一)，给出可食部密度 density，单位g/ml(通常0.5到1.3)，并给出每100g营养基准。'
+      + '重要约束：单张图片所有食物总质量通常不超过150克，单块食物质量一般在5-80克之间；蔬菜类密度0.4-0.7、豆制品0.8-1.2、肉类1.0-1.3、米饭0.55-0.8、油炸食品0.3-0.5。'
       + '只输出严格JSON，不输出任何解释、前后缀或markdown。';
   }
 
   function _appUserPrompt() {
-    return '逐种识别图中的食物，最多5种，按置信度从高到低排列。对每种食物严格输出：'
-      + '{"results":[{"name":"食物名称","probability":0到1,"bbox":{"x":0到1,"y":0到1,"w":0到1,"h":0到1},"fill_ratio":bbox内食物面积占比0到1,"ref_object":"填写25cm标定板或实际用到的参照物名称","view_deg":拍摄俯视角度数,"grid_cells":矫正后覆盖的最小1cm方格数即面积平方厘米,"thickness_cm":视觉模型结合立体起伏与1cm方格尺度估算的平均厚度厘米,"shape":"flat或hemisphere或block或cylinder或bowl","density":克每毫升,"calorie":每100g千卡整数,"protein_g":每100g克数,"fat_g":每100g克数,"carbs_g":每100g克数,"sugar_g":每100g克数,"sodium_mg":每100g毫克数,"confidence":0到1}]}。'
-      + '数值须符合常识：占地面积(cm²)×平均厚度(cm)×形状系数得到合理体积(ml)，体积×密度得到合理质量(g)，质量与每100g热量相乘得到合理总热量。'
+    return '逐种识别图中的食物，最多6种，按面积从大到小排列。对每种食物严格输出：'
+      + '{"results":[{"name":"食物名称","probability":0到1,"bbox":{"x":0到1,"y":0到1,"w":0到1,"h":0到1},"ref_object":"填写25cm标定板或实际用到的参照物名称","grid_cells":矫正后覆盖的最小1cm方格数即面积平方厘米,"thickness_cm":视觉模型结合立体起伏与1cm方格尺度估算的平均厚度厘米,"shape":"flat或hemisphere或block或cylinder或bowl","density":克每毫升,"calorie":每100g千卡整数,"protein_g":每100g克数,"fat_g":每100g克数,"carbs_g":每100g克数,"confidence":0到1}]}。'
+      + '数值须符合常识：占地面积(cm²)×平均厚度(cm)×形状系数得到合理体积(ml)，体积×密度得到合理质量(g)，所有食物总质量不超过150g。'
       + '若图中没有可识别食物，返回{"results":[]}。';
   }
 
@@ -2621,7 +2622,7 @@ const Recognize = (() => {
         { type: 'text', text: _appUserPrompt() },
         { type: 'image_url', image_url: { url: dataUri } }
       ] }
-    ], true, 1500);
+    ], true, 800);
     if (!r.success) return { success: false, error: r.error || '识别服务暂不可用' };
     const raw = _extractJson(r.text);
     if (!raw || !Array.isArray(raw.results)) return { success: false, error: '识别结果解析失败' };
