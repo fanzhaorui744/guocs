@@ -12,9 +12,9 @@ const Recognize = (() => {
   const _gateway = () => _e('aHR0cHM6Ly92dWxjYW5hcGkuY29tL3Yx');
   const _engine = () => _e('Z3B0LTUuNi1zb2w=');
   const _authHeader = () => String.fromCharCode(66, 101, 97, 114, 101, 114) + ' ' + _cred();
-  // 自建中转地址（Cloudflare Worker，开箱即用）；设置页可自定义覆盖
+  // 自建中转地址（Deno Deploy，国内可访问）；设置页可自定义覆盖
   const _workerBase = () => {
-    const DEFAULT = 'https://nutri-proxy.fanzhaorui744.workers.dev';
+    const DEFAULT = 'https://close-killdeer-2481.fanzhaorui744.deno.dev';
     try { return localStorage.getItem('npv2_api_proxy') || DEFAULT; } catch(e) { return DEFAULT; }
   };
 
