@@ -99,18 +99,14 @@ const PageMeal = (() => {
   }
 
   function renderRecognizing() {
-    const steps = ['实例分割', '尺度标定', '视角矫正', '体积/质量估算'];
-    const ds = state.depthStatus;
-    const depthText = ds ? ds.text : '初始化本地视觉引擎…';
+    const steps = ['实例分割', '尺度标定', '透视高度', '体积/质量估算'];
     return `
       <div class="card">
         <div class="state-view">
           <div class="loading-spinner" style="width:48px;height:48px;border-width:3px;"></div>
           <div class="state-title">正在进行视觉定量分析…</div>
           <div class="state-desc">${steps.map((s, i) => `<span style="display:inline-block;margin:2px 6px;padding:3px 10px;border-radius:999px;background:var(--bg-alt);font-size:0.75rem;color:var(--text-secondary);">${i + 1}. ${s}</span>`).join('')}</div>
-          <div id="depthProgress" style="margin-top:10px;font-size:0.78rem;color:var(--primary);font-weight:600;">深度感知：${depthText}</div>
-          ${ds && ds.preview ? `<img src="${ds.preview}" alt="深度场" style="width:120px;height:120px;object-fit:cover;border-radius:var(--radius-md);margin-top:8px;image-rendering:pixelated;border:1px solid var(--border-light);">` : ''}
-          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;">首次使用需在本地加载约数十 MB 视觉模型，之后自动缓存；图片仅在本机处理，不上传。</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;">多模态视觉引擎正在识别食物轮廓、1cm 网格标定与透视高度，随后计算体积与热量</div>
           <div class="state-actions">
             <button class="btn btn-secondary" onclick="PageMeal.cancelRecognize()"><i data-lucide="x"></i>取消</button>
           </div>
@@ -131,7 +127,7 @@ const PageMeal = (() => {
           <div style="padding:10px 14px;background:var(--primary-50,#eef6f5);border-radius:var(--radius-md);margin:12px 14px 0;font-size:0.75rem;color:var(--text-secondary);display:flex;gap:14px;flex-wrap:wrap;">
             <span>📐 尺度标定：${refLabel(state.measureSummary.reference_type)}</span>
             <span>🍱 食物数：${state.measureSummary.food_count}（逐块分割）</span>
-            <span>🛰 ${state.measureSummary.depth_meta && state.measureSummary.depth_meta.used ? '本地深度场' + (state.measureSummary.depth_meta.device ? '（' + String(state.measureSummary.depth_meta.device).toUpperCase() + '）' : '') : '形状厚度估计'}</span>
+            <span>📏 透视高度估计</span>
             <span>⚖️ 视觉总估重：约 <b>${state.measureSummary.total_mass_g} g</b></span>
             <span>🔥 估算总热量：<b>${state.measureSummary.total_kcal_range ? state.measureSummary.total_kcal_range[0]+'~'+state.measureSummary.total_kcal_range[1] : state.measureSummary.total_kcal} kcal</b></span>
           </div>` : ''}
@@ -261,7 +257,7 @@ const PageMeal = (() => {
       <div style="margin:0 14px;border:1px solid var(--border-light);border-radius:var(--radius-md);overflow:hidden;">
         <div style="padding:10px 14px;background:var(--primary-50,#eef6f5);font-size:0.8125rem;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:6px;">
           <i data-lucide="ruler"></i>视觉定量推导
-          <span class="tag" style="margin-left:auto;font-size:0.68rem;background:#fff;">深度：${m.depthSource === 'depth_model' ? '深度模型' : '形状语义估计'}</span>
+          <span class="tag" style="margin-left:auto;font-size:0.68rem;background:#fff;">透视高度</span>
         </div>
         <div style="padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;font-size:0.75rem;color:var(--text-secondary);">
           <div><div style="color:var(--text-muted);">占地面积 S</div><div style="font-weight:700;color:var(--text);">${m.areaCm2} cm²</div></div>
@@ -343,36 +339,19 @@ const PageMeal = (() => {
   async function startRecognize() {
     if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
     state.error = null; state.step = 'recognizing'; state.isMock = false;
-    state.depthStatus = { active: true, text: '初始化本地视觉引擎…', device: null, preview: null, failed: false };
-    state.depthRes = null;
+    state.depthStatus = null; state.depthRes = null;
     App.rerender();
 
-    const dataUri = 'data:image/jpeg;base64,' + state.compressedBase64;
-    // 浏览器端相对深度 与 多模态实例分割 并行，缩短等待
-    const depthP = (typeof DepthWeb !== 'undefined')
-      ? DepthWeb.estimate(dataUri, (txt) => tickDepth(txt)).catch(e => ({ ok: false, error: String((e && e.message) || e) }))
-      : Promise.resolve({ ok: false });
-    const rawP = Recognize.measureRaw(state.compressedBase64);
-    const [depthRes, rawRes] = await Promise.all([depthP, rawP]);
-
-    state.depthRes = (depthRes && depthRes.ok) ? depthRes : null;
-    if (state.depthRes) {
-      tickDepth('深度场计算完成（' + String(state.depthRes.device || '').toUpperCase() + '，' + state.depthRes.ms + 'ms）', state.depthRes.preview, state.depthRes.device);
-    } else {
-      tickDepth('本地深度未启用，改用形状厚度估计', null, null, true);
-    }
-
-    if (rawRes.success) {
-      const mr = Recognize.analyzeMeasure(rawRes.raw, state.imgSize.w, state.imgSize.h, state.depthRes);
-      if (mr.success) {
-        state.candidates = mapMeasure(mr.data);
-        state.measureSummary = mr.data;
-        state.lowConfidence = state.candidates.every(c => parseFloat(c.probability) < 0.3);
-        state.step = 'candidates';
-        UI.toast(`定量分析完成：${mr.data.food_count} 项食物，估重约 ${mr.data.total_mass_g}g`, 'success');
-        App.rerender();
-        return;
-      }
+    // 视觉定量：多模态模型一次完成实例分割、1cm网格标定、透视相对高度估计，再由本地几何内核算体积/质量/热量
+    const mr = await Recognize.measure(state.compressedBase64, state.imgSize.w, state.imgSize.h, null);
+    if (mr.success) {
+      state.candidates = mapMeasure(mr.data);
+      state.measureSummary = mr.data;
+      state.lowConfidence = state.candidates.every(c => parseFloat(c.probability) < 0.3);
+      state.step = 'candidates';
+      UI.toast(`定量分析完成：${mr.data.food_count} 项食物，估重约 ${mr.data.total_mass_g}g`, 'success');
+      App.rerender();
+      return;
     }
     // 兜底：仅类型识别（用户手动给克重）
     const dr = await Recognize.dish(state.compressedBase64);
