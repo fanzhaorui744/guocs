@@ -384,16 +384,29 @@ const PageMeal = (() => {
     state.error = null; state.step = 'recognizing'; state.isMock = false;
     App.rerender();
 
-    // 直接使用类型识别（短提示词，5秒内响应），用户手动确认份量
+    // 视觉定量：多模态模型一次完成实例分割、1cm网格标定、透视相对高度估计，再由本地几何内核算体积/质量/热量
+    const mr = await Recognize.measure(state.compressedBase64, state.imgSize.w, state.imgSize.h, null);
+    if (mr.success) {
+      state.candidates = mapMeasure(mr.data);
+      state.measureSummary = mr.data;
+      state.lowConfidence = state.candidates.every(c => parseFloat(c.probability) < 0.3);
+      state.selectedIndices = state.candidates.map((_, i) => i); // 默认全选
+      state.candidateWeights = {};
+      state.step = 'candidates';
+      UI.toast(`定量分析完成：${mr.data.food_count} 项食物，估重约 ${mr.data.total_mass_g}g`, 'success');
+      App.rerender();
+      return;
+    }
+    // 兜底：仅类型识别（用户手动给克重）
     const dr = await Recognize.dish(state.compressedBase64);
     if (dr.success) {
       state.candidates = dr.results;
       state.measureSummary = null;
       state.lowConfidence = dr.results.every(c => parseFloat(c.probability) < 0.3);
-      state.selectedIndices = state.candidates.map((_, i) => i); // 默认全选
+      state.selectedIndices = state.candidates.map((_, i) => i);
       state.candidateWeights = {};
       state.step = 'candidates';
-      UI.toast(`识别完成：${dr.results.length} 项食物，请确认份量`, 'success');
+      UI.toast('已完成类型识别，可手动确认份量', 'info');
     } else {
       state.error = { title: '识别失败', detail: '可重试、重新拍摄，或使用"快速体验"查看完整流程。' };
       state.step = 'upload';
