@@ -205,8 +205,10 @@ const UI = (() => {
     const rs = p.record_snapshot;
     return `<div class="post-item" style="${isHidden?'opacity:0.6;':''}">
       <div class="post-header">
-        <div class="post-avatar">${p.author_name?.[0] || 'U'}</div>
-        <div><div class="post-author">${p.author_name} ${p.verification_badge?`<span class="post-role-badge">${p.verification_badge}</span>`:''}<span class="post-role-badge">${p.author_role==='user'?'用户':p.author_role==='merchant'?'商家':'营养师'}</span></div></div>
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="PageCommunity.openProfile('${p.author_id}')" title="查看 ${p.author_name} 的主页">
+          <div class="post-avatar">${p.author_name?.[0] || 'U'}</div>
+          <div><div class="post-author">${p.author_name} ${p.verification_badge?`<span class="post-role-badge">${p.verification_badge}</span>`:''}<span class="post-role-badge">${p.author_role==='user'?'用户':p.author_role==='merchant'?'商家':'营养师'}</span></div></div>
+        </div>
         <div class="post-time">${p.created_at?.slice(0,16).replace('T',' ') || ''}</div>
       </div>
       ${isPending ? '<div class="tag tag-pending" style="margin-bottom:8px;">待审核 · 仅自己可见</div>' : ''}
@@ -236,9 +238,10 @@ const UI = (() => {
       </div>
       <div id="comments_${idx}" style="display:none;">
         <div class="comment-list">
-          ${(p.comments||[]).map(c => `<div class="comment-item"><div class="comment-avatar">${c.author?.[0]||'U'}</div><div class="comment-body"><div class="comment-header">${c.author} <span class="post-role-badge">${c.role||'用户'}</span>${c.qualification?` <span class="post-role-badge">资质:${c.qualification}</span>`:''} · ${c.time}</div><div class="comment-text">${c.text}</div></div></div>`).join('')}
+          ${(p.comments||[]).map((c,ci) => `<div class="comment-item"><div class="comment-avatar">${c.author?.[0]||'U'}</div><div class="comment-body"><div class="comment-header">${c.author} <span class="post-role-badge">${c.role||'用户'}</span>${c.qualification?` <span class="post-role-badge">资质:${c.qualification}</span>`:''} · ${c.time}</div><div class="comment-text">${c.reply_to?`<span style="color:var(--primary);font-weight:600;">回复 @${c.reply_to}：</span>`:''}${c.text}</div><div style="display:flex;gap:14px;margin-top:4px;font-size:.72rem;color:var(--text-muted);"><span style="cursor:pointer;" onclick="PageCommunity.likeComment(${idx},${ci})">👍 ${c.likes||0}</span><span style="cursor:pointer;" onclick="PageCommunity.startReply(${idx},${ci},'${(c.author||'').replace(/'/g,'')}')">回复</span></div></div></div>`).join('')}
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;"><input class="form-input" id="commentInput_${idx}" placeholder="写评论..." style="flex:1;"><button class="btn btn-primary btn-sm" onclick="PageCommunity.addComment(${idx})">发送</button></div>
+        <div style="display:flex;gap:8px;margin-top:8px;"><input class="form-input" id="commentInput_${idx}" placeholder="写评论..." style="flex:1;" onkeydown="if(event.key==='Enter')PageCommunity.addComment(${idx})"><button class="btn btn-primary btn-sm" onclick="PageCommunity.addComment(${idx})">发送</button></div>
+        <div id="replyHint_${idx}" style="display:none;font-size:.7rem;color:var(--primary);margin-top:4px;"></div>
       </div>
     </div>`;
   }
