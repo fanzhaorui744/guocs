@@ -4,8 +4,8 @@
 <!-- 营养智链 · 外卖个性化营养管理平台 | 单文件版 2026-09 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>钀ュ吇鏅洪摼 鈥斺€?澶栧崠涓€у寲钀ュ吇绠＄悊骞冲彴</title>
-<meta name="description" content="钀ュ吇鏅洪摼鈥斺€旈潰鍚戠敤鎴枫€佸晢瀹躲€佽惀鍏诲笀涓夌鍗忓悓鐨勫鍗栦釜鎬у寲钀ュ吇绠＄悊骞冲彴锛屾彁渚涢椋熸櫤鑳借瘑鍒€侀ギ鍝佽惀鍏昏绠椼€佽秼鍔垮垎鏋愪笌鍗忓悓绀惧尯銆?>
+<title>营养智链 —— 外卖个性化营养管理平台</title>
+<meta name="description" content="营养智链——面向用户、商家、营养师三端协同的外卖个性化营养管理平台，提供餐食智能识别、饮品营养计算、趋势分析与协同社区�?>
 <link rel="icon" type="image/png" href="assets/logo-mark.png">
 <style>
 /* 营养智链 Web 原型样式 v3.0 - UI全面升级
@@ -534,82 +534,82 @@ ul,ol{list-style:none}
 </head>
 <body>
 <div id="app">
-  <!-- 椤堕儴瀵艰埅鏍?-->
+  <!-- 顶部导航�?-->
   <header class="app-header" role="banner">
     <div class="header-inner">
-      <a href="#/" class="brand" aria-label="钀ュ吇鏅洪摼棣栭〉">
-        <img src="assets/logo-mark.png" alt="钀ュ吇鏅洪摼瀹樻柟Logo" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <a href="#/" class="brand" aria-label="营养智链首页">
+        <img src="assets/logo-mark.png" alt="营养智链官方Logo" class="brand-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <span class="brand-mark" aria-hidden="true" style="display:none;"></span>
-        <span class="brand-text">钀ュ吇鏅洪摼</span>
+        <span class="brand-text">营养智链</span>
       </a>
       <div class="header-right">
-        <div class="role-switcher" role="group" aria-label="瑙掕壊鍒囨崲">
-          <button class="role-btn active" data-role="user" aria-pressed="true">鐢ㄦ埛</button>
-          <button class="role-btn" data-role="merchant" aria-pressed="false">鍟嗗</button>
-          <button class="role-btn" data-role="nutritionist" aria-pressed="false">钀ュ吇甯?/button>
+        <div class="role-switcher" role="group" aria-label="角色切换">
+          <button class="role-btn active" data-role="user" aria-pressed="true">用户</button>
+          <button class="role-btn" data-role="merchant" aria-pressed="false">商家</button>
+          <button class="role-btn" data-role="nutritionist" aria-pressed="false">营养�?/button>
         </div>
         <div id="userChip" class="user-chip-box"></div>
-        <button class="menu-toggle" id="menuToggle" aria-label="鎵撳紑鑿滃崟" aria-expanded="false">
+        <button class="menu-toggle" id="menuToggle" aria-label="打开菜单" aria-expanded="false">
           <svg class="icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           <svg class="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
     </div>
-    <!-- 涓诲鑸?-->
-    <nav class="main-nav" id="mainNav" role="navigation" aria-label="涓诲鑸?>
+    <!-- 主导�?-->
+    <nav class="main-nav" id="mainNav" role="navigation" aria-label="主导�?>
       <div class="nav-inner">
-        <!-- 鐢ㄦ埛瑙掕壊鑿滃崟 -->
-        <a href="#/" class="nav-link" data-role="user" data-route="/"><i data-lucide="home"></i><span>鎬昏/浠婃棩</span></a>
+        <!-- 用户角色菜单 -->
+        <a href="#/" class="nav-link" data-role="user" data-route="/"><i data-lucide="home"></i><span>总览/今日</span></a>
         <div class="nav-group" data-role="user">
-          <a href="#/record/order" class="nav-link" data-role="user" data-route="/record/order"><i data-lucide="receipt"></i><span>璁㈠崟瀵煎叆</span></a>
-          <a href="#/record/meal-photo" class="nav-link" data-role="user" data-route="/record/meal-photo"><i data-lucide="camera"></i><span>椁愰鎷嶇収</span></a>
-          <a href="#/record/beverage" class="nav-link" data-role="user" data-route="/record/beverage"><i data-lucide="cup-soda"></i><span>楗搧閰嶇疆</span></a>
+          <a href="#/record/order" class="nav-link" data-role="user" data-route="/record/order"><i data-lucide="receipt"></i><span>订单导入</span></a>
+          <a href="#/record/meal-photo" class="nav-link" data-role="user" data-route="/record/meal-photo"><i data-lucide="camera"></i><span>餐食拍照</span></a>
+          <a href="#/record/beverage" class="nav-link" data-role="user" data-route="/record/beverage"><i data-lucide="cup-soda"></i><span>饮品配置</span></a>
         </div>
-        <a href="#/history" class="nav-link" data-role="user" data-route="/history"><i data-lucide="history"></i><span>璁板綍涓庤秼鍔?/span></a>
-        <a href="#/goals" class="nav-link" data-role="user" data-route="/goals"><i data-lucide="target"></i><span>鐩爣涓庤缃?/span></a>
+        <a href="#/history" class="nav-link" data-role="user" data-route="/history"><i data-lucide="history"></i><span>记录与趋�?/span></a>
+        <a href="#/goals" class="nav-link" data-role="user" data-route="/goals"><i data-lucide="target"></i><span>目标与设�?/span></a>
         <span class="nav-divider" data-role="user"></span>
-        <!-- 鍟嗗瑙掕壊鑿滃崟 -->
-        <a href="#/merchant" class="nav-link" data-role="merchant" data-route="/merchant"><i data-lucide="store"></i><span>鍟嗗宸ヤ綔鍙?/span></a>
-        <a href="#/merchant/analytics" class="nav-link" data-role="merchant" data-route="/merchant/analytics"><i data-lucide="bar-chart-3"></i><span>鏁版嵁鍒嗘瀽</span></a>
-        <a href="#/merchant/dishes" class="nav-link" data-role="merchant" data-route="/merchant/dishes"><i data-lucide="utensils"></i><span>鑿滃搧绠＄悊</span></a>
-        <a href="#/merchant/community" class="nav-link" data-role="merchant" data-route="/merchant/community"><i data-lucide="message-square"></i><span>绀惧尯杩愯惀</span></a>
+        <!-- 商家角色菜单 -->
+        <a href="#/merchant" class="nav-link" data-role="merchant" data-route="/merchant"><i data-lucide="store"></i><span>商家工作�?/span></a>
+        <a href="#/merchant/analytics" class="nav-link" data-role="merchant" data-route="/merchant/analytics"><i data-lucide="bar-chart-3"></i><span>数据分析</span></a>
+        <a href="#/merchant/dishes" class="nav-link" data-role="merchant" data-route="/merchant/dishes"><i data-lucide="utensils"></i><span>菜品管理</span></a>
+        <a href="#/merchant/community" class="nav-link" data-role="merchant" data-route="/merchant/community"><i data-lucide="message-square"></i><span>社区运营</span></a>
         <span class="nav-divider" data-role="merchant"></span>
-        <!-- 钀ュ吇甯堣鑹茶彍鍗?-->
-        <a href="#/nutritionist" class="nav-link" data-role="nutritionist" data-route="/nutritionist"><i data-lucide="stethoscope"></i><span>澶嶆牳宸ヤ綔鍙?/span></a>
-        <a href="#/nutritionist/users" class="nav-link" data-role="nutritionist" data-route="/nutritionist/users"><i data-lucide="users"></i><span>鐢ㄦ埛绠＄悊</span></a>
-        <a href="#/nutritionist/articles" class="nav-link" data-role="nutritionist" data-route="/nutritionist/articles"><i data-lucide="book-open"></i><span>鐭ヨ瘑鍙戝竷</span></a>
-        <a href="#/nutritionist/stats" class="nav-link" data-role="nutritionist" data-route="/nutritionist/stats"><i data-lucide="bar-chart-2"></i><span>鏁版嵁缁熻</span></a>
+        <!-- 营养师角色菜单 -->
+        <a href="#/nutritionist" class="nav-link" data-role="nutritionist" data-route="/nutritionist"><i data-lucide="stethoscope"></i><span>复核工作�?/span></a>
+        <a href="#/nutritionist/users" class="nav-link" data-role="nutritionist" data-route="/nutritionist/users"><i data-lucide="users"></i><span>用户管理</span></a>
+        <a href="#/nutritionist/articles" class="nav-link" data-role="nutritionist" data-route="/nutritionist/articles"><i data-lucide="book-open"></i><span>知识发布</span></a>
+        <a href="#/nutritionist/stats" class="nav-link" data-role="nutritionist" data-route="/nutritionist/stats"><i data-lucide="bar-chart-2"></i><span>数据统计</span></a>
         <span class="nav-divider" data-role="nutritionist"></span>
-        <!-- 鍏辩敤鑿滃崟 -->
-        <a href="#/community" class="nav-link" data-role="all" data-route="/community"><i data-lucide="users"></i><span>鍗忓悓绀惧尯</span></a>
-        <a href="#/project" class="nav-link" data-role="all" data-route="/project"><i data-lucide="award"></i><span>椤圭洰灞曠ず</span></a>
+        <!-- 共用菜单 -->
+        <a href="#/community" class="nav-link" data-role="all" data-route="/community"><i data-lucide="users"></i><span>协同社区</span></a>
+        <a href="#/project" class="nav-link" data-role="all" data-route="/project"><i data-lucide="award"></i><span>项目展示</span></a>
       </div>
     </nav>
   </header>
 
-  <!-- 涓诲唴瀹瑰尯 -->
+  <!-- 主内容区 -->
   <main id="mainContent" role="main" tabindex="-1"></main>
 
-  <!-- 搴曢儴瀵艰埅锛堢Щ鍔ㄧ锛?-->
-  <nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="绉诲姩绔揩鎹峰鑸?>
-    <a href="#/" class="bottom-link" data-route="/"><i data-lucide="home"></i><span>鎬昏</span></a>
-    <a href="#/record/beverage" class="bottom-link" data-route="/record/beverage"><i data-lucide="cup-soda"></i><span>楗搧</span></a>
-    <a href="#/record/meal-photo" class="bottom-link" data-route="/record/meal-photo"><i data-lucide="camera"></i><span>鎷嶇収</span></a>
-    <a href="#/history" class="bottom-link" data-route="/history"><i data-lucide="history"></i><span>鍘嗗彶</span></a>
-    <a href="#/goals" class="bottom-link" data-route="/goals"><i data-lucide="settings"></i><span>璁剧疆</span></a>
+  <!-- 底部导航（移动端�?-->
+  <nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="移动端快捷导�?>
+    <a href="#/" class="bottom-link" data-route="/"><i data-lucide="home"></i><span>总览</span></a>
+    <a href="#/record/beverage" class="bottom-link" data-route="/record/beverage"><i data-lucide="cup-soda"></i><span>饮品</span></a>
+    <a href="#/record/meal-photo" class="bottom-link" data-route="/record/meal-photo"><i data-lucide="camera"></i><span>拍照</span></a>
+    <a href="#/history" class="bottom-link" data-route="/history"><i data-lucide="history"></i><span>历史</span></a>
+    <a href="#/goals" class="bottom-link" data-route="/goals"><i data-lucide="settings"></i><span>设置</span></a>
   </nav>
 
-  <!-- Toast 瀹瑰櫒 -->
+  <!-- Toast 容器 -->
   <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- 妯℃€佹瀹瑰櫒 -->
+  <!-- 模态框容器 -->
   <div id="modalContainer"></div>
 </div>
 
-<!-- 椤佃剼 -->
+<!-- 页脚 -->
 <footer class="app-footer" role="contentinfo">
   <div class="footer-inner">
-    <p><strong>钀ュ吇鏅洪摼</strong> 路 澶栧崠涓€у寲钀ュ吇绠＄悊骞冲彴</p>
+    <p><strong>营养智链</strong> · 外卖个性化营养管理平台</p>
   </div>
 </footer>
 
@@ -2490,6 +2490,7 @@ const Recognize = (() => {
   /* ---------- 餐食视觉定量：分类+分割+参照物标定+形状厚度，一次调用后由 Volume 计算体积质量热量 ---------- */
   function _measureSys() {
     return '你是食物视觉测量专家。对餐食照片做实例分割、尺度标定、视角与厚度判定。坐标归一化为0~999整数：左上(0,0)、右下(999,999)，x向右、y向下。只输出JSON，不要解释。'
+      + '【图片预处理铁律】若图片是手机截图或相册分享图，忽略状态栏、时间、电量、地点文字、视频控制条、底部按钮、水印等所有非食物UI元素，只对画面中央的真实食物和餐盘/网格纸做分析。若食物区域被UI遮挡，按可见部分估算。'
       + '【尺度标定铁律】画面出现方格纸时reference.type必须为grid1cm，严禁把金属盘、托盘、电子秤盘当餐盘(plate)标定。网格纸由1cm×1cm的最小方格整齐排列而成，按两步精确标定：'
       + '①grid_pts按左上、右上、右下、左下给出【整张可见网格纸外边框】四个角；②数清这张纸一行有多少个最小格grid_cols、一列有多少个最小格grid_rows(整数)；'
       + '同时就近选一个方正、清晰、未被遮挡的【单个最小格】，用px_points给它的四角(左上右上右下左下)，known_cm=1.0。最小格是网格线围成的最小封闭正方形，切勿把2×2的田字格当成一格。'
@@ -3461,6 +3462,8 @@ const PageMeal = (() => {
     compressedBase64: null,
     imgSize: { w: 1024, h: 1024 },
     candidates: [],
+    selectedIndices: [], // 多选：选中的候选索引数组
+    candidateWeights: {}, // 每项自定义重量 {index: grams}
     selectedDish: null,
     weight: 250,
     nutrition: null,
@@ -3468,9 +3471,7 @@ const PageMeal = (() => {
     error: null,
     isMock: false,
     lowConfidence: false,
-    measureSummary: null,
-    depthStatus: null,
-    depthRes: null
+    measureSummary: null
   };
 
   // 快速体验数据：附带视觉定量几何，完整演示“面积→厚度→体积→质量→热量”链路
@@ -3572,6 +3573,23 @@ const PageMeal = (() => {
 
   function renderCandidates() {
     const allLow = state.candidates.every(c => parseFloat(c.probability) < 0.3);
+    const selCount = state.selectedIndices.length;
+    const allSelected = selCount === state.candidates.length;
+    // 计算选中项的总重量和总热量
+    let totalMass = 0, totalKcalMin = 0, totalKcalMax = 0;
+    state.selectedIndices.forEach(idx => {
+      const c = state.candidates[idx];
+      const w = state.candidateWeights[idx] != null ? state.candidateWeights[idx] : (c.measure ? c.measure.massG : 150);
+      totalMass += w;
+      const cal100 = parseFloat(c.calorie) || 0;
+      if (c.measure && c.measure.kcalRange) {
+        totalKcalMin += Math.round(cal100 * c.measure.kcalRange[0] / Math.max(c.measure.kcal, 1) * w / 100);
+        totalKcalMax += Math.round(cal100 * w / 100);
+      } else {
+        totalKcalMin += Math.round(cal100 * w / 100);
+        totalKcalMax += Math.round(cal100 * w / 100);
+      }
+    });
     return `
       <div class="card">
         <div class="card-header">
@@ -3590,14 +3608,26 @@ const PageMeal = (() => {
           <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin:12px 14px 0;">
             <span style="font-size:0.8125rem;color:var(--warning);font-weight:500;">⚠️ 识别置信度较低，建议手动确认或重新拍摄</span>
           </div>` : ''}
+        <!-- 多选工具栏 -->
+        <div style="padding:10px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border-light);">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.8125rem;color:var(--text-secondary);">
+            <input type="checkbox" ${allSelected ? 'checked' : ''} onchange="PageMeal.toggleSelectAll()" style="width:16px;height:16px;accent-color:var(--primary);">
+            全选
+          </label>
+          <span style="font-size:0.8125rem;color:var(--primary);font-weight:700;">已选 ${selCount} 项</span>
+          <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">可勾选要保存的食物，重量可修改</span>
+        </div>
         <div class="candidate-list">
           ${state.candidates.map((c, i) => {
             const prob = parseFloat(c.probability);
             const probColor = prob >= 0.7 ? 'var(--success)' : prob >= 0.4 ? 'var(--accent-gold)' : 'var(--accent-coral)';
             const m = c.measure;
+            const isSelected = state.selectedIndices.includes(i);
+            const w = state.candidateWeights[i] != null ? state.candidateWeights[i] : (m ? m.massG : 150);
             return `
-              <div class="candidate-item" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px;">
+              <div class="candidate-item" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px;${isSelected ? '' : 'opacity:0.55;'}">
                 <div style="display:flex;align-items:center;gap:10px;">
+                  <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="PageMeal.toggleSelect(${i})" style="width:18px;height:18px;accent-color:var(--primary);flex-shrink:0;">
                   <div class="candidate-info" style="flex:1;">
                     <div class="candidate-name">${c.name}</div>
                     <div class="candidate-meta">
@@ -3605,24 +3635,36 @@ const PageMeal = (() => {
                       ${c.calorie ? ` · ${c.calorie} kcal/100g` : ''}
                     </div>
                   </div>
-                  <button class="btn btn-primary btn-sm" onclick="PageMeal.selectDish(${i})"><i data-lucide="check"></i>选择</button>
+                  <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+                    <input type="number" value="${w}" min="1" max="2000" onchange="PageMeal.setCandidateWeight(${i}, this.value)" style="width:64px;padding:4px 6px;border:1px solid var(--border-light);border-radius:6px;font-size:0.75rem;text-align:center;">
+                    <span style="font-size:0.7rem;color:var(--text-muted);">g</span>
+                  </div>
                 </div>
                 ${m ? `
-                  <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:0.72rem;">
-                    <span class="tag" style="background:var(--bg-alt);">占地 ${m.areaCm2} cm²</span>
-                    <span class="tag" style="background:var(--bg-alt);">厚 ${m.thicknessCm} cm</span>
-                    <span class="tag" style="background:var(--bg-alt);">体积 ${m.volumeCm3} cm³</span>
-                    <span class="tag" style="background:var(--bg-alt);">密度 ${m.density} g/cm³</span>
-                    <span class="tag tag-success">视觉估重 ≈ ${m.massG} g</span>
-                    <span class="tag tag-demo-data">${m.kcalRange ? m.kcalRange[0] + '~' + m.kcalRange[1] : m.kcal} kcal</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:0.7rem;padding-left:28px;">
+                    <span class="tag" style="background:var(--bg-alt);">占地 ${m.areaCm2}cm²</span>
+                    <span class="tag" style="background:var(--bg-alt);">厚 ${m.thicknessCm}cm</span>
+                    <span class="tag" style="background:var(--bg-alt);">体积 ${m.volumeCm3}cm³</span>
+                    <span class="tag" style="background:var(--bg-alt);">密度 ${m.density}</span>
+                    <span class="tag tag-success">估重 ${m.massG}g</span>
+                    <span class="tag tag-demo-data">${m.kcalRange ? m.kcalRange[0]+'~'+m.kcalRange[1] : m.kcal} kcal</span>
                   </div>` : ''}
               </div>
             `;
           }).join('')}
         </div>
-        <div style="margin-top:14px;padding:14px;border-top:1px solid var(--border-light);display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-secondary" onclick="PageMeal.manualInput()"><i data-lucide="edit-3"></i>手动输入菜品名</button>
-          <button class="btn btn-ghost" onclick="PageMeal.backToUpload()"><i data-lucide="rotate-ccw"></i>重新上传</button>
+        <!-- 选中汇总 + 保存按钮 -->
+        <div style="margin-top:14px;padding:14px;border-top:1px solid var(--border-light);background:var(--bg-alt);border-radius:0 0 var(--radius-lg) var(--radius-lg);">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px;">
+            <span style="font-size:0.8125rem;color:var(--text-secondary);">选中 <b style="color:var(--primary);">${selCount}</b> 项 · 总重 <b>${Math.round(totalMass)}g</b> · 总热量 <b>${totalKcalMin}~${totalKcalMax} kcal</b></span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" style="flex:1;min-width:200px;" onclick="PageMeal.saveSelected()" ${selCount === 0 ? 'disabled style="opacity:0.5;cursor:not-allowed;flex:1;min-width:200px;"' : ''}>
+              <i data-lucide="save"></i>确认保存选中的 ${selCount} 项食物
+            </button>
+            <button class="btn btn-secondary" onclick="PageMeal.manualInput()"><i data-lucide="edit-3"></i>手动输入</button>
+            <button class="btn btn-ghost" onclick="PageMeal.backToUpload()"><i data-lucide="rotate-ccw"></i>重新上传</button>
+          </div>
         </div>
       </div>
     `;
@@ -3730,12 +3772,14 @@ const PageMeal = (() => {
   }
 
   function renderSaved() {
+    const s = state.savedSummary;
+    const desc = s ? `已保存 ${s.count} 项：${s.names.join('、')}，共约 ${s.totalMass}g / ${s.totalKcal} kcal` : (state.selectedDish ? `${state.selectedDish.name} · ${state.weight}g` : '已加入历史记录');
     return `
       <div class="card">
         <div class="state-view">
           <div class="state-icon" style="color:var(--success);"><i data-lucide="check-circle-2" style="width:56px;height:56px;"></i></div>
           <div class="state-title">已保存到今日记录</div>
-          <div class="state-desc">${state.selectedDish?.name || '菜品'} · ${state.weight}g · 已加入历史记录</div>
+          <div class="state-desc">${desc}</div>
           <div class="state-actions">
             <a href="#/" class="btn btn-primary"><i data-lucide="home"></i>查看总览</a>
             <button class="btn btn-secondary" onclick="PageMeal.reset()"><i data-lucide="plus"></i>继续记录</button>
@@ -3794,7 +3838,6 @@ const PageMeal = (() => {
   async function startRecognize() {
     if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
     state.error = null; state.step = 'recognizing'; state.isMock = false;
-    state.depthStatus = null; state.depthRes = null;
     App.rerender();
 
     // 视觉定量：多模态模型一次完成实例分割、1cm网格标定、透视相对高度估计，再由本地几何内核算体积/质量/热量
@@ -3803,6 +3846,8 @@ const PageMeal = (() => {
       state.candidates = mapMeasure(mr.data);
       state.measureSummary = mr.data;
       state.lowConfidence = state.candidates.every(c => parseFloat(c.probability) < 0.3);
+      state.selectedIndices = state.candidates.map((_, i) => i); // 默认全选
+      state.candidateWeights = {};
       state.step = 'candidates';
       UI.toast(`定量分析完成：${mr.data.food_count} 项食物，估重约 ${mr.data.total_mass_g}g`, 'success');
       App.rerender();
@@ -3814,6 +3859,8 @@ const PageMeal = (() => {
       state.candidates = dr.results;
       state.measureSummary = null;
       state.lowConfidence = dr.results.every(c => parseFloat(c.probability) < 0.3);
+      state.selectedIndices = state.candidates.map((_, i) => i);
+      state.candidateWeights = {};
       state.step = 'candidates';
       UI.toast('已完成类型识别，可手动确认份量', 'info');
     } else {
@@ -3823,21 +3870,81 @@ const PageMeal = (() => {
     App.rerender();
   }
 
-  function tickDepth(text, preview, device, failed) {
-    if (!state.depthStatus) state.depthStatus = { active: true };
-    state.depthStatus.text = text;
-    if (preview) state.depthStatus.preview = preview;
-    if (device) state.depthStatus.device = device;
-    if (failed) state.depthStatus.failed = true;
-    const el = document.getElementById('depthProgress');
-    if (el) el.textContent = '深度感知：' + text;
-  }
-
   function cancelRecognize() { state.step = 'upload'; App.rerender(); }
+
+  // ---------- 多选相关 ----------
+  function toggleSelect(index) {
+    const idx = state.selectedIndices.indexOf(index);
+    if (idx >= 0) state.selectedIndices.splice(idx, 1);
+    else state.selectedIndices.push(index);
+    App.rerender();
+  }
+  function toggleSelectAll() {
+    if (state.selectedIndices.length === state.candidates.length) {
+      state.selectedIndices = [];
+    } else {
+      state.selectedIndices = state.candidates.map((_, i) => i);
+    }
+    App.rerender();
+  }
+  function setCandidateWeight(index, value) {
+    const w = parseFloat(value);
+    if (!isNaN(w) && w > 0) state.candidateWeights[index] = w;
+  }
+  // 一次性保存所有选中的食物到历史记录
+  function saveSelected() {
+    if (state.selectedIndices.length === 0) { UI.toast('请至少选择一项食物', 'warning'); return; }
+    const now = new Date();
+    const hour = now.getHours();
+    const period = hour >= 6 && hour < 10 ? 'breakfast' : hour >= 11 && hour < 14 ? 'lunch' : hour >= 17 && hour < 21 ? 'dinner' : 'snack';
+    const records = AppState.getRecords();
+    let totalKcal = 0, totalMass = 0, savedNames = [];
+    state.selectedIndices.forEach(idx => {
+      const c = state.candidates[idx];
+      const w = state.candidateWeights[idx] != null ? state.candidateWeights[idx] : (c.measure ? c.measure.massG : 150);
+      const cal100 = parseFloat(c.calorie) || 0;
+      const kcal = Math.round(cal100 * w / 100);
+      totalKcal += kcal; totalMass += w; savedNames.push(c.name);
+      const m = c.measure;
+      records.push({
+        id: 'meal_' + Date.now() + '_' + idx,
+        source_type: state.isMock ? 'demo_mock' : 'smart_recognize',
+        merchant_label: c.name,
+        meal_period: period,
+        visual_measure: m ? {
+          area_cm2: m.areaCm2, thickness_cm: m.thicknessCm, volume_cm3: m.volumeCm3,
+          density_g_cm3: m.density, mass_g: m.massG, shape: m.shape
+        } : null,
+        items: [{
+          id: 'item_' + Math.random().toString(36).slice(2),
+          name: c.name, category: 'meal',
+          estimated_weight_g: w, consumed_ratio: 1,
+          calories_kcal: { value: kcal, interval: null, value_type: 'estimated' },
+          protein_g: { value: null, interval: null, value_type: 'unknown' },
+          fat_g: { value: null, interval: null, value_type: 'unknown' },
+          carbs_g: { value: null, interval: null, value_type: 'unknown' },
+          sugar_g: { value: null, interval: null, value_type: 'unknown' },
+          sodium_mg: { value: null, interval: null, value_type: 'unknown' },
+          confidence: parseFloat(c.probability) || 0.5,
+          source_ids: [], value_type: 'estimated',
+          warnings: [m ? '视觉定量估算：分割标定→透视高度→体积→估重，结果可手动修正' : '智能识别结果，按每100g参考值×份量估算']
+        }],
+        status: 'confirmed',
+        created_at: now.toISOString(), updated_at: now.toISOString()
+      });
+    });
+    AppState.setRecords(records);
+    state.step = 'saved';
+    state.savedSummary = { count: state.selectedIndices.length, names: savedNames, totalMass: Math.round(totalMass), totalKcal };
+    UI.toast(`已保存 ${state.selectedIndices.length} 项食物：${savedNames.join('、')}，共约 ${Math.round(totalMass)}g / ${totalKcal} kcal`, 'success');
+    App.rerender();
+  }
 
   function useMockData() {
     state.candidates = MOCK_DISHES.map(d => ({ ...d }));
     state.isMock = true; state.lowConfidence = false;
+    state.selectedIndices = state.candidates.map((_, i) => i);
+    state.candidateWeights = {};
     state.measureSummary = {
       reference_type: 'grid1cm', food_count: MOCK_DISHES.length,
       total_mass_g: MOCK_DISHES.reduce((a, b) => a + b.measure.massG, 0),
@@ -3921,11 +4028,11 @@ const PageMeal = (() => {
   }
 
   function reset() {
-    state = { step: 'upload', previewImage: null, compressedBase64: null, imgSize: { w: 1024, h: 1024 }, candidates: [], selectedDish: null, weight: 250, nutrition: null, nutritionLoading: false, error: null, isMock: false, lowConfidence: false, measureSummary: null, depthStatus: null, depthRes: null };
+    state = { step: 'upload', previewImage: null, compressedBase64: null, imgSize: { w: 1024, h: 1024 }, candidates: [], selectedIndices: [], candidateWeights: {}, selectedDish: null, weight: 250, nutrition: null, nutritionLoading: false, error: null, isMock: false, lowConfidence: false, measureSummary: null, savedSummary: null };
     App.rerender();
   }
 
-  return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, retryNutrition, setWeight, manualInput, saveRecord, reset, backToUpload };
+  return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, retryNutrition, setWeight, manualInput, saveRecord, reset, backToUpload, toggleSelect, toggleSelectAll, setCandidateWeight, saveSelected };
 })();
 
 /* 饮品配置页 - 严格顺序 + 透明杯门控 + 区间/unknown */
