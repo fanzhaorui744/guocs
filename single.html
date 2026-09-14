@@ -2610,7 +2610,7 @@ const Recognize = (() => {
         { type: 'text', text: _appUserPrompt() },
         { type: 'image_url', image_url: { url: dataUri } }
       ] }
-    ], true, 1500);
+    ], true, 800);
     if (!r.success) return { success: false, error: r.error || '识别服务暂不可用' };
     const raw = _extractJson(r.text);
     if (!raw || !Array.isArray(raw.results)) return { success: false, error: '识别结果解析失败' };
