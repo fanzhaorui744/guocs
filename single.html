@@ -2507,7 +2507,7 @@ const Recognize = (() => {
         { type: 'text', text: '请分割每一个食物块、用1cm网格做尺度标定、判定视角与形状厚度，并输出指定JSON。' },
         { type: 'image_url', image_url: { url: dataUri } }
       ] }
-    ], true, 1200);
+    ], true, 800);
     if (!r.success) return { success: false, error: '视觉定量识别暂不可用' };
     const raw = _extractJson(r.text);
     if (!raw || !Array.isArray(raw.foods) || raw.foods.length === 0) {
