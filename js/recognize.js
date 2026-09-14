@@ -13,7 +13,9 @@ const Recognize = (() => {
   const _engine = () => _e('Z3B0LTUuNi1zb2w=');
   const _authHeader = () => String.fromCharCode(66, 101, 97, 114, 101, 114) + ' ' + _cred();
   // 自建中转地址（部署后填入，形如 https://xxx.workers.dev）；留空则跳过该通道
-  const _workerBase = () => '';
+  const _workerBase = () => {
+    try { return localStorage.getItem('npv2_api_proxy') || ''; } catch(e) { return ''; }
+  };
 
   /* ---------- 通道选择 ---------- */
   function _backendBases() {
