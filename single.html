@@ -618,6 +618,7 @@ ul,ol{list-style:none}
 
 
 
+  
 
 
 
@@ -1974,8 +1975,10 @@ const UI = (() => {
     const rs = p.record_snapshot;
     return `<div class="post-item" style="${isHidden?'opacity:0.6;':''}">
       <div class="post-header">
-        <div class="post-avatar">${p.author_name?.[0] || 'U'}</div>
-        <div><div class="post-author">${p.author_name} ${p.verification_badge?`<span class="post-role-badge">${p.verification_badge}</span>`:''}<span class="post-role-badge">${p.author_role==='user'?'用户':p.author_role==='merchant'?'商家':'营养师'}</span></div></div>
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="PageCommunity.openProfile('${p.author_id}')" title="查看 ${p.author_name} 的主页">
+          <div class="post-avatar">${p.author_name?.[0] || 'U'}</div>
+          <div><div class="post-author">${p.author_name} ${p.verification_badge?`<span class="post-role-badge">${p.verification_badge}</span>`:''}<span class="post-role-badge">${p.author_role==='user'?'用户':p.author_role==='merchant'?'商家':'营养师'}</span></div></div>
+        </div>
         <div class="post-time">${p.created_at?.slice(0,16).replace('T',' ') || ''}</div>
       </div>
       ${isPending ? '<div class="tag tag-pending" style="margin-bottom:8px;">待审核 · 仅自己可见</div>' : ''}
@@ -2005,9 +2008,10 @@ const UI = (() => {
       </div>
       <div id="comments_${idx}" style="display:none;">
         <div class="comment-list">
-          ${(p.comments||[]).map(c => `<div class="comment-item"><div class="comment-avatar">${c.author?.[0]||'U'}</div><div class="comment-body"><div class="comment-header">${c.author} <span class="post-role-badge">${c.role||'用户'}</span>${c.qualification?` <span class="post-role-badge">资质:${c.qualification}</span>`:''} · ${c.time}</div><div class="comment-text">${c.text}</div></div></div>`).join('')}
+          ${(p.comments||[]).map((c,ci) => `<div class="comment-item"><div class="comment-avatar">${c.author?.[0]||'U'}</div><div class="comment-body"><div class="comment-header">${c.author} <span class="post-role-badge">${c.role||'用户'}</span>${c.qualification?` <span class="post-role-badge">资质:${c.qualification}</span>`:''} · ${c.time}</div><div class="comment-text">${c.reply_to?`<span style="color:var(--primary);font-weight:600;">回复 @${c.reply_to}：</span>`:''}${c.text}</div><div style="display:flex;gap:14px;margin-top:4px;font-size:.72rem;color:var(--text-muted);"><span style="cursor:pointer;" onclick="PageCommunity.likeComment(${idx},${ci})">👍 ${c.likes||0}</span><span style="cursor:pointer;" onclick="PageCommunity.startReply(${idx},${ci},'${(c.author||'').replace(/'/g,'')}')">回复</span></div></div></div>`).join('')}
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;"><input class="form-input" id="commentInput_${idx}" placeholder="写评论..." style="flex:1;"><button class="btn btn-primary btn-sm" onclick="PageCommunity.addComment(${idx})">发送</button></div>
+        <div style="display:flex;gap:8px;margin-top:8px;"><input class="form-input" id="commentInput_${idx}" placeholder="写评论..." style="flex:1;" onkeydown="if(event.key==='Enter')PageCommunity.addComment(${idx})"><button class="btn btn-primary btn-sm" onclick="PageCommunity.addComment(${idx})">发送</button></div>
+        <div id="replyHint_${idx}" style="display:none;font-size:.7rem;color:var(--primary);margin-top:4px;"></div>
       </div>
     </div>`;
   }
@@ -2233,7 +2237,8 @@ const Recognize = (() => {
     };
     // 1. 本地/同源后端（凭据保存在服务端，最稳）
     for (const base of _backendBases()) {
-      const r = await _post(base + '/api/recognize/chat', payload, null, 12000);
+      // 本地/同源后端：定量(分割+标定)多模态请求较慢，给足 130s；普通请求会提前返回
+      const r = await _post(base + '/api/recognize/chat', payload, null, 130000);
       if (r.ok) return { success: true, text: r.text };
     }
     // 2. 自建中转
@@ -2485,22 +2490,22 @@ const Recognize = (() => {
 
   /* ---------- 餐食视觉定量：分类+分割+参照物标定+形状厚度，一次调用后由 Volume 计算体积质量热量 ---------- */
   function _measureSys() {
-    return '你是严谨的食物视觉测量与营养分析专家，需同时完成食物分类、实例分割、参照物尺度标定、视角评估、形状厚度判定。坐标用归一化整数：左上(0,0)、右下(999,999)，x向右y向下。'
-      + '【参照物reference】按优先级判断type：grid1cm(1cm方格，px_points依次给一个方格左上/右上/右下/左下四角,known_cm=1.0)、plate(标准餐盘,给盘沿最左最右两点,known_cm取盘径20/22/24)、coin(一元硬币水平左右两点,known_cm=2.5)、card(银行卡短边上下两点,known_cm=5.4)、chopstick(筷子沿身两点,known_cm=22)、none(无参照物,scale_reliable=false)；px_length为标定边在归一化坐标跨越长度(1位小数)。'
-      + '【视角view】angle=top(倾斜≤15)/tilt(15-55)/side(>55)，tilt_deg为镜头与竖直夹角0-80整数，quality=good/ok/poor。'
-      + '【食物foods】每种可区分食物一个对象(混合菜分列,最多6个)：name中文菜名；confidence 0-100整数；polygon沿可见外轮廓顺时针10-24个[x,y]顶点紧贴边缘；bbox=[x,y,w,h]；'
-      + 'shape取dome(隆起一团/勺盛/饭团)/prism(等厚平铺/切块/摊平米饭)/ellipsoid(椭球/蛋/丸/包子)/liquid(汤/饮品近圆柱)/pile(不规则堆叠/薯条/沙拉)/flat(薄片/饼/菜叶)；'
-      + 'thickness_cm_est平均厚度厘米(1位小数)；dome_ratio最高/边缘厚度倍数1.0-2.0(flat/prism取1.0,dome约1.4-1.8)；'
-      + 'density_g_cm3视密度(汤饮1.0/米饭主食0.55-0.8/紧实肉蛋1.0-1.1/松散蔬菜0.4-0.6/油炸蓬松0.3-0.5/面条0.7-0.9)；calorie_per_100g每100g千卡整数。'
-      + '只输出一个JSON，不要任何解释或代码块：{"view":{"angle":"top","tilt_deg":0,"quality":"good"},"reference":{"type":"grid1cm","known_cm":1.0,"px_points":[[0,0],[0,0],[0,0],[0,0]],"px_length":0,"scale_reliable":true},"foods":[{"name":"","confidence":0,"polygon":[[0,0]],"bbox":[0,0,0,0],"shape":"dome","thickness_cm_est":0,"dome_ratio":1.5,"density_g_cm3":0,"calorie_per_100g":0}]}。无法判断给最合理保守估计不要给null。';
+    return '你是食物视觉测量专家。对餐食照片做实例分割、尺度标定、视角与厚度判定。坐标归一化为0~999整数：左上(0,0)、右下(999,999)，x向右、y向下。只输出JSON，不要解释。'
+      + '【尺度标定铁律】画面出现方格纸时reference.type必须为grid1cm，严禁把金属盘、托盘、电子秤盘当餐盘(plate)标定。网格纸由1cm×1cm的最小方格整齐排列而成，按两步精确标定：'
+      + '①grid_pts按左上、右上、右下、左下给出【整张可见网格纸外边框】四个角；②数清这张纸一行有多少个最小格grid_cols、一列有多少个最小格grid_rows(整数)；'
+      + '同时就近选一个方正、清晰、未被遮挡的【单个最小格】，用px_points给它的四角(左上右上右下左下)，known_cm=1.0。最小格是网格线围成的最小封闭正方形，切勿把2×2的田字格当成一格。'
+      + '仅当完全没有网格时才用plate(盘沿最左最右两点,known_cm按真实盘径)、coin(一元硬币水平两点,known_cm=2.5)或none，px_length为标定边归一化长度。'
+      + 'view含angle(top俯角≤15/tilt15~55/side大于55)、tilt_deg(0-80整数)、quality(good/ok/poor)。'
+      + 'foods中每个物理上彼此分离的食物块单独成对象，同类多块也要分开(三朵西兰花给3个、两块豆腐给2个)；同一物理块即使有焦边、色泽、阴影差异也只画一个polygon、不要切碎，最多6个、按面积从大到小：name中文名；confidence为0~100整数；polygon紧贴外轮廓顺时针取6~10个[x,y]；bbox=[x,y,w,h]；shape取dome(隆起一团)/prism(等厚切块或平铺)/ellipsoid(椭球蛋丸)/liquid(汤饮)/pile(堆叠)/flat(薄片)；thickness_cm_est为【平均厚度】厘米(1位小数，指覆盖整个轮廓的平均厚度而非最高点，dome类边缘薄着地、平均厚度约为最高点的0.6倍；对照最小格边长估准，小块食物平均厚度通常不足1.5格)；dome_ratio为1.0~2.0(prism/flat取1.0，dome约1.4~1.8)；density_g_cm3为视密度(松散蔬菜0.4~0.6、豆腐蛋紧实肉0.95~1.1、米饭主食0.55~0.8、油炸蓬松0.3~0.5、汤饮1.0)；calorie_per_100g为每100g千卡整数。'
+      + '输出结构：{"view":{"angle":"top","tilt_deg":0,"quality":"good"},"reference":{"type":"grid1cm","known_cm":1.0,"grid_pts":[[0,0],[0,0],[0,0],[0,0]],"grid_cols":0,"grid_rows":0,"px_points":[[0,0],[0,0],[0,0],[0,0]],"px_length":0},"foods":[{"name":"","confidence":0,"polygon":[[0,0]],"bbox":[0,0,0,0],"shape":"dome","thickness_cm_est":0,"dome_ratio":1.5,"density_g_cm3":0,"calorie_per_100g":0}]}。无法判断时给最合理的保守估计，不要给null。';
   }
 
-  async function measure(imageBase64, imgW, imgH) {
+  async function measureRaw(imageBase64) {
     const dataUri = imageBase64.startsWith('data:') ? imageBase64 : 'data:image/jpeg;base64,' + imageBase64;
     const r = await _chat([
       { role: 'system', content: _measureSys() },
       { role: 'user', content: [
-        { type: 'text', text: '请对这张餐食照片完成分割、参照物标定、视角与形状厚度判定，并输出指定JSON。' },
+        { type: 'text', text: '请分割每一个食物块、用一个最小的1cm网格格做尺度标定、判定视角与形状厚度，并输出指定JSON。' },
         { type: 'image_url', image_url: { url: dataUri } }
       ] }
     ], true);
@@ -2509,13 +2514,34 @@ const Recognize = (() => {
     if (!raw || !Array.isArray(raw.foods) || raw.foods.length === 0) {
       return { success: false, error: '未能完成视觉定量分析' };
     }
-    // DepthAnything 未接入时 depthMap 为空，Volume 自动使用语义厚度兜底
-    const result = (typeof Volume !== 'undefined') ? Volume.analyze(raw, imgW || 1024, imgH || 1024, null) : null;
-    if (!result) return { success: false, error: '定量计算内核不可用' };
+    return { success: true, raw };
+  }
+
+  // 分割结果(raw) + 浏览器端相对深度(depth) → 几何体积/质量/热量
+  function analyzeMeasure(raw, imgW, imgH, depth) {
+    if (typeof Volume === 'undefined') return { success: false, error: '定量计算内核不可用' };
+    let depthMap = null;
+    const depthMeta = { used: false, device: null, ms: null };
+    if (depth && depth.grid && depth.rows) {
+      try {
+        depthMap = Volume.fuseDepth(depth.grid, depth.rows, depth.cols, null, raw);
+        depthMeta.used = !!(depthMap && Object.keys(depthMap).length);
+        depthMeta.device = depth.device || null;
+        depthMeta.ms = depth.ms || null;
+      } catch (e) { depthMap = null; }
+    }
+    const result = Volume.analyze(raw, imgW || 1024, imgH || 1024, depthMap);
+    result.depth_meta = depthMeta;
     return { success: true, data: result, raw };
   }
 
-  return { dish, orderImage, orderText, nutrition, measure };
+  async function measure(imageBase64, imgW, imgH, depth) {
+    const rr = await measureRaw(imageBase64);
+    if (!rr.success) return rr;
+    return analyzeMeasure(rr.raw, imgW, imgH, depth);
+  }
+
+  return { dish, orderImage, orderText, nutrition, measure, measureRaw, analyzeMeasure };
 })();
 
 /* ============================================================
@@ -2565,20 +2591,33 @@ const Volume = (() => {
    */
   function calibrate(reference, imgW, imgH) {
     const r = reference || {};
-    const pts = Array.isArray(r.px_points) ? r.px_points : [];
     const ar = (imgW && imgH) ? imgW / imgH : 1; // 像素宽高比，用于 y 方向校正
-    // 1) 网格四角：非等比
-    if (r.type === 'grid1cm' && pts.length >= 4 && Number(r.known_cm) > 0) {
-      const ex = Math.max(dist(pts[0], pts[1]), 1e-6); // 上边宽
-      const ey = Math.max(dist(pts[0], pts[3]), 1e-6); // 左边高
-      return { ux: r.known_cm / ex, uy: r.known_cm / ey, reliable: true, type: r.type };
+    if (r.type === 'grid1cm') {
+      const kcm = Number(r.known_cm) > 0 ? Number(r.known_cm) : 1.0;
+      // 1) 整网格纸外边框 + 行列格数平均法：单格边长 = 整纸跨度 / 格数（最稳）
+      const gp = Array.isArray(r.grid_pts) ? r.grid_pts : [];
+      const cols = Number(r.grid_cols) || 0, rows = Number(r.grid_rows) || 0;
+      if (gp.length >= 4 && cols >= 1) {
+        const gx = Math.max(dist(gp[0], gp[1]), 1e-6); // 整纸上边宽
+        const ex = gx / cols;
+        let ey = ex;
+        if (rows >= 1) { const gy = Math.max(dist(gp[0], gp[3]), 1e-6); ey = gy / rows; }
+        return { ux: kcm / ex, uy: kcm / ey, reliable: true, type: r.type };
+      }
+      // 2) 单个最小格四角
+      const pts = Array.isArray(r.px_points) ? r.px_points : [];
+      if (pts.length >= 4) {
+        const ex = Math.max(dist(pts[0], pts[1]), 1e-6); // 上边宽
+        const ey = Math.max(dist(pts[0], pts[3]), 1e-6); // 左边高
+        return { ux: kcm / ex, uy: kcm / ey, reliable: true, type: r.type };
+      }
     }
-    // 2) 已知标定边长度
+    // 3) 已知标定边长度
     if (Number(r.px_length) > 1 && Number(r.known_cm) > 0) {
       const u = r.known_cm / r.px_length;
       return { ux: u, uy: u / ar * ar, reliable: r.scale_reliable !== false, type: r.type || 'ref' };
     }
-    // 3) 经验兜底：归一化 999 宽度 ≈ 25cm 视场
+    // 4) 经验兜底：归一化 999 宽度 ≈ 25cm 视场
     const ux = 25 / 999;
     return { ux, uy: ux, reliable: false, type: 'none' };
   }
@@ -2638,10 +2677,8 @@ const Volume = (() => {
     let volumeCm3;
     if (food.shape === 'ellipsoid') {
       volumeCm3 = ellipsoidVolume(food.bbox, scale, h) || shapeVolume(areaCm2, h, food.shape, food.dome_ratio, food.fill_ratio);
-    } else if (useDepth) {
-      // 有真实高度场平均高度时按柱体×形状系数积分
-      volumeCm3 = shapeVolume(areaCm2, h, food.shape === 'dome' ? 'prism' : food.shape, 1, food.fill_ratio);
     } else {
+      // 无论厚度来自语义估计还是深度场，都使用同一套形状系数，保证两条口径自洽
       volumeCm3 = shapeVolume(areaCm2, h, food.shape, food.dome_ratio, food.fill_ratio);
     }
     const density = densityOf(food.name, food.density_g_cm3);
@@ -2717,7 +2754,9 @@ const Volume = (() => {
       if (n > 0 && maxD > edgeD) {
         const seed = Number(food.thickness_cm_est) || 2; // 语义厚度锚定绝对量级
         const avgRel = sumD / n;
-        const h = Math.max(0.2, (avgRel - edgeD) / (maxD - edgeD) * seed * 1.4);
+        // 以语义平均厚度为锚，深度相对形态做 ±25% 温和校正，避免相对深度整体抬升厚度
+        const r = (avgRel - edgeD) / (maxD - edgeD);
+        const h = Math.max(0.2, seed * (0.75 + 0.25 * r));
         out[i] = round2(h);
       }
     });
@@ -2740,6 +2779,185 @@ const Volume = (() => {
   function round4(x) { return Math.round(Number(x) * 10000) / 10000; }
 
   return { analyze, fuseDepth, polygonAreaNorm, calibrate, shapeVolume, densityOf };
+})();
+
+/* ============================================================
+   DepthWeb —— 纯浏览器端单目相对深度感知
+   transformers.js + Depth-Anything-Small（模型权重随站点自托管）
+   WebGPU(fp16) 优先，失败自动降级 WASM(q8)
+   零后端 / 零费用 / 图片不出端；任何失败都向外抛错，由调用方退回形状语义厚度
+   ============================================================ */
+const DepthWeb = (() => {
+  const MODEL = 'Xenova/depth-anything-small-hf';
+  const GRID = 40; // 输出深度网格分辨率（rows×cols）
+  const LIB_CDNS = [
+    'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js',
+    'https://fastly.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js',
+    'https://unpkg.com/@xenova/transformers@2.17.2/dist/transformers.min.js',
+    'https://esm.sh/@xenova/transformers@2.17.2'
+  ];
+
+  let libPromise = null;    // 运行库单例
+  let pipePromise = null;   // 管线单例（含失败可重置）
+  let pipe = null;
+  const meta = { device: null, dtype: null };
+  let phase = 'idle';       // idle | loading | ready | error
+  let phaseText = '';
+
+  function status() { return { phase, phaseText, device: meta.device, dtype: meta.dtype }; }
+
+  function hasWebGPU() { try { return !!navigator.gpu; } catch (e) { return false; } }
+
+  // 站点内模型目录（兼容根路径与 /guocs/ 子路径、hash 路由）
+  function siteModelsPath() {
+    try { return location.pathname.replace(/[^/]*$/, '') + 'models/'; }
+    catch (e) { return 'models/'; }
+  }
+
+  // 动态 ESM 导入运行库，多 CDN 轮询（CDN 仅提供 JS 运行库，权重走站点本地）
+  async function loadLib() {
+    if (libPromise) return libPromise;
+    libPromise = (async () => {
+      let lastErr;
+      for (const url of LIB_CDNS) {
+        try {
+          const m = await import(/* webpackIgnore: true */ url);
+          const mod = (m && m.pipeline) ? m : (m.default && m.default.pipeline ? m.default : null);
+          if (mod && mod.pipeline) return mod;
+          lastErr = new Error('运行库导出为空');
+        } catch (e) { lastErr = e; }
+      }
+      throw lastErr || new Error('深度引擎运行库加载失败（网络不可用）');
+    })();
+    return libPromise;
+  }
+
+  // 权重随站点自托管：只走本地同源目录，避免运行时回连被墙/跨域受限的模型源
+  function applyLocal(env) {
+    try {
+      env.allowLocalModels = true;
+      env.allowRemoteModels = false;
+      env.localModelPath = siteModelsPath();
+      env.useBrowserCache = true; // 权重缓存到浏览器，二次免下载
+    } catch (e) { /* 用默认值 */ }
+  }
+
+  async function buildPipe(device, dtype, onProgress) {
+    const mod = await loadLib();
+    applyLocal(mod.env);
+    const opts = {
+      device,
+      dtype,
+      progress_callback: (e) => {
+        if (!onProgress) return;
+        if (e.status === 'downloading' || e.status === 'progress') {
+          const pct = e.progress ? Math.round(e.progress) + '%' : '';
+          onProgress(`加载本地视觉引擎 ${pct} ${e.file ? e.file.split('/').pop() : ''}`.trim());
+        } else if (e.status === 'compiling') {
+          onProgress('正在编译深度模型（' + device.toUpperCase() + '）…');
+        } else if (e.status === 'ready' || e.status === 'done') {
+          onProgress('深度模型就绪');
+        }
+      }
+    };
+    return await mod.pipeline('depth-estimation', MODEL, opts);
+  }
+
+  // 懒加载：WebGPU(fp16) → WASM(q8) 依次尝试
+  async function ensure(onProgress) {
+    if (pipe) return { ok: true, device: meta.device, dtype: meta.dtype };
+    if (pipePromise) return pipePromise;
+    phase = 'loading';
+    const set = (t) => { phaseText = t; onProgress && onProgress(t); };
+    pipePromise = (async () => {
+      const attempts = [];
+      if (hasWebGPU()) attempts.push({ device: 'webgpu', dtype: 'fp16' });
+      attempts.push({ device: 'wasm', dtype: 'q8' });
+      let err;
+      for (const a of attempts) {
+        try {
+          set('正在加载本地视觉引擎（' + a.device.toUpperCase() + '）…');
+          pipe = await buildPipe(a.device, a.dtype, set);
+          meta.device = a.device; meta.dtype = a.dtype;
+          phase = 'ready'; phaseText = '深度模型就绪';
+          return { ok: true, device: a.device, dtype: a.dtype };
+        } catch (e) { err = e; pipe = null; }
+      }
+      phase = 'error'; phaseText = '本地深度引擎不可用，已改用形状估计';
+      pipePromise = null; // 允许后续重试
+      throw err || new Error('深度模型加载失败');
+    })();
+    return pipePromise;
+  }
+
+  // 把任意分辨率深度张量降采样为 rows×cols 的 0~1 归一化网格
+  function downsample(data, H, W, rows, cols) {
+    const sum = Array.from({ length: rows }, () => new Float64Array(cols));
+    const cnt = Array.from({ length: rows }, () => new Uint16Array(cols));
+    let mn = Infinity, mx = -Infinity;
+    for (let y = 0; y < H; y++) {
+      const r = Math.min(rows - 1, Math.floor(y / H * rows));
+      for (let x = 0; x < W; x++) {
+        const v = Number(data[y * W + x]);
+        if (!isFinite(v)) continue;
+        const c = Math.min(cols - 1, Math.floor(x / W * cols));
+        sum[r][c] += v; cnt[r][c]++; if (v < mn) mn = v; if (v > mx) mx = v;
+      }
+    }
+    const grid = [];
+    const span = (mx > mn) ? (mx - mn) : 1;
+    for (let r = 0; r < rows; r++) {
+      const row = [];
+      for (let c = 0; c < cols; c++) {
+        const mean = cnt[r][c] ? sum[r][c] / cnt[r][c] : mn;
+        row.push(Number(((mean - mn) / span).toFixed(4)));
+      }
+      grid.push(row);
+    }
+    return grid;
+  }
+
+  /**
+   * 对一张图做相对深度估计
+   * @param imageInput dataURI 字符串 / URL / HTMLImageElement / RawImage
+   * @returns {ok,grid,rows,cols,device,dtype,ms,preview(dataURI灰度深度图)}
+   */
+  async function estimate(imageInput, onProgress) {
+    await ensure(onProgress);
+    const t0 = performance.now();
+    const out = await pipe(imageInput);
+    const td = out && out.predicted_depth;
+    if (!td || !td.data) throw new Error('深度输出为空');
+    const dims = td.dims || [];
+    const H = dims.length >= 2 ? dims[dims.length - 2] : Math.sqrt(td.data.length) | 0;
+    const W = dims.length >= 2 ? dims[dims.length - 1] : Math.sqrt(td.data.length) | 0;
+    const grid = downsample(td.data, H, W, GRID, GRID);
+    const ms = Math.round(performance.now() - t0);
+    return {
+      ok: true, grid, rows: GRID, cols: GRID,
+      device: meta.device, dtype: meta.dtype, ms,
+      preview: gridPreview(grid)
+    };
+  }
+
+  // 深度网格 → 灰度预览 dataURI（近亮远暗）
+  function gridPreview(grid) {
+    try {
+      const rows = grid.length, cols = grid[0].length;
+      const cv = document.createElement('canvas'); cv.width = cols; cv.height = rows;
+      const ctx = cv.getContext('2d'); const img = ctx.createImageData(cols, rows);
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const v = Math.round(255 * grid[r][c]), i = (r * cols + c) * 4;
+        img.data[i] = v; img.data[i + 1] = v; img.data[i + 2] = v; img.data[i + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      return cv.toDataURL('image/png');
+    } catch (e) { return null; }
+  }
+
+  function reset() { pipe = null; pipePromise = null; libPromise = null; phase = 'idle'; phaseText = ''; }
+
+  return { status, ensure, estimate, reset, hasWebGPU };
 })();
 
 /* 总览/今日页 v3.0 - MacroFactor/Sleek风格重设计 */
@@ -3430,7 +3648,9 @@ const PageMeal = (() => {
     error: null,
     isMock: false,
     lowConfidence: false,
-    measureSummary: null
+    measureSummary: null,
+    depthStatus: null,
+    depthRes: null
   };
 
   // 快速体验数据：附带视觉定量几何，完整演示“面积→厚度→体积→质量→热量”链路
@@ -3514,13 +3734,18 @@ const PageMeal = (() => {
   }
 
   function renderRecognizing() {
-    const steps = ['食物分割', '尺度标定', '视角矫正', '体积/质量估算'];
+    const steps = ['实例分割', '尺度标定', '视角矫正', '体积/质量估算'];
+    const ds = state.depthStatus;
+    const depthText = ds ? ds.text : '初始化本地视觉引擎…';
     return `
       <div class="card">
         <div class="state-view">
           <div class="loading-spinner" style="width:48px;height:48px;border-width:3px;"></div>
           <div class="state-title">正在进行视觉定量分析…</div>
           <div class="state-desc">${steps.map((s, i) => `<span style="display:inline-block;margin:2px 6px;padding:3px 10px;border-radius:999px;background:var(--bg-alt);font-size:0.75rem;color:var(--text-secondary);">${i + 1}. ${s}</span>`).join('')}</div>
+          <div id="depthProgress" style="margin-top:10px;font-size:0.78rem;color:var(--primary);font-weight:600;">深度感知：${depthText}</div>
+          ${ds && ds.preview ? `<img src="${ds.preview}" alt="深度场" style="width:120px;height:120px;object-fit:cover;border-radius:var(--radius-md);margin-top:8px;image-rendering:pixelated;border:1px solid var(--border-light);">` : ''}
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;">首次使用需在本地加载约数十 MB 视觉模型，之后自动缓存；图片仅在本机处理，不上传。</div>
           <div class="state-actions">
             <button class="btn btn-secondary" onclick="PageMeal.cancelRecognize()"><i data-lucide="x"></i>取消</button>
           </div>
@@ -3540,7 +3765,8 @@ const PageMeal = (() => {
         ${state.measureSummary ? `
           <div style="padding:10px 14px;background:var(--primary-50,#eef6f5);border-radius:var(--radius-md);margin:12px 14px 0;font-size:0.75rem;color:var(--text-secondary);display:flex;gap:14px;flex-wrap:wrap;">
             <span>📐 尺度标定：${refLabel(state.measureSummary.reference_type)}</span>
-            <span>🍱 食物数：${state.measureSummary.food_count}</span>
+            <span>🍱 食物数：${state.measureSummary.food_count}（逐块分割）</span>
+            <span>🛰 ${state.measureSummary.depth_meta && state.measureSummary.depth_meta.used ? '本地深度场' + (state.measureSummary.depth_meta.device ? '（' + String(state.measureSummary.depth_meta.device).toUpperCase() + '）' : '') : '形状厚度估计'}</span>
             <span>⚖️ 视觉总估重：约 <b>${state.measureSummary.total_mass_g} g</b></span>
             <span>🔥 估算总热量：<b>${state.measureSummary.total_kcal_range ? state.measureSummary.total_kcal_range[0]+'~'+state.measureSummary.total_kcal_range[1] : state.measureSummary.total_kcal} kcal</b></span>
           </div>` : ''}
@@ -3752,17 +3978,36 @@ const PageMeal = (() => {
   async function startRecognize() {
     if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
     state.error = null; state.step = 'recognizing'; state.isMock = false;
+    state.depthStatus = { active: true, text: '初始化本地视觉引擎…', device: null, preview: null, failed: false };
+    state.depthRes = null;
     App.rerender();
-    // 首选：视觉定量（分割+标定+体积+质量）
-    const mr = await Recognize.measure(state.compressedBase64, state.imgSize.w, state.imgSize.h);
-    if (mr.success) {
-      state.candidates = mapMeasure(mr.data);
-      state.measureSummary = mr.data;
-      state.lowConfidence = state.candidates.every(c => parseFloat(c.probability) < 0.3);
-      state.step = 'candidates';
-      UI.toast(`定量分析完成：${mr.data.food_count} 项食物，估重约 ${mr.data.total_mass_g}g`, 'success');
-      App.rerender();
-      return;
+
+    const dataUri = 'data:image/jpeg;base64,' + state.compressedBase64;
+    // 浏览器端相对深度 与 多模态实例分割 并行，缩短等待
+    const depthP = (typeof DepthWeb !== 'undefined')
+      ? DepthWeb.estimate(dataUri, (txt) => tickDepth(txt)).catch(e => ({ ok: false, error: String((e && e.message) || e) }))
+      : Promise.resolve({ ok: false });
+    const rawP = Recognize.measureRaw(state.compressedBase64);
+    const [depthRes, rawRes] = await Promise.all([depthP, rawP]);
+
+    state.depthRes = (depthRes && depthRes.ok) ? depthRes : null;
+    if (state.depthRes) {
+      tickDepth('深度场计算完成（' + String(state.depthRes.device || '').toUpperCase() + '，' + state.depthRes.ms + 'ms）', state.depthRes.preview, state.depthRes.device);
+    } else {
+      tickDepth('本地深度未启用，改用形状厚度估计', null, null, true);
+    }
+
+    if (rawRes.success) {
+      const mr = Recognize.analyzeMeasure(rawRes.raw, state.imgSize.w, state.imgSize.h, state.depthRes);
+      if (mr.success) {
+        state.candidates = mapMeasure(mr.data);
+        state.measureSummary = mr.data;
+        state.lowConfidence = state.candidates.every(c => parseFloat(c.probability) < 0.3);
+        state.step = 'candidates';
+        UI.toast(`定量分析完成：${mr.data.food_count} 项食物，估重约 ${mr.data.total_mass_g}g`, 'success');
+        App.rerender();
+        return;
+      }
     }
     // 兜底：仅类型识别（用户手动给克重）
     const dr = await Recognize.dish(state.compressedBase64);
@@ -3777,6 +4022,16 @@ const PageMeal = (() => {
       state.step = 'upload';
     }
     App.rerender();
+  }
+
+  function tickDepth(text, preview, device, failed) {
+    if (!state.depthStatus) state.depthStatus = { active: true };
+    state.depthStatus.text = text;
+    if (preview) state.depthStatus.preview = preview;
+    if (device) state.depthStatus.device = device;
+    if (failed) state.depthStatus.failed = true;
+    const el = document.getElementById('depthProgress');
+    if (el) el.textContent = '深度感知：' + text;
   }
 
   function cancelRecognize() { state.step = 'upload'; App.rerender(); }
@@ -3867,7 +4122,7 @@ const PageMeal = (() => {
   }
 
   function reset() {
-    state = { step: 'upload', previewImage: null, compressedBase64: null, imgSize: { w: 1024, h: 1024 }, candidates: [], selectedDish: null, weight: 250, nutrition: null, nutritionLoading: false, error: null, isMock: false, lowConfidence: false, measureSummary: null };
+    state = { step: 'upload', previewImage: null, compressedBase64: null, imgSize: { w: 1024, h: 1024 }, candidates: [], selectedDish: null, weight: 250, nutrition: null, nutritionLoading: false, error: null, isMock: false, lowConfidence: false, measureSummary: null, depthStatus: null, depthRes: null };
     App.rerender();
   }
 
@@ -6183,6 +6438,8 @@ const PageCommunity = (() => {
   let feedTab = 'recommend'; // recommend | follow | challenge
   let roleFilter = 'all';    // all | user | merchant | nutritionist
   let likedSet = {};
+  let commentLikeSet = {};
+  let replyTo = null; // { idx, name }
   let collectedSet = {};
   let collected = { meals: [], knowledge: [] };
   let streak = 3;
@@ -6200,19 +6457,27 @@ const PageCommunity = (() => {
       posts.forEach(p => { if (!p.author_id) p.author_id = 'a_' + (p.author_name || 'x'); });
     }
     try { likedSet = JSON.parse(localStorage.getItem('npv2_liked')) || {}; } catch { likedSet = {}; }
+    try { commentLikeSet = JSON.parse(localStorage.getItem('npv2_comment_liked')) || {}; } catch { commentLikeSet = {}; }
     try { collectedSet = JSON.parse(localStorage.getItem('npv2_collected_set')) || {}; } catch { collectedSet = {}; }
     const c = localStorage.getItem('npv2_collected');
     if (c) collected = JSON.parse(c);
     streak = parseInt(localStorage.getItem('npv2_streak')) || 3;
     // 依据本地点赞集合恢复显示数
-    posts.forEach(p => { if (likedSet[p.id] && !p._adj) { p.likes = (p.likes || 0) + 1; p._adj = true; } });
+    posts.forEach(p => {
+      if (likedSet[p.id] && !p._adj) { p.likes = (p.likes || 0) + 1; p._adj = true; }
+      (p.comments || []).forEach((c, ci) => { if (commentLikeSet[p.id + '_' + ci] && !c._ladj) { c.likes = (c.likes || 0) + 1; c._ladj = true; } });
+    });
   }
 
   function save() {
-    posts.forEach(p => delete p._adj);
+    posts.forEach(p => { delete p._adj; (p.comments || []).forEach(c => delete c._ladj); });
     localStorage.setItem('npv2_community_posts', JSON.stringify(posts));
-    posts.forEach(p => { if (likedSet[p.id]) p._adj = true; });
+    posts.forEach(p => {
+      if (likedSet[p.id]) p._adj = true;
+      (p.comments || []).forEach((c, ci) => { if (commentLikeSet[p.id + '_' + ci]) c._ladj = true; });
+    });
     localStorage.setItem('npv2_liked', JSON.stringify(likedSet));
+    localStorage.setItem('npv2_comment_liked', JSON.stringify(commentLikeSet));
     localStorage.setItem('npv2_collected_set', JSON.stringify(collectedSet));
     localStorage.setItem('npv2_collected', JSON.stringify(collected));
     localStorage.setItem('npv2_streak', String(streak));
@@ -6438,9 +6703,85 @@ const PageCommunity = (() => {
     if (!text) { UI.toast('请输入评论内容', 'warning'); return; }
     const m = me();
     posts[idx].comments = posts[idx].comments || [];
-    posts[idx].comments.push({ author: m.name, role: m.role, text, time: '刚刚' });
+    const c = { author: m.name, role: m.role, text, time: '刚刚', likes: 0 };
+    if (replyTo && replyTo.idx === idx && replyTo.name) c.reply_to = replyTo.name;
+    posts[idx].comments.push(c);
+    replyTo = null;
     save(); App.rerender(); UI.toast('评论已发布', 'success');
   }
+
+  function likeComment(idx, ci) {
+    const p = posts[idx]; if (!p || !p.comments || !p.comments[ci]) return;
+    const key = p.id + '_' + ci, c = p.comments[ci];
+    if (commentLikeSet[key]) { c.likes = Math.max(0, (c.likes || 0) - 1); delete commentLikeSet[key]; }
+    else { c.likes = (c.likes || 0) + 1; commentLikeSet[key] = true; }
+    save(); App.rerender();
+  }
+
+  function startReply(idx, ci, name) {
+    replyTo = { idx, name };
+    const input = document.getElementById(`commentInput_${idx}`);
+    if (input) { input.placeholder = '回复 @' + name + '：'; input.focus(); }
+    const hint = document.getElementById(`replyHint_${idx}`);
+    if (hint) { hint.style.display = 'block'; hint.textContent = '正在回复 @' + name + '，发送后自动取消'; }
+  }
+
+  // 作者个人主页（资料卡 + 数据统计 + TA的内容）
+  function profileOf(authorId) {
+    const mine = posts.filter(p => p.author_id === authorId);
+    const role = mine[0]?.author_role || 'user';
+    const name = mine[0]?.author_name || '营养用户';
+    const totalLikes = mine.reduce((a, p) => a + (p.likes || 0), 0);
+    const totalCollect = mine.reduce((a, p) => a + (p.collected || 0), 0);
+    const following = followingIds().includes(authorId);
+    const roleName = role === 'user' ? '用户' : role === 'merchant' ? '认证商家' : '认证营养师';
+    const roleColor = role === 'merchant' ? '#D9A441' : role === 'nutritionist' ? '#6366F1' : '#2A9D8F';
+    const bio = role === 'merchant' ? '专注健康轻食，持续更新菜品营养数据'
+      : role === 'nutritionist' ? '注册营养师，提供循证营养建议与纠错'
+      : '认真记录每一餐，科学管理每日摄入';
+    const fans = role === 'nutritionist' ? 1280 : role === 'merchant' ? 860 : 236;
+    return { mine, role, name, totalLikes, totalCollect, following, roleName, roleColor, bio, fans };
+  }
+
+  function openProfile(authorId) {
+    const pf = profileOf(authorId);
+    UI.modal(`个人主页 · ${pf.name}`, `
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,${pf.roleColor},${pf.roleColor}cc);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;flex-shrink:0;">${pf.name[0] || 'U'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.05rem;font-weight:800;">${pf.name} <span class="post-role-badge" style="background:${pf.roleColor}18;color:${pf.roleColor};">${pf.roleName}</span></div>
+          <div style="font-size:.78rem;color:var(--text-muted);margin-top:3px;">${pf.bio}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn ${pf.following ? 'btn-ghost' : 'btn-primary'} btn-sm" id="profileFollowBtn" onclick="PageCommunity.followFromProfile('${authorId}')">${pf.following ? '已关注' : '+ 关注'}</button>
+        <button class="btn btn-secondary btn-sm" onclick="PageCommunity.messageTo('${pf.name.replace(/'/g, '')}')">私信</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-bottom:6px;">
+        <div style="background:var(--bg-alt);padding:10px 4px;border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;">${pf.mine.length}</div><div style="font-size:.7rem;color:var(--text-muted);">内容</div></div>
+        <div style="background:var(--bg-alt);padding:10px 4px;border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;">${pf.totalLikes}</div><div style="font-size:.7rem;color:var(--text-muted);">获赞</div></div>
+        <div style="background:var(--bg-alt);padding:10px 4px;border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;">${pf.fans}</div><div style="font-size:.7rem;color:var(--text-muted);">粉丝</div></div>
+        <div style="background:var(--bg-alt);padding:10px 4px;border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;">${pf.totalCollect}</div><div style="font-size:.7rem;color:var(--text-muted);">收藏</div></div>
+      </div>
+      <div class="divider"></div>
+      <h4 style="font-size:.9rem;margin:10px 0;">TA 的内容（${pf.mine.length}）</h4>
+      ${pf.mine.length ? pf.mine.map(mp => { const gi = posts.indexOf(mp); return `
+        <div style="padding:10px;border:1px solid var(--border-light);border-radius:10px;margin-bottom:8px;cursor:pointer;" onclick="document.querySelector('.modal-overlay')?.remove();setTimeout(()=>PageCommunity.viewPost(${gi}),80);">
+          <div style="font-size:.85rem;font-weight:700;">${mp.title}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${mp.body}</div>
+          <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">👍 ${mp.likes || 0} · 💬 ${(mp.comments || []).length} · ⭐ ${mp.collected || 0}</div>
+        </div>`; }).join('') : '<p style="font-size:.8rem;color:var(--text-muted);">暂无公开内容</p>'}
+    `, `<button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">关闭</button>`);
+  }
+
+  function followFromProfile(authorId) {
+    if (typeof Auth !== 'undefined' && !Auth.current()) { UI.toast('请先登录后再关注', 'warning'); location.hash = '#/auth'; return; }
+    const now = Auth.toggleFollow(authorId);
+    const btn = document.getElementById('profileFollowBtn');
+    if (btn) { btn.textContent = now ? '已关注' : '+ 关注'; btn.className = `btn ${now ? 'btn-ghost' : 'btn-primary'} btn-sm`; }
+    UI.toast(now ? '已关注' : '已取消关注', 'info');
+  }
+  function messageTo(name) { UI.toast('已向 ' + name + ' 发起私信', 'info'); }
 
   function followAuthor(authorId, btn) {
     if (typeof Auth === 'undefined' || !Auth.current()) { UI.toast('请先登录后再关注', 'warning'); location.hash = '#/auth'; return; }
@@ -6499,7 +6840,8 @@ const PageCommunity = (() => {
       <div style="margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
         <span class="tag ${p.author_role==='merchant'?'tag-demo-data':p.author_role==='nutritionist'?'tag-pending':'tag-demo'}">${p.author_role==='user'?'用户':p.author_role==='merchant'?'商家':'营养师'}</span>
         <span class="tag tag-${p.moderation_status==='已发布'?'success':p.moderation_status==='待审核'?'pending':'error'}">${p.moderation_status}</span>
-        <button class="btn ${following?'btn-ghost':'btn-secondary'} btn-sm" style="margin-left:auto;" onclick="PageCommunity.followAuthor('${p.author_id}',this)">${following?'已关注':'+ 关注作者'}</button>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto;" onclick="PageCommunity.openProfile('${p.author_id}')">TA的主页</button>
+        <button class="btn ${following?'btn-ghost':'btn-secondary'} btn-sm" onclick="PageCommunity.followAuthor('${p.author_id}',this)">${following?'已关注':'+ 关注作者'}</button>
         <button class="btn btn-secondary btn-sm" onclick="PageCommunity.forward(${idx})">转发</button>
       </div>
       <p style="font-size:.9375rem;color:var(--text-secondary);margin-bottom:14px;line-height:1.7;">${p.body}</p>
@@ -6520,7 +6862,8 @@ const PageCommunity = (() => {
       <h4 style="font-size:.9375rem;margin:10px 0;">评论 (${(p.comments||[]).length})</h4>
       ${(p.comments||[]).map(c => `<div style="padding:10px 0;border-bottom:1px solid var(--border-light);">
         <div style="font-size:.8125rem;font-weight:600;">${c.author} <span class="post-role-badge">${c.role||'用户'}</span> <span style="font-weight:400;color:var(--text-muted);font-size:.75rem;">· ${c.time}</span></div>
-        <div style="font-size:.875rem;color:var(--text-secondary);margin-top:4px;">${c.text}</div>
+        <div style="font-size:.875rem;color:var(--text-secondary);margin-top:4px;">${c.reply_to?`<span style="color:var(--primary);font-weight:600;">回复 @${c.reply_to}：</span>`:''}${c.text}</div>
+        ${c.likes?`<div style="font-size:.72rem;color:var(--text-muted);margin-top:4px;">👍 ${c.likes}</div>`:''}
       </div>`).join('') || '<p style="font-size:.8rem;color:var(--text-muted);">还没有评论，来说两句吧</p>'}
     `, `<button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">关闭</button>`);
   }
@@ -6578,7 +6921,7 @@ const PageCommunity = (() => {
     UI.toast(`收藏「${type==='meals'?'我的餐单':'营养知识'}」共 ${n} 条`, 'info');
   }
 
-  return { render, search, filterTopic, setSort, setTab, setRoleFilter, like, toggleCollect, toggleComments, addComment, followAuthor, forward, checkin, askNutritionist, report, confirmReport, viewPost, newPost, confirmNewPost, openMessages, showCollected };
+  return { render, search, filterTopic, setSort, setTab, setRoleFilter, like, toggleCollect, toggleComments, addComment, likeComment, startReply, openProfile, followFromProfile, messageTo, followAuthor, forward, checkin, askNutritionist, report, confirmReport, viewPost, newPost, confirmNewPost, openMessages, showCollected };
 })();
 
 /* 项目展示与证据页 */
