@@ -61,7 +61,8 @@ const Recognize = (() => {
     };
     // 1. 本地/同源后端（凭据保存在服务端，最稳）
     for (const base of _backendBases()) {
-      const r = await _post(base + '/api/recognize/chat', payload, null, 12000);
+      // 本地/同源后端：定量(分割+标定)多模态请求较慢，给足 130s；普通请求会提前返回
+      const r = await _post(base + '/api/recognize/chat', payload, null, 130000);
       if (r.ok) return { success: true, text: r.text };
     }
     // 2. 自建中转
@@ -313,22 +314,22 @@ const Recognize = (() => {
 
   /* ---------- 餐食视觉定量：分类+分割+参照物标定+形状厚度，一次调用后由 Volume 计算体积质量热量 ---------- */
   function _measureSys() {
-    return '你是严谨的食物视觉测量与营养分析专家，需同时完成食物分类、实例分割、参照物尺度标定、视角评估、形状厚度判定。坐标用归一化整数：左上(0,0)、右下(999,999)，x向右y向下。'
-      + '【参照物reference】按优先级判断type：grid1cm(1cm方格，px_points依次给一个方格左上/右上/右下/左下四角,known_cm=1.0)、plate(标准餐盘,给盘沿最左最右两点,known_cm取盘径20/22/24)、coin(一元硬币水平左右两点,known_cm=2.5)、card(银行卡短边上下两点,known_cm=5.4)、chopstick(筷子沿身两点,known_cm=22)、none(无参照物,scale_reliable=false)；px_length为标定边在归一化坐标跨越长度(1位小数)。'
-      + '【视角view】angle=top(倾斜≤15)/tilt(15-55)/side(>55)，tilt_deg为镜头与竖直夹角0-80整数，quality=good/ok/poor。'
-      + '【食物foods】每种可区分食物一个对象(混合菜分列,最多6个)：name中文菜名；confidence 0-100整数；polygon沿可见外轮廓顺时针10-24个[x,y]顶点紧贴边缘；bbox=[x,y,w,h]；'
-      + 'shape取dome(隆起一团/勺盛/饭团)/prism(等厚平铺/切块/摊平米饭)/ellipsoid(椭球/蛋/丸/包子)/liquid(汤/饮品近圆柱)/pile(不规则堆叠/薯条/沙拉)/flat(薄片/饼/菜叶)；'
-      + 'thickness_cm_est平均厚度厘米(1位小数)；dome_ratio最高/边缘厚度倍数1.0-2.0(flat/prism取1.0,dome约1.4-1.8)；'
-      + 'density_g_cm3视密度(汤饮1.0/米饭主食0.55-0.8/紧实肉蛋1.0-1.1/松散蔬菜0.4-0.6/油炸蓬松0.3-0.5/面条0.7-0.9)；calorie_per_100g每100g千卡整数。'
-      + '只输出一个JSON，不要任何解释或代码块：{"view":{"angle":"top","tilt_deg":0,"quality":"good"},"reference":{"type":"grid1cm","known_cm":1.0,"px_points":[[0,0],[0,0],[0,0],[0,0]],"px_length":0,"scale_reliable":true},"foods":[{"name":"","confidence":0,"polygon":[[0,0]],"bbox":[0,0,0,0],"shape":"dome","thickness_cm_est":0,"dome_ratio":1.5,"density_g_cm3":0,"calorie_per_100g":0}]}。无法判断给最合理保守估计不要给null。';
+    return '你是食物视觉测量专家。对餐食照片做实例分割、尺度标定、视角与厚度判定。坐标归一化为0~999整数：左上(0,0)、右下(999,999)，x向右、y向下。只输出JSON，不要解释。'
+      + '【尺度标定铁律】画面出现方格纸时reference.type必须为grid1cm，严禁把金属盘、托盘、电子秤盘当餐盘(plate)标定。网格纸由1cm×1cm的最小方格整齐排列而成，按两步精确标定：'
+      + '①grid_pts按左上、右上、右下、左下给出【整张可见网格纸外边框】四个角；②数清这张纸一行有多少个最小格grid_cols、一列有多少个最小格grid_rows(整数)；'
+      + '同时就近选一个方正、清晰、未被遮挡的【单个最小格】，用px_points给它的四角(左上右上右下左下)，known_cm=1.0。最小格是网格线围成的最小封闭正方形，切勿把2×2的田字格当成一格。'
+      + '仅当完全没有网格时才用plate(盘沿最左最右两点,known_cm按真实盘径)、coin(一元硬币水平两点,known_cm=2.5)或none，px_length为标定边归一化长度。'
+      + 'view含angle(top俯角≤15/tilt15~55/side大于55)、tilt_deg(0-80整数)、quality(good/ok/poor)。'
+      + 'foods中每个物理上彼此分离的食物块单独成对象，同类多块也要分开(三朵西兰花给3个、两块豆腐给2个)；同一物理块即使有焦边、色泽、阴影差异也只画一个polygon、不要切碎，最多6个、按面积从大到小：name中文名；confidence为0~100整数；polygon紧贴外轮廓顺时针取6~10个[x,y]；bbox=[x,y,w,h]；shape取dome(隆起一团)/prism(等厚切块或平铺)/ellipsoid(椭球蛋丸)/liquid(汤饮)/pile(堆叠)/flat(薄片)；thickness_cm_est为【平均厚度】厘米(1位小数，指覆盖整个轮廓的平均厚度而非最高点，dome类边缘薄着地、平均厚度约为最高点的0.6倍；对照最小格边长估准，小块食物平均厚度通常不足1.5格)；dome_ratio为1.0~2.0(prism/flat取1.0，dome约1.4~1.8)；density_g_cm3为视密度(松散蔬菜0.4~0.6、豆腐蛋紧实肉0.95~1.1、米饭主食0.55~0.8、油炸蓬松0.3~0.5、汤饮1.0)；calorie_per_100g为每100g千卡整数。'
+      + '输出结构：{"view":{"angle":"top","tilt_deg":0,"quality":"good"},"reference":{"type":"grid1cm","known_cm":1.0,"grid_pts":[[0,0],[0,0],[0,0],[0,0]],"grid_cols":0,"grid_rows":0,"px_points":[[0,0],[0,0],[0,0],[0,0]],"px_length":0},"foods":[{"name":"","confidence":0,"polygon":[[0,0]],"bbox":[0,0,0,0],"shape":"dome","thickness_cm_est":0,"dome_ratio":1.5,"density_g_cm3":0,"calorie_per_100g":0}]}。无法判断时给最合理的保守估计，不要给null。';
   }
 
-  async function measure(imageBase64, imgW, imgH) {
+  async function measureRaw(imageBase64) {
     const dataUri = imageBase64.startsWith('data:') ? imageBase64 : 'data:image/jpeg;base64,' + imageBase64;
     const r = await _chat([
       { role: 'system', content: _measureSys() },
       { role: 'user', content: [
-        { type: 'text', text: '请对这张餐食照片完成分割、参照物标定、视角与形状厚度判定，并输出指定JSON。' },
+        { type: 'text', text: '请分割每一个食物块、用一个最小的1cm网格格做尺度标定、判定视角与形状厚度，并输出指定JSON。' },
         { type: 'image_url', image_url: { url: dataUri } }
       ] }
     ], true);
@@ -337,11 +338,32 @@ const Recognize = (() => {
     if (!raw || !Array.isArray(raw.foods) || raw.foods.length === 0) {
       return { success: false, error: '未能完成视觉定量分析' };
     }
-    // DepthAnything 未接入时 depthMap 为空，Volume 自动使用语义厚度兜底
-    const result = (typeof Volume !== 'undefined') ? Volume.analyze(raw, imgW || 1024, imgH || 1024, null) : null;
-    if (!result) return { success: false, error: '定量计算内核不可用' };
+    return { success: true, raw };
+  }
+
+  // 分割结果(raw) + 浏览器端相对深度(depth) → 几何体积/质量/热量
+  function analyzeMeasure(raw, imgW, imgH, depth) {
+    if (typeof Volume === 'undefined') return { success: false, error: '定量计算内核不可用' };
+    let depthMap = null;
+    const depthMeta = { used: false, device: null, ms: null };
+    if (depth && depth.grid && depth.rows) {
+      try {
+        depthMap = Volume.fuseDepth(depth.grid, depth.rows, depth.cols, null, raw);
+        depthMeta.used = !!(depthMap && Object.keys(depthMap).length);
+        depthMeta.device = depth.device || null;
+        depthMeta.ms = depth.ms || null;
+      } catch (e) { depthMap = null; }
+    }
+    const result = Volume.analyze(raw, imgW || 1024, imgH || 1024, depthMap);
+    result.depth_meta = depthMeta;
     return { success: true, data: result, raw };
   }
 
-  return { dish, orderImage, orderText, nutrition, measure };
+  async function measure(imageBase64, imgW, imgH, depth) {
+    const rr = await measureRaw(imageBase64);
+    if (!rr.success) return rr;
+    return analyzeMeasure(rr.raw, imgW, imgH, depth);
+  }
+
+  return { dish, orderImage, orderText, nutrition, measure, measureRaw, analyzeMeasure };
 })();
