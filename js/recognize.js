@@ -64,22 +64,21 @@ const Recognize = (() => {
     };
     // 1. 本地/同源后端（凭据保存在服务端，最稳）
     for (const base of _backendBases()) {
-      // 本地/同源后端：定量(分割+标定)多模态请求较慢，给足 130s；普通请求会提前返回
       const r = await _post(base + '/api/recognize/chat', payload, null, 130000);
       if (r.ok) return { success: true, text: r.text };
     }
-    // 2. 自建中转
+    // 2. 自建中转（Netlify Functions，传递 Authorization header，给足 60s）
     const worker = _workerBase();
     if (worker) {
-      const r = await _post(worker, payload, null, 15000);
+      const r = await _post(worker, payload, _authHeader(), 60000);
       if (r.ok) return { success: true, text: r.text };
     }
     // 3. 直连
-    const direct = await _post(_gateway() + '/chat/completions', payload, _authHeader(), 12000);
+    const direct = await _post(_gateway() + '/chat/completions', payload, _authHeader(), 30000);
     if (direct.ok) return { success: true, text: direct.text };
     // 4. 公共中转轮询
     for (const wrap of _publicProxies()) {
-      const r = await _post(wrap(_gateway() + '/chat/completions'), payload, _authHeader(), 8000);
+      const r = await _post(wrap(_gateway() + '/chat/completions'), payload, _authHeader(), 15000);
       if (r.ok) return { success: true, text: r.text };
     }
     return { success: false, error: '网络连接异常，请稍后重试' };
