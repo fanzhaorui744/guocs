@@ -6,6 +6,8 @@ const PageMeal = (() => {
     compressedBase64: null,
     imgSize: { w: 1024, h: 1024 },
     candidates: [],
+    selectedIndices: [], // 多选：选中的候选索引数组
+    candidateWeights: {}, // 每项自定义重量 {index: grams}
     selectedDish: null,
     weight: 250,
     nutrition: null,
@@ -13,9 +15,7 @@ const PageMeal = (() => {
     error: null,
     isMock: false,
     lowConfidence: false,
-    measureSummary: null,
-    depthStatus: null,
-    depthRes: null
+    measureSummary: null
   };
 
   // 快速体验数据：附带视觉定量几何，完整演示“面积→厚度→体积→质量→热量”链路
@@ -117,6 +117,23 @@ const PageMeal = (() => {
 
   function renderCandidates() {
     const allLow = state.candidates.every(c => parseFloat(c.probability) < 0.3);
+    const selCount = state.selectedIndices.length;
+    const allSelected = selCount === state.candidates.length;
+    // 计算选中项的总重量和总热量
+    let totalMass = 0, totalKcalMin = 0, totalKcalMax = 0;
+    state.selectedIndices.forEach(idx => {
+      const c = state.candidates[idx];
+      const w = state.candidateWeights[idx] != null ? state.candidateWeights[idx] : (c.measure ? c.measure.massG : 150);
+      totalMass += w;
+      const cal100 = parseFloat(c.calorie) || 0;
+      if (c.measure && c.measure.kcalRange) {
+        totalKcalMin += Math.round(cal100 * c.measure.kcalRange[0] / Math.max(c.measure.kcal, 1) * w / 100);
+        totalKcalMax += Math.round(cal100 * w / 100);
+      } else {
+        totalKcalMin += Math.round(cal100 * w / 100);
+        totalKcalMax += Math.round(cal100 * w / 100);
+      }
+    });
     return `
       <div class="card">
         <div class="card-header">
@@ -135,14 +152,26 @@ const PageMeal = (() => {
           <div style="padding:10px 14px;background:var(--warning-light);border-radius:var(--radius-md);margin:12px 14px 0;">
             <span style="font-size:0.8125rem;color:var(--warning);font-weight:500;">⚠️ 识别置信度较低，建议手动确认或重新拍摄</span>
           </div>` : ''}
+        <!-- 多选工具栏 -->
+        <div style="padding:10px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border-light);">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.8125rem;color:var(--text-secondary);">
+            <input type="checkbox" ${allSelected ? 'checked' : ''} onchange="PageMeal.toggleSelectAll()" style="width:16px;height:16px;accent-color:var(--primary);">
+            全选
+          </label>
+          <span style="font-size:0.8125rem;color:var(--primary);font-weight:700;">已选 ${selCount} 项</span>
+          <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">可勾选要保存的食物，重量可修改</span>
+        </div>
         <div class="candidate-list">
           ${state.candidates.map((c, i) => {
             const prob = parseFloat(c.probability);
             const probColor = prob >= 0.7 ? 'var(--success)' : prob >= 0.4 ? 'var(--accent-gold)' : 'var(--accent-coral)';
             const m = c.measure;
+            const isSelected = state.selectedIndices.includes(i);
+            const w = state.candidateWeights[i] != null ? state.candidateWeights[i] : (m ? m.massG : 150);
             return `
-              <div class="candidate-item" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px;">
+              <div class="candidate-item" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px;${isSelected ? '' : 'opacity:0.55;'}">
                 <div style="display:flex;align-items:center;gap:10px;">
+                  <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="PageMeal.toggleSelect(${i})" style="width:18px;height:18px;accent-color:var(--primary);flex-shrink:0;">
                   <div class="candidate-info" style="flex:1;">
                     <div class="candidate-name">${c.name}</div>
                     <div class="candidate-meta">
@@ -150,24 +179,36 @@ const PageMeal = (() => {
                       ${c.calorie ? ` · ${c.calorie} kcal/100g` : ''}
                     </div>
                   </div>
-                  <button class="btn btn-primary btn-sm" onclick="PageMeal.selectDish(${i})"><i data-lucide="check"></i>选择</button>
+                  <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+                    <input type="number" value="${w}" min="1" max="2000" onchange="PageMeal.setCandidateWeight(${i}, this.value)" style="width:64px;padding:4px 6px;border:1px solid var(--border-light);border-radius:6px;font-size:0.75rem;text-align:center;">
+                    <span style="font-size:0.7rem;color:var(--text-muted);">g</span>
+                  </div>
                 </div>
                 ${m ? `
-                  <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:0.72rem;">
-                    <span class="tag" style="background:var(--bg-alt);">占地 ${m.areaCm2} cm²</span>
-                    <span class="tag" style="background:var(--bg-alt);">厚 ${m.thicknessCm} cm</span>
-                    <span class="tag" style="background:var(--bg-alt);">体积 ${m.volumeCm3} cm³</span>
-                    <span class="tag" style="background:var(--bg-alt);">密度 ${m.density} g/cm³</span>
-                    <span class="tag tag-success">视觉估重 ≈ ${m.massG} g</span>
-                    <span class="tag tag-demo-data">${m.kcalRange ? m.kcalRange[0] + '~' + m.kcalRange[1] : m.kcal} kcal</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:0.7rem;padding-left:28px;">
+                    <span class="tag" style="background:var(--bg-alt);">占地 ${m.areaCm2}cm²</span>
+                    <span class="tag" style="background:var(--bg-alt);">厚 ${m.thicknessCm}cm</span>
+                    <span class="tag" style="background:var(--bg-alt);">体积 ${m.volumeCm3}cm³</span>
+                    <span class="tag" style="background:var(--bg-alt);">密度 ${m.density}</span>
+                    <span class="tag tag-success">估重 ${m.massG}g</span>
+                    <span class="tag tag-demo-data">${m.kcalRange ? m.kcalRange[0]+'~'+m.kcalRange[1] : m.kcal} kcal</span>
                   </div>` : ''}
               </div>
             `;
           }).join('')}
         </div>
-        <div style="margin-top:14px;padding:14px;border-top:1px solid var(--border-light);display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-secondary" onclick="PageMeal.manualInput()"><i data-lucide="edit-3"></i>手动输入菜品名</button>
-          <button class="btn btn-ghost" onclick="PageMeal.backToUpload()"><i data-lucide="rotate-ccw"></i>重新上传</button>
+        <!-- 选中汇总 + 保存按钮 -->
+        <div style="margin-top:14px;padding:14px;border-top:1px solid var(--border-light);background:var(--bg-alt);border-radius:0 0 var(--radius-lg) var(--radius-lg);">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px;">
+            <span style="font-size:0.8125rem;color:var(--text-secondary);">选中 <b style="color:var(--primary);">${selCount}</b> 项 · 总重 <b>${Math.round(totalMass)}g</b> · 总热量 <b>${totalKcalMin}~${totalKcalMax} kcal</b></span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" style="flex:1;min-width:200px;" onclick="PageMeal.saveSelected()" ${selCount === 0 ? 'disabled style="opacity:0.5;cursor:not-allowed;flex:1;min-width:200px;"' : ''}>
+              <i data-lucide="save"></i>确认保存选中的 ${selCount} 项食物
+            </button>
+            <button class="btn btn-secondary" onclick="PageMeal.manualInput()"><i data-lucide="edit-3"></i>手动输入</button>
+            <button class="btn btn-ghost" onclick="PageMeal.backToUpload()"><i data-lucide="rotate-ccw"></i>重新上传</button>
+          </div>
         </div>
       </div>
     `;
@@ -275,12 +316,14 @@ const PageMeal = (() => {
   }
 
   function renderSaved() {
+    const s = state.savedSummary;
+    const desc = s ? `已保存 ${s.count} 项：${s.names.join('、')}，共约 ${s.totalMass}g / ${s.totalKcal} kcal` : (state.selectedDish ? `${state.selectedDish.name} · ${state.weight}g` : '已加入历史记录');
     return `
       <div class="card">
         <div class="state-view">
           <div class="state-icon" style="color:var(--success);"><i data-lucide="check-circle-2" style="width:56px;height:56px;"></i></div>
           <div class="state-title">已保存到今日记录</div>
-          <div class="state-desc">${state.selectedDish?.name || '菜品'} · ${state.weight}g · 已加入历史记录</div>
+          <div class="state-desc">${desc}</div>
           <div class="state-actions">
             <a href="#/" class="btn btn-primary"><i data-lucide="home"></i>查看总览</a>
             <button class="btn btn-secondary" onclick="PageMeal.reset()"><i data-lucide="plus"></i>继续记录</button>
@@ -339,7 +382,6 @@ const PageMeal = (() => {
   async function startRecognize() {
     if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
     state.error = null; state.step = 'recognizing'; state.isMock = false;
-    state.depthStatus = null; state.depthRes = null;
     App.rerender();
 
     // 视觉定量：多模态模型一次完成实例分割、1cm网格标定、透视相对高度估计，再由本地几何内核算体积/质量/热量
@@ -348,6 +390,8 @@ const PageMeal = (() => {
       state.candidates = mapMeasure(mr.data);
       state.measureSummary = mr.data;
       state.lowConfidence = state.candidates.every(c => parseFloat(c.probability) < 0.3);
+      state.selectedIndices = state.candidates.map((_, i) => i); // 默认全选
+      state.candidateWeights = {};
       state.step = 'candidates';
       UI.toast(`定量分析完成：${mr.data.food_count} 项食物，估重约 ${mr.data.total_mass_g}g`, 'success');
       App.rerender();
@@ -359,6 +403,8 @@ const PageMeal = (() => {
       state.candidates = dr.results;
       state.measureSummary = null;
       state.lowConfidence = dr.results.every(c => parseFloat(c.probability) < 0.3);
+      state.selectedIndices = state.candidates.map((_, i) => i);
+      state.candidateWeights = {};
       state.step = 'candidates';
       UI.toast('已完成类型识别，可手动确认份量', 'info');
     } else {
@@ -368,21 +414,81 @@ const PageMeal = (() => {
     App.rerender();
   }
 
-  function tickDepth(text, preview, device, failed) {
-    if (!state.depthStatus) state.depthStatus = { active: true };
-    state.depthStatus.text = text;
-    if (preview) state.depthStatus.preview = preview;
-    if (device) state.depthStatus.device = device;
-    if (failed) state.depthStatus.failed = true;
-    const el = document.getElementById('depthProgress');
-    if (el) el.textContent = '深度感知：' + text;
-  }
-
   function cancelRecognize() { state.step = 'upload'; App.rerender(); }
+
+  // ---------- 多选相关 ----------
+  function toggleSelect(index) {
+    const idx = state.selectedIndices.indexOf(index);
+    if (idx >= 0) state.selectedIndices.splice(idx, 1);
+    else state.selectedIndices.push(index);
+    App.rerender();
+  }
+  function toggleSelectAll() {
+    if (state.selectedIndices.length === state.candidates.length) {
+      state.selectedIndices = [];
+    } else {
+      state.selectedIndices = state.candidates.map((_, i) => i);
+    }
+    App.rerender();
+  }
+  function setCandidateWeight(index, value) {
+    const w = parseFloat(value);
+    if (!isNaN(w) && w > 0) state.candidateWeights[index] = w;
+  }
+  // 一次性保存所有选中的食物到历史记录
+  function saveSelected() {
+    if (state.selectedIndices.length === 0) { UI.toast('请至少选择一项食物', 'warning'); return; }
+    const now = new Date();
+    const hour = now.getHours();
+    const period = hour >= 6 && hour < 10 ? 'breakfast' : hour >= 11 && hour < 14 ? 'lunch' : hour >= 17 && hour < 21 ? 'dinner' : 'snack';
+    const records = AppState.getRecords();
+    let totalKcal = 0, totalMass = 0, savedNames = [];
+    state.selectedIndices.forEach(idx => {
+      const c = state.candidates[idx];
+      const w = state.candidateWeights[idx] != null ? state.candidateWeights[idx] : (c.measure ? c.measure.massG : 150);
+      const cal100 = parseFloat(c.calorie) || 0;
+      const kcal = Math.round(cal100 * w / 100);
+      totalKcal += kcal; totalMass += w; savedNames.push(c.name);
+      const m = c.measure;
+      records.push({
+        id: 'meal_' + Date.now() + '_' + idx,
+        source_type: state.isMock ? 'demo_mock' : 'smart_recognize',
+        merchant_label: c.name,
+        meal_period: period,
+        visual_measure: m ? {
+          area_cm2: m.areaCm2, thickness_cm: m.thicknessCm, volume_cm3: m.volumeCm3,
+          density_g_cm3: m.density, mass_g: m.massG, shape: m.shape
+        } : null,
+        items: [{
+          id: 'item_' + Math.random().toString(36).slice(2),
+          name: c.name, category: 'meal',
+          estimated_weight_g: w, consumed_ratio: 1,
+          calories_kcal: { value: kcal, interval: null, value_type: 'estimated' },
+          protein_g: { value: null, interval: null, value_type: 'unknown' },
+          fat_g: { value: null, interval: null, value_type: 'unknown' },
+          carbs_g: { value: null, interval: null, value_type: 'unknown' },
+          sugar_g: { value: null, interval: null, value_type: 'unknown' },
+          sodium_mg: { value: null, interval: null, value_type: 'unknown' },
+          confidence: parseFloat(c.probability) || 0.5,
+          source_ids: [], value_type: 'estimated',
+          warnings: [m ? '视觉定量估算：分割标定→透视高度→体积→估重，结果可手动修正' : '智能识别结果，按每100g参考值×份量估算']
+        }],
+        status: 'confirmed',
+        created_at: now.toISOString(), updated_at: now.toISOString()
+      });
+    });
+    AppState.setRecords(records);
+    state.step = 'saved';
+    state.savedSummary = { count: state.selectedIndices.length, names: savedNames, totalMass: Math.round(totalMass), totalKcal };
+    UI.toast(`已保存 ${state.selectedIndices.length} 项食物：${savedNames.join('、')}，共约 ${Math.round(totalMass)}g / ${totalKcal} kcal`, 'success');
+    App.rerender();
+  }
 
   function useMockData() {
     state.candidates = MOCK_DISHES.map(d => ({ ...d }));
     state.isMock = true; state.lowConfidence = false;
+    state.selectedIndices = state.candidates.map((_, i) => i);
+    state.candidateWeights = {};
     state.measureSummary = {
       reference_type: 'grid1cm', food_count: MOCK_DISHES.length,
       total_mass_g: MOCK_DISHES.reduce((a, b) => a + b.measure.massG, 0),
@@ -466,9 +572,9 @@ const PageMeal = (() => {
   }
 
   function reset() {
-    state = { step: 'upload', previewImage: null, compressedBase64: null, imgSize: { w: 1024, h: 1024 }, candidates: [], selectedDish: null, weight: 250, nutrition: null, nutritionLoading: false, error: null, isMock: false, lowConfidence: false, measureSummary: null, depthStatus: null, depthRes: null };
+    state = { step: 'upload', previewImage: null, compressedBase64: null, imgSize: { w: 1024, h: 1024 }, candidates: [], selectedIndices: [], candidateWeights: {}, selectedDish: null, weight: 250, nutrition: null, nutritionLoading: false, error: null, isMock: false, lowConfidence: false, measureSummary: null, savedSummary: null };
     App.rerender();
   }
 
-  return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, retryNutrition, setWeight, manualInput, saveRecord, reset, backToUpload };
+  return { render, handleImage, clearImage, startRecognize, cancelRecognize, useMockData, selectDish, retryNutrition, setWeight, manualInput, saveRecord, reset, backToUpload, toggleSelect, toggleSelectAll, setCandidateWeight, saveSelected };
 })();
