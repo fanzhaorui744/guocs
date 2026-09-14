@@ -111,8 +111,29 @@ const PageGoals = (() => {
 
       <div class="card">
         <div class="card-header">
+          <div class="card-title"><i data-lucide="globe"></i>API 中转配置</div>
+          <span class="tag tag-demo-data">线上部署需配置</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:0.8125rem;color:var(--color-text-secondary);margin-bottom:12px;">
+            线上 GitHub Pages 为纯静态站，无法直接跨域调用识别接口，需配置一个 API 中转地址（如 Cloudflare Worker）。本地运行后端（localhost:8080）时无需配置。
+          </p>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="apiProxyInput" placeholder="https://your-worker.workers.dev" 
+              value="${(function(){try{return localStorage.getItem('npv2_api_proxy')||'';}catch(e){return '';}})()}"
+              style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--border-color);border-radius:var(--radius-md);font-size:0.875rem;">
+            <button class="btn btn-primary" onclick="PageGoals.saveApiProxy()"><i data-lucide="save"></i>保存</button>
+            <button class="btn btn-ghost" onclick="PageGoals.clearApiProxy()"><i data-lucide="x"></i>清除</button>
+          </div>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);margin-top:8px;">
+            中转脚本见项目 <code>scripts/cf-worker-proxy.js</code>，部署到 Cloudflare Worker 后填入上方地址即可。
+          </p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
           <div class="card-title"><i data-lucide="info"></i>估算边界与免责声明</div>
-          
         </div>
         <div class="card-body" style="font-size:0.875rem;color:var(--color-text-secondary);line-height:1.8;">
           <p>• 所有营养估算为参考值或区间，不是精确测量。</p>
@@ -221,5 +242,21 @@ const PageGoals = (() => {
     }, '清空所有数据', true);
   }
 
-  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll };
+  function saveApiProxy() {
+    const input = document.getElementById('apiProxyInput');
+    if (!input) return;
+    let val = input.value.trim();
+    if (val && !val.startsWith('http')) val = 'https://' + val;
+    if (val.endsWith('/')) val = val.slice(0, -1);
+    localStorage.setItem('npv2_api_proxy', val);
+    UI.toast(val ? 'API 中转地址已保存' : 'API 中转地址已清除', 'success');
+  }
+  function clearApiProxy() {
+    localStorage.removeItem('npv2_api_proxy');
+    const input = document.getElementById('apiProxyInput');
+    if (input) input.value = '';
+    UI.toast('已清除 API 中转地址', 'info');
+  }
+
+  return { render, updateProfile, togglePref, saveProfile, grantConsent, confirmGrant, revokeConsent, exportAll, clearAll, saveApiProxy, clearApiProxy };
 })();
