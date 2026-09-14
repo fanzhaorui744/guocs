@@ -2187,9 +2187,10 @@ const Recognize = (() => {
   const _gateway = () => _e('aHR0cHM6Ly92dWxjYW5hcGkuY29tL3Yx');
   const _engine = () => _e('Z3B0LTUuNi1zb2w=');
   const _authHeader = () => String.fromCharCode(66, 101, 97, 114, 101, 114) + ' ' + _cred();
-  // 自建中转地址（部署后填入，形如 https://xxx.workers.dev）；留空则跳过该通道
+  // 自建中转地址（Cloudflare Worker，开箱即用）；设置页可自定义覆盖
   const _workerBase = () => {
-    try { return localStorage.getItem('npv2_api_proxy') || ''; } catch(e) { return ''; }
+    const DEFAULT = 'https://nutri-proxy.fanzhaorui744.workers.dev';
+    try { return localStorage.getItem('npv2_api_proxy') || DEFAULT; } catch(e) { return DEFAULT; }
   };
 
   /* ---------- 通道选择 ---------- */
