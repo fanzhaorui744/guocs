@@ -2187,10 +2187,15 @@ const Recognize = (() => {
   const _gateway = () => _e('aHR0cHM6Ly92dWxjYW5hcGkuY29tL3Yx');
   const _engine = () => _e('Z3B0LTUuNi1zb2w=');
   const _authHeader = () => String.fromCharCode(66, 101, 97, 114, 101, 114) + ' ' + _cred();
-  // 自建中转地址（Netlify Functions，国内可访问，SSL正常）；设置页可自定义覆盖
+  // 自建中转地址（支持多个，依次尝试）；设置页可自定义覆盖
   const _workerBase = () => {
     const DEFAULT = 'https://nutri-proxy-fzr.netlify.app/.netlify/functions/proxy';
     try { return localStorage.getItem('npv2_api_proxy') || DEFAULT; } catch(e) { return DEFAULT; }
+  };
+  // Cloudflare Workers 代理（支持长请求，免费版 CPU 时间 10ms 但墙钟时间不限）
+  const _cfWorkerBase = () => {
+    const DEFAULT = 'https://nutri-proxy.fanzhaorui744.workers.dev/';
+    try { return localStorage.getItem('npv2_cf_proxy') || DEFAULT; } catch(e) { return DEFAULT; }
   };
 
   /* ---------- 通道选择 ---------- */
@@ -2243,16 +2248,22 @@ const Recognize = (() => {
       const r = await _post(base + '/api/recognize/chat', payload, null, 130000);
       if (r.ok) return { success: true, text: r.text };
     }
-    // 2. 自建中转（Netlify Functions，传递 Authorization header，给足 60s）
+    // 2. Cloudflare Workers 代理（支持长请求，墙钟时间不限，给足 120s）
+    const cfWorker = _cfWorkerBase();
+    if (cfWorker) {
+      const r = await _post(cfWorker, payload, _authHeader(), 120000);
+      if (r.ok) return { success: true, text: r.text };
+    }
+    // 3. 自建中转（Netlify Functions，传递 Authorization header，给足 60s，但免费版实际超时 26s）
     const worker = _workerBase();
     if (worker) {
       const r = await _post(worker, payload, _authHeader(), 60000);
       if (r.ok) return { success: true, text: r.text };
     }
-    // 3. 直连
+    // 4. 直连
     const direct = await _post(_gateway() + '/chat/completions', payload, _authHeader(), 30000);
     if (direct.ok) return { success: true, text: direct.text };
-    // 4. 公共中转轮询
+    // 5. 公共中转轮询
     for (const wrap of _publicProxies()) {
       const r = await _post(wrap(_gateway() + '/chat/completions'), payload, _authHeader(), 15000);
       if (r.ok) return { success: true, text: r.text };
@@ -2610,7 +2621,7 @@ const Recognize = (() => {
         { type: 'text', text: _appUserPrompt() },
         { type: 'image_url', image_url: { url: dataUri } }
       ] }
-    ], true, 800);
+    ], true, 1500);
     if (!r.success) return { success: false, error: r.error || '识别服务暂不可用' };
     const raw = _extractJson(r.text);
     if (!raw || !Array.isArray(raw.results)) return { success: false, error: '识别结果解析失败' };
