@@ -7,6 +7,8 @@ const PageCommunity = (() => {
   let feedTab = 'recommend'; // recommend | follow | challenge
   let roleFilter = 'all';    // all | user | merchant | nutritionist
   let likedSet = {};
+  let commentLikeSet = {};
+  let replyTo = null; // { idx, name }
   let collectedSet = {};
   let collected = { meals: [], knowledge: [] };
   let streak = 3;
@@ -24,19 +26,27 @@ const PageCommunity = (() => {
       posts.forEach(p => { if (!p.author_id) p.author_id = 'a_' + (p.author_name || 'x'); });
     }
     try { likedSet = JSON.parse(localStorage.getItem('npv2_liked')) || {}; } catch { likedSet = {}; }
+    try { commentLikeSet = JSON.parse(localStorage.getItem('npv2_comment_liked')) || {}; } catch { commentLikeSet = {}; }
     try { collectedSet = JSON.parse(localStorage.getItem('npv2_collected_set')) || {}; } catch { collectedSet = {}; }
     const c = localStorage.getItem('npv2_collected');
     if (c) collected = JSON.parse(c);
     streak = parseInt(localStorage.getItem('npv2_streak')) || 3;
     // 依据本地点赞集合恢复显示数
-    posts.forEach(p => { if (likedSet[p.id] && !p._adj) { p.likes = (p.likes || 0) + 1; p._adj = true; } });
+    posts.forEach(p => {
+      if (likedSet[p.id] && !p._adj) { p.likes = (p.likes || 0) + 1; p._adj = true; }
+      (p.comments || []).forEach((c, ci) => { if (commentLikeSet[p.id + '_' + ci] && !c._ladj) { c.likes = (c.likes || 0) + 1; c._ladj = true; } });
+    });
   }
 
   function save() {
-    posts.forEach(p => delete p._adj);
+    posts.forEach(p => { delete p._adj; (p.comments || []).forEach(c => delete c._ladj); });
     localStorage.setItem('npv2_community_posts', JSON.stringify(posts));
-    posts.forEach(p => { if (likedSet[p.id]) p._adj = true; });
+    posts.forEach(p => {
+      if (likedSet[p.id]) p._adj = true;
+      (p.comments || []).forEach((c, ci) => { if (commentLikeSet[p.id + '_' + ci]) c._ladj = true; });
+    });
     localStorage.setItem('npv2_liked', JSON.stringify(likedSet));
+    localStorage.setItem('npv2_comment_liked', JSON.stringify(commentLikeSet));
     localStorage.setItem('npv2_collected_set', JSON.stringify(collectedSet));
     localStorage.setItem('npv2_collected', JSON.stringify(collected));
     localStorage.setItem('npv2_streak', String(streak));
@@ -262,9 +272,85 @@ const PageCommunity = (() => {
     if (!text) { UI.toast('请输入评论内容', 'warning'); return; }
     const m = me();
     posts[idx].comments = posts[idx].comments || [];
-    posts[idx].comments.push({ author: m.name, role: m.role, text, time: '刚刚' });
+    const c = { author: m.name, role: m.role, text, time: '刚刚', likes: 0 };
+    if (replyTo && replyTo.idx === idx && replyTo.name) c.reply_to = replyTo.name;
+    posts[idx].comments.push(c);
+    replyTo = null;
     save(); App.rerender(); UI.toast('评论已发布', 'success');
   }
+
+  function likeComment(idx, ci) {
+    const p = posts[idx]; if (!p || !p.comments || !p.comments[ci]) return;
+    const key = p.id + '_' + ci, c = p.comments[ci];
+    if (commentLikeSet[key]) { c.likes = Math.max(0, (c.likes || 0) - 1); delete commentLikeSet[key]; }
+    else { c.likes = (c.likes || 0) + 1; commentLikeSet[key] = true; }
+    save(); App.rerender();
+  }
+
+  function startReply(idx, ci, name) {
+    replyTo = { idx, name };
+    const input = document.getElementById(`commentInput_${idx}`);
+    if (input) { input.placeholder = '回复 @' + name + '：'; input.focus(); }
+    const hint = document.getElementById(`replyHint_${idx}`);
+    if (hint) { hint.style.display = 'block'; hint.textContent = '正在回复 @' + name + '，发送后自动取消'; }
+  }
+
+  // 作者个人主页（资料卡 + 数据统计 + TA的内容）
+  function profileOf(authorId) {
+    const mine = posts.filter(p => p.author_id === authorId);
+    const role = mine[0]?.author_role || 'user';
+    const name = mine[0]?.author_name || '营养用户';
+    const totalLikes = mine.reduce((a, p) => a + (p.likes || 0), 0);
+    const totalCollect = mine.reduce((a, p) => a + (p.collected || 0), 0);
+    const following = followingIds().includes(authorId);
+    const roleName = role === 'user' ? '用户' : role === 'merchant' ? '认证商家' : '认证营养师';
+    const roleColor = role === 'merchant' ? '#D9A441' : role === 'nutritionist' ? '#6366F1' : '#2A9D8F';
+    const bio = role === 'merchant' ? '专注健康轻食，持续更新菜品营养数据'
+      : role === 'nutritionist' ? '注册营养师，提供循证营养建议与纠错'
+      : '认真记录每一餐，科学管理每日摄入';
+    const fans = role === 'nutritionist' ? 1280 : role === 'merchant' ? 860 : 236;
+    return { mine, role, name, totalLikes, totalCollect, following, roleName, roleColor, bio, fans };
+  }
+
+  function openProfile(authorId) {
+    const pf = profileOf(authorId);
+    UI.modal(`个人主页 · ${pf.name}`, `
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,${pf.roleColor},${pf.roleColor}cc);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;flex-shrink:0;">${pf.name[0] || 'U'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:1.05rem;font-weight:800;">${pf.name} <span class="post-role-badge" style="background:${pf.roleColor}18;color:${pf.roleColor};">${pf.roleName}</span></div>
+          <div style="font-size:.78rem;color:var(--text-muted);margin-top:3px;">${pf.bio}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn ${pf.following ? 'btn-ghost' : 'btn-primary'} btn-sm" id="profileFollowBtn" onclick="PageCommunity.followFromProfile('${authorId}')">${pf.following ? '已关注' : '+ 关注'}</button>
+        <button class="btn btn-secondary btn-sm" onclick="PageCommunity.messageTo('${pf.name.replace(/'/g, '')}')">私信</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-bottom:6px;">
+        <div style="background:var(--bg-alt);padding:10px 4px;border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;">${pf.mine.length}</div><div style="font-size:.7rem;color:var(--text-muted);">内容</div></div>
+        <div style="background:var(--bg-alt);padding:10px 4px;border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;">${pf.totalLikes}</div><div style="font-size:.7rem;color:var(--text-muted);">获赞</div></div>
+        <div style="background:var(--bg-alt);padding:10px 4px;border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;">${pf.fans}</div><div style="font-size:.7rem;color:var(--text-muted);">粉丝</div></div>
+        <div style="background:var(--bg-alt);padding:10px 4px;border-radius:10px;"><div style="font-size:1.1rem;font-weight:800;">${pf.totalCollect}</div><div style="font-size:.7rem;color:var(--text-muted);">收藏</div></div>
+      </div>
+      <div class="divider"></div>
+      <h4 style="font-size:.9rem;margin:10px 0;">TA 的内容（${pf.mine.length}）</h4>
+      ${pf.mine.length ? pf.mine.map(mp => { const gi = posts.indexOf(mp); return `
+        <div style="padding:10px;border:1px solid var(--border-light);border-radius:10px;margin-bottom:8px;cursor:pointer;" onclick="document.querySelector('.modal-overlay')?.remove();setTimeout(()=>PageCommunity.viewPost(${gi}),80);">
+          <div style="font-size:.85rem;font-weight:700;">${mp.title}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${mp.body}</div>
+          <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">👍 ${mp.likes || 0} · 💬 ${(mp.comments || []).length} · ⭐ ${mp.collected || 0}</div>
+        </div>`; }).join('') : '<p style="font-size:.8rem;color:var(--text-muted);">暂无公开内容</p>'}
+    `, `<button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">关闭</button>`);
+  }
+
+  function followFromProfile(authorId) {
+    if (typeof Auth !== 'undefined' && !Auth.current()) { UI.toast('请先登录后再关注', 'warning'); location.hash = '#/auth'; return; }
+    const now = Auth.toggleFollow(authorId);
+    const btn = document.getElementById('profileFollowBtn');
+    if (btn) { btn.textContent = now ? '已关注' : '+ 关注'; btn.className = `btn ${now ? 'btn-ghost' : 'btn-primary'} btn-sm`; }
+    UI.toast(now ? '已关注' : '已取消关注', 'info');
+  }
+  function messageTo(name) { UI.toast('已向 ' + name + ' 发起私信', 'info'); }
 
   function followAuthor(authorId, btn) {
     if (typeof Auth === 'undefined' || !Auth.current()) { UI.toast('请先登录后再关注', 'warning'); location.hash = '#/auth'; return; }
@@ -323,7 +409,8 @@ const PageCommunity = (() => {
       <div style="margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
         <span class="tag ${p.author_role==='merchant'?'tag-demo-data':p.author_role==='nutritionist'?'tag-pending':'tag-demo'}">${p.author_role==='user'?'用户':p.author_role==='merchant'?'商家':'营养师'}</span>
         <span class="tag tag-${p.moderation_status==='已发布'?'success':p.moderation_status==='待审核'?'pending':'error'}">${p.moderation_status}</span>
-        <button class="btn ${following?'btn-ghost':'btn-secondary'} btn-sm" style="margin-left:auto;" onclick="PageCommunity.followAuthor('${p.author_id}',this)">${following?'已关注':'+ 关注作者'}</button>
+        <button class="btn btn-secondary btn-sm" style="margin-left:auto;" onclick="PageCommunity.openProfile('${p.author_id}')">TA的主页</button>
+        <button class="btn ${following?'btn-ghost':'btn-secondary'} btn-sm" onclick="PageCommunity.followAuthor('${p.author_id}',this)">${following?'已关注':'+ 关注作者'}</button>
         <button class="btn btn-secondary btn-sm" onclick="PageCommunity.forward(${idx})">转发</button>
       </div>
       <p style="font-size:.9375rem;color:var(--text-secondary);margin-bottom:14px;line-height:1.7;">${p.body}</p>
@@ -344,7 +431,8 @@ const PageCommunity = (() => {
       <h4 style="font-size:.9375rem;margin:10px 0;">评论 (${(p.comments||[]).length})</h4>
       ${(p.comments||[]).map(c => `<div style="padding:10px 0;border-bottom:1px solid var(--border-light);">
         <div style="font-size:.8125rem;font-weight:600;">${c.author} <span class="post-role-badge">${c.role||'用户'}</span> <span style="font-weight:400;color:var(--text-muted);font-size:.75rem;">· ${c.time}</span></div>
-        <div style="font-size:.875rem;color:var(--text-secondary);margin-top:4px;">${c.text}</div>
+        <div style="font-size:.875rem;color:var(--text-secondary);margin-top:4px;">${c.reply_to?`<span style="color:var(--primary);font-weight:600;">回复 @${c.reply_to}：</span>`:''}${c.text}</div>
+        ${c.likes?`<div style="font-size:.72rem;color:var(--text-muted);margin-top:4px;">👍 ${c.likes}</div>`:''}
       </div>`).join('') || '<p style="font-size:.8rem;color:var(--text-muted);">还没有评论，来说两句吧</p>'}
     `, `<button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">关闭</button>`);
   }
@@ -402,5 +490,5 @@ const PageCommunity = (() => {
     UI.toast(`收藏「${type==='meals'?'我的餐单':'营养知识'}」共 ${n} 条`, 'info');
   }
 
-  return { render, search, filterTopic, setSort, setTab, setRoleFilter, like, toggleCollect, toggleComments, addComment, followAuthor, forward, checkin, askNutritionist, report, confirmReport, viewPost, newPost, confirmNewPost, openMessages, showCollected };
+  return { render, search, filterTopic, setSort, setTab, setRoleFilter, like, toggleCollect, toggleComments, addComment, likeComment, startReply, openProfile, followFromProfile, messageTo, followAuthor, forward, checkin, askNutritionist, report, confirmReport, viewPost, newPost, confirmNewPost, openMessages, showCollected };
 })();
