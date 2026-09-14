@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nutrition intelligence network icon">
+  <rect x="4" y="4" width="56" height="56" rx="17" fill="#0B7285"/>
+  <path d="M19 20C25 14 39 14 46 20M49 25C53 33 50 44 43 48M21 48C13 43 11 31 15 25" fill="none" stroke="#D1E8EC" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="19" cy="20" r="3.8" fill="#D9A441"/>
+  <circle cx="46" cy="20" r="3.8" fill="#2A9D8F"/>
+  <circle cx="19" cy="47" r="3.8" fill="#E76F51"/>
+  <g stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 36C18.7 31 24.8 29 30.5 29C34.8 29 38.7 30.3 40.9 33.5" fill="none" stroke-width="2.8"/>
+    <path d="M16 36.7H42L39.6 42H18.4Z" fill="#FFFFFF" stroke-width="1.9"/>
+    <path d="M21 38.6V40.6M25 38.6V40.6M29 38.6V40.6" stroke="#0B7285" stroke-width="1.8"/>
+    <path d="M38.1 25.8H47L45.9 36.2H39.2Z" fill="#FFFFFF" stroke-width="1.9"/>
+    <path d="M38.5 25.8H46.6M45.2 25.8L49 21.4" stroke-width="1.9"/>
+    <path d="M42.6 29.2H44.3M42.2 32H43.9" stroke="#2A9D8F" stroke-width="1.7"/>
+  </g>
+  <circle cx="46" cy="47" r="6.8" fill="#E76F51"/>
+  <path d="M42.9 47L45 49.1L49.3 44.5" fill="none" stroke="#FFFFFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
