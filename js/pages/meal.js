@@ -397,6 +397,9 @@ const PageMeal = (() => {
       App.rerender();
       return;
     }
+    // measure 失败时显示错误信息（调试用）
+    console.error('[measure failed]', mr.error);
+    UI.toast(`定量分析暂不可用（${mr.error}），已降级为类型识别`, 'warning');
     // 兜底：仅类型识别（用户手动给克重）
     const dr = await Recognize.dish(state.compressedBase64);
     if (dr.success) {
