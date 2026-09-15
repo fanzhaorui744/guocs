@@ -54,9 +54,11 @@ const PageBeverage = (() => {
           <div class="form-group">
             <label class="form-label">上传订单截图/杯贴照片</label>
             ${UI.uploadZone('bevUpload', { icon: 'image', text: '点击上传订单/杯贴照片', hint: '上传后可自动识别图片中的文字' })}
-            <div id="bevImagePreview" class="upload-preview" style="display:none;"></div>
             ${state.imagePreview ? `
-              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <div style="margin-top:12px;text-align:center;">
+                <img src="${state.imagePreview}" alt="订单图片预览" style="max-height:180px;border-radius:8px;box-shadow:var(--shadow-md);">
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
                 <button class="btn btn-primary btn-sm" onclick="PageBeverage.recognizeImage()" ${state.isRecognizing?'disabled':''}>
                   ${state.isRecognizing ? '<span class="loading-spinner" style="width:14px;height:14px;border-width:2px;margin:0;"></span>识别中...' : '<i data-lucide="scan-text"></i>识别图片文字'}
                 </button>
@@ -539,13 +541,9 @@ const PageBeverage = (() => {
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
             state.compressedBase64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+            App.rerender();
           };
           img.src = ev.target.result;
-          const prev = document.getElementById('bevImagePreview');
-          if (prev) {
-            prev.style.display = 'block';
-            prev.innerHTML = `<img src="${ev.target.result}" alt="订单图片预览" style="max-height:160px;border-radius:8px;margin:0 auto;"><div class="preview-tag tag tag-success">已上传</div>`;
-          }
           UI.toast('图片已加载，点击"识别图片文字"自动提取饮品信息', 'success');
         };
         reader.readAsDataURL(file);
