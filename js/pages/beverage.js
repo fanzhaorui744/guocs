@@ -609,6 +609,31 @@ const PageBeverage = (() => {
     const result = await Recognize.nutrition(drinkName);
     if (result.success && result.data) {
       const nut = result.data;
+      // API 返回的是每100g的营养值，按杯型比例放大
+      // 中杯500ml ≈ 500g = 5 × 100g，大杯650ml ≈ 650g = 6.5 × 100g
+      const mediumFactor = 5;
+      const largeFactor = 6.5;
+      const cal100 = nut.calorie || (nut.protein_g*4 + nut.fat_g*9 + nut.carbs_g*4);
+      const calMedium = Math.round(cal100 * mediumFactor);
+      const calLarge = Math.round(cal100 * largeFactor);
+      const proteinMedium = Math.round((nut.protein_g||0) * mediumFactor);
+      const proteinLarge = Math.round((nut.protein_g||0) * largeFactor);
+      const fatMedium = Math.round((nut.fat_g||0) * mediumFactor);
+      const fatLarge = Math.round((nut.fat_g||0) * largeFactor);
+      const carbsMedium = Math.round((nut.carbs_g||0) * mediumFactor);
+      const carbsLarge = Math.round((nut.carbs_g||0) * largeFactor);
+      const sugarMedium = Math.round((nut.sugar_g||0) * mediumFactor);
+      const sugarLarge = Math.round((nut.sugar_g||0) * largeFactor);
+      const sodiumMedium = nut.sodium_mg ? Math.round(nut.sodium_mg * mediumFactor) : null;
+      const sodiumLarge = nut.sodium_mg ? Math.round(nut.sodium_mg * largeFactor) : null;
+      
+      // 糖度差值按比例计算（全糖→半糖约减50%糖，热量减约25%）
+      const sugarDeltaHalf = Math.max(10, Math.round(calMedium * 0.25));
+      const sugarDeltaLess = Math.max(5, Math.round(sugarDeltaHalf * 0.5));
+      const sugarDeltaQuarter = Math.max(15, Math.round(sugarDeltaHalf * 1.5));
+      const sugarDeltaNone = Math.max(20, Math.round(sugarDeltaHalf * 2));
+      const sugarGramHalf = Math.max(2, Math.round(sugarMedium * 0.5));
+      
       // 创建新的 SKU
       const newSku = {
         brand_id: 'user_added',
@@ -627,12 +652,31 @@ const PageBeverage = (() => {
           toppings: []
         },
         base_nutrition: {
-          medium: { full_sugar: { kcal:{value:null,interval:{min:Math.round((nut.protein_g*4+nut.fat_g*9+nut.carbs_g*4)*0.8),max:Math.round((nut.protein_g*4+nut.fat_g*9+nut.carbs_g*4)*1.2)}}, protein_g:{value:nut.protein_g,interval:{min:Math.round(nut.protein_g*0.8),max:Math.round(nut.protein_g*1.2)}}, fat_g:{value:nut.fat_g,interval:{min:Math.round(nut.fat_g*0.8),max:Math.round(nut.fat_g*1.2)}}, carbs_g:{value:nut.carbs_g,interval:{min:Math.round(nut.carbs_g*0.8),max:Math.round(nut.carbs_g*1.2)}}, sugar_g:{value:nut.sugar_g||0,interval:{min:0,max:Math.round((nut.sugar_g||0)*1.5)}}, sodium_mg:{value:nut.sodium_mg||null,interval:{min:0,max:Math.round((nut.sodium_mg||50)*1.5)}} } },
-          large: { full_sugar: { kcal:{value:null,interval:{min:Math.round((nut.protein_g*4+nut.fat_g*9+nut.carbs_g*4)*1.0),max:Math.round((nut.protein_g*4+nut.fat_g*9+nut.carbs_g*4)*1.5)}}, protein_g:{value:Math.round(nut.protein_g*1.3),interval:{min:Math.round(nut.protein_g),max:Math.round(nut.protein_g*1.6)}}, fat_g:{value:Math.round(nut.fat_g*1.3),interval:{min:Math.round(nut.fat_g),max:Math.round(nut.fat_g*1.6)}}, carbs_g:{value:Math.round(nut.carbs_g*1.3),interval:{min:Math.round(nut.carbs_g),max:Math.round(nut.carbs_g*1.6)}}, sugar_g:{value:Math.round((nut.sugar_g||0)*1.3),interval:{min:0,max:Math.round((nut.sugar_g||0)*2)}}, sodium_mg:{value:nut.sodium_mg||null,interval:{min:0,max:Math.round((nut.sodium_mg||80)*1.5)}} } }
+          medium: { full_sugar: { 
+            kcal:{value:null,interval:{min:Math.max(0,Math.round(calMedium*0.85)),max:Math.round(calMedium*1.15)}}, 
+            protein_g:{value:proteinMedium,interval:{min:Math.max(0,Math.round(proteinMedium*0.85)),max:Math.round(proteinMedium*1.15)}}, 
+            fat_g:{value:fatMedium,interval:{min:Math.max(0,Math.round(fatMedium*0.85)),max:Math.round(fatMedium*1.15)}}, 
+            carbs_g:{value:carbsMedium,interval:{min:Math.max(0,Math.round(carbsMedium*0.85)),max:Math.round(carbsMedium*1.15)}}, 
+            sugar_g:{value:sugarMedium,interval:{min:Math.max(0,Math.round(sugarMedium*0.85)),max:Math.round(sugarMedium*1.15)}}, 
+            sodium_mg:{value:sodiumMedium,interval:{min:0,max:sodiumMedium?Math.round(sodiumMedium*1.3):50}} 
+          } },
+          large: { full_sugar: { 
+            kcal:{value:null,interval:{min:Math.max(0,Math.round(calLarge*0.85)),max:Math.round(calLarge*1.15)}}, 
+            protein_g:{value:proteinLarge,interval:{min:Math.max(0,Math.round(proteinLarge*0.85)),max:Math.round(proteinLarge*1.15)}}, 
+            fat_g:{value:fatLarge,interval:{min:Math.max(0,Math.round(fatLarge*0.85)),max:Math.round(fatLarge*1.15)}}, 
+            carbs_g:{value:carbsLarge,interval:{min:Math.max(0,Math.round(carbsLarge*0.85)),max:Math.round(carbsLarge*1.15)}}, 
+            sugar_g:{value:sugarLarge,interval:{min:Math.max(0,Math.round(sugarLarge*0.85)),max:Math.round(sugarLarge*1.15)}}, 
+            sodium_mg:{value:sodiumLarge,interval:{min:0,max:sodiumLarge?Math.round(sodiumLarge*1.3):80}} 
+          } }
         },
-        sugar_deltas: { full_to_less:{kcal:-15,sugar_g:-4}, full_to_half:{kcal:-30,sugar_g:-8}, full_to_quarter:{kcal:-45,sugar_g:-12}, full_to_none:{kcal:-60,sugar_g:-16} },
-        confidence: nut.confidence || 0.5,
-        notes: '通过API查询添加的饮品营养数据，仅供参考。'
+        sugar_deltas: { 
+          full_to_less:{kcal:-sugarDeltaLess,sugar_g:-Math.max(1,Math.round(sugarGramHalf*0.5))}, 
+          full_to_half:{kcal:-sugarDeltaHalf,sugar_g:-sugarGramHalf}, 
+          full_to_quarter:{kcal:-sugarDeltaQuarter,sugar_g:-Math.max(1,Math.round(sugarGramHalf*1.5))}, 
+          full_to_none:{kcal:-sugarDeltaNone,sugar_g:-Math.max(1,Math.round(sugarGramHalf*2))} 
+        },
+        confidence: Math.max(0.5, nut.confidence || 0.5),
+        notes: '通过API查询添加的饮品营养数据，按500ml/650ml比例换算，仅供参考。'
       };
       // 添加到知识库
       NPV2_DATA.BEVERAGE_CATALOG.push(newSku);
