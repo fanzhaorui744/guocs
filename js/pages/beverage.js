@@ -4,6 +4,8 @@ const PageBeverage = (() => {
     step: 1, // 1输入源 2候选 3配置确认 4透明杯比例 5结果
     inputText: '',
     imagePreview: null,
+    compressedBase64: null,
+    isRecognizing: false,
     candidates: [],
     selectedCandidate: null,
     config: {
@@ -50,10 +52,17 @@ const PageBeverage = (() => {
         </div>
         <div class="card-body">
           <div class="form-group">
-            <label class="form-label">上传订单截图/杯贴照片（仅预览）</label>
-            ${UI.uploadZone('bevUpload', { icon: 'image', text: '点击上传订单/杯贴照片', hint: '图片仅本地预览参考，饮品信息请在下方粘贴文字或选择候选' })}
+            <label class="form-label">上传订单截图/杯贴照片</label>
+            ${UI.uploadZone('bevUpload', { icon: 'image', text: '点击上传订单/杯贴照片', hint: '上传后可自动识别图片中的文字' })}
             <div id="bevImagePreview" class="upload-preview" style="display:none;"></div>
-            <p class="form-hint" style="margin-top:8px;"><i data-lucide="alert-triangle" style="width:14px;height:14px;vertical-align:middle;color:var(--color-warning);"></i> 单张奶茶/果茶照片不能直接转换为可靠kcal。必须经过配置确认流程。</p>
+            ${state.imagePreview ? `
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" onclick="PageBeverage.recognizeImage()" ${state.isRecognizing?'disabled':''}>
+                  ${state.isRecognizing ? '<span class="loading-spinner" style="width:14px;height:14px;border-width:2px;margin:0;"></span>识别中...' : '<i data-lucide="scan-text"></i>识别图片文字'}
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="PageBeverage.clearImage()"><i data-lucide="x"></i>移除图片</button>
+              </div>
+            ` : ''}
           </div>
           <div class="divider"></div>
           <div class="form-group">
@@ -91,10 +100,11 @@ const PageBeverage = (() => {
           ${state.candidates.length === 0 ? `
             ${UI.stateView('unknown', {
               title: '未匹配到候选',
-              desc: '文本中未匹配到饮品库中的品牌或SKU。可以返回修改文本，或手动选择品牌/SKU。',
+              desc: '文本中未匹配到饮品库中的品牌或SKU。可以用API查询营养信息并自动添加到知识库，或手动选择。',
               actions: [
                 '<button class="btn btn-secondary" onclick="PageBeverage.goStep(1)">返回修改</button>',
-                '<button class="btn btn-primary" onclick="PageBeverage.manualSelect()">手动选择品牌/SKU</button>'
+                '<button class="btn btn-primary" onclick="PageBeverage.queryAndAddBeverage()"><i data-lucide="sparkles"></i>用API查询并添加到知识库</button>',
+                '<button class="btn btn-secondary" onclick="PageBeverage.manualSelect()">手动选择品牌/SKU</button>'
               ]
             })}
           ` : `
@@ -516,17 +526,133 @@ const PageBeverage = (() => {
         const reader = new FileReader();
         reader.onload = (ev) => {
           state.imagePreview = ev.target.result;
+          // 压缩图片
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxDim = 1024;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            state.compressedBase64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+          };
+          img.src = ev.target.result;
           const prev = document.getElementById('bevImagePreview');
           if (prev) {
             prev.style.display = 'block';
-            prev.innerHTML = `<img src="${ev.target.result}" alt="订单图片预览" style="max-height:160px;border-radius:8px;margin:0 auto;"><div class="preview-tag tag tag-success">图片仅供参考</div>`;
+            prev.innerHTML = `<img src="${ev.target.result}" alt="订单图片预览" style="max-height:160px;border-radius:8px;margin:0 auto;"><div class="preview-tag tag tag-success">已上传</div>`;
           }
-          UI.toast('图片已加载（仅预览）', 'info');
+          UI.toast('图片已加载，点击"识别图片文字"自动提取饮品信息', 'success');
         };
         reader.readAsDataURL(file);
       });
     }
   }
 
-  return { render, loadDemo, goStep2, goStep, selectCandidate, manualSelect, goStep3, setBrand, setSku, setCupSize, setSugar, setIce, toggleTopping, clearToppings, setCupState, setConsumedRatio, goStep4, calculate, saveRecord, reset, bindEvents };
+  function clearImage() {
+    state.imagePreview = null;
+    state.compressedBase64 = null;
+    App.rerender();
+  }
+
+  async function recognizeImage() {
+    if (!state.compressedBase64) { UI.toast('请先上传图片', 'warning'); return; }
+    state.isRecognizing = true;
+    App.rerender();
+    const result = await Recognize.orderImage(state.compressedBase64);
+    state.isRecognizing = false;
+    if (result.success && result.data && result.data.items && result.data.items.length > 0) {
+      // 从识别结果中提取饮品相关文字
+      const lines = [];
+      if (result.data.merchant) lines.push(result.data.merchant);
+      for (const item of result.data.items) {
+        let line = item.name || '';
+        if (item.spec) line += ' ' + item.spec;
+        if (item.quantity && item.quantity > 1) line += ' x' + item.quantity;
+        if (line) lines.push(line);
+      }
+      const text = lines.join('\n');
+      state.inputText = text;
+      App.rerender();
+      // 自动填充到文本框并生成候选
+      setTimeout(() => {
+        const textarea = document.getElementById('bevText');
+        if (textarea) textarea.value = text;
+        goStep2();
+      }, 100);
+      UI.toast(`识别成功，提取到 ${result.data.items.length} 项`, 'success');
+    } else {
+      UI.toast(result.error || '识别失败，请手动粘贴文字', 'error');
+    }
+  }
+
+  async function queryAndAddBeverage() {
+    // 从输入文本中提取饮品名称（取第一行非商家名的文本）
+    const lines = state.inputText.split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length === 0) { UI.toast('请先输入饮品名称', 'warning'); return; }
+    // 尝试提取饮品名（去掉品牌名、规格等）
+    let drinkName = lines[0];
+    if (lines.length > 1) {
+      // 如果第一行像品牌名（短且不含饮品关键词），取第二行
+      const drinkKeywords = /(茶|奶|咖啡|可乐|雪碧|果汁|奶茶|拿铁|美式|乌龙|绿茶|红茶|柠檬|芒果|草莓|葡萄|西瓜|橙|桃|梨|苹果|椰|芋|珍珠|布丁|红豆|冰沙|奶昔|气泡|苏打|矿泉|柠檬水|养乐多|酸奶|豆浆|牛奶|可可|抹茶|燕麦|焦糖|玛奇朵|芝士|奶盖|咸蛋黄|提拉米苏|黑糖|鲜奶|紫米|香蕉|木瓜|蓝莓|荔枝|白桃|石榴|菠萝|水蜜桃)/;
+      if (!drinkKeywords.test(lines[0]) && drinkKeywords.test(lines[1])) {
+        drinkName = lines[1];
+      }
+    }
+    // 去掉规格词
+    drinkName = drinkName.replace(/(中杯|大杯|小杯|半糖|全糖|七分糖|三分糖|无糖|少冰|正常冰|去冰|热饮|加|\+).*$/, '').trim();
+    if (!drinkName) { UI.toast('无法提取饮品名称，请手动输入', 'warning'); return; }
+
+    UI.toast(`正在查询「${drinkName}」的营养信息...`, 'info');
+    const result = await Recognize.nutrition(drinkName);
+    if (result.success && result.data) {
+      const nut = result.data;
+      // 创建新的 SKU
+      const newSku = {
+        brand_id: 'user_added',
+        brand_name: '用户添加',
+        sku_id: 'user_' + Date.now(),
+        display_name: drinkName,
+        aliases: [drinkName],
+        category: 'other',
+        record_status: 'api_estimated',
+        source_ids: ['api_query'],
+        source_insufficient: false,
+        available_configuration: {
+          cup_sizes: [{id:'medium',label:'中杯',ml:500},{id:'large',label:'大杯',ml:650}],
+          sugar_levels: [{id:'full_sugar',label:'全糖'},{id:'less_sugar',label:'七分糖'},{id:'half_sugar',label:'半糖'},{id:'quarter_sugar',label:'三分糖'},{id:'no_sugar',label:'无糖'}],
+          ice_levels: [{id:'normal_ice',label:'正常冰'},{id:'less_ice',label:'少冰'},{id:'no_ice',label:'去冰'},{id:'hot',label:'热饮'}],
+          toppings: []
+        },
+        base_nutrition: {
+          medium: { full_sugar: { kcal:{value:null,interval:{min:Math.round((nut.protein_g*4+nut.fat_g*9+nut.carbs_g*4)*0.8),max:Math.round((nut.protein_g*4+nut.fat_g*9+nut.carbs_g*4)*1.2)}}, protein_g:{value:nut.protein_g,interval:{min:Math.round(nut.protein_g*0.8),max:Math.round(nut.protein_g*1.2)}}, fat_g:{value:nut.fat_g,interval:{min:Math.round(nut.fat_g*0.8),max:Math.round(nut.fat_g*1.2)}}, carbs_g:{value:nut.carbs_g,interval:{min:Math.round(nut.carbs_g*0.8),max:Math.round(nut.carbs_g*1.2)}}, sugar_g:{value:nut.sugar_g||0,interval:{min:0,max:Math.round((nut.sugar_g||0)*1.5)}}, sodium_mg:{value:nut.sodium_mg||null,interval:{min:0,max:Math.round((nut.sodium_mg||50)*1.5)}} } },
+          large: { full_sugar: { kcal:{value:null,interval:{min:Math.round((nut.protein_g*4+nut.fat_g*9+nut.carbs_g*4)*1.0),max:Math.round((nut.protein_g*4+nut.fat_g*9+nut.carbs_g*4)*1.5)}}, protein_g:{value:Math.round(nut.protein_g*1.3),interval:{min:Math.round(nut.protein_g),max:Math.round(nut.protein_g*1.6)}}, fat_g:{value:Math.round(nut.fat_g*1.3),interval:{min:Math.round(nut.fat_g),max:Math.round(nut.fat_g*1.6)}}, carbs_g:{value:Math.round(nut.carbs_g*1.3),interval:{min:Math.round(nut.carbs_g),max:Math.round(nut.carbs_g*1.6)}}, sugar_g:{value:Math.round((nut.sugar_g||0)*1.3),interval:{min:0,max:Math.round((nut.sugar_g||0)*2)}}, sodium_mg:{value:nut.sodium_mg||null,interval:{min:0,max:Math.round((nut.sodium_mg||80)*1.5)}} } }
+        },
+        sugar_deltas: { full_to_less:{kcal:-15,sugar_g:-4}, full_to_half:{kcal:-30,sugar_g:-8}, full_to_quarter:{kcal:-45,sugar_g:-12}, full_to_none:{kcal:-60,sugar_g:-16} },
+        confidence: nut.confidence || 0.5,
+        notes: '通过API查询添加的饮品营养数据，仅供参考。'
+      };
+      // 添加到知识库
+      NPV2_DATA.BEVERAGE_CATALOG.push(newSku);
+      // 保存到 localStorage
+      try {
+        const userAdded = JSON.parse(localStorage.getItem('npv2_user_beverages') || '[]');
+        userAdded.push(newSku);
+        localStorage.setItem('npv2_user_beverages', JSON.stringify(userAdded));
+      } catch(e) {}
+      // 重新生成候选
+      state.candidates = BeverageEngine.matchCandidates(state.inputText);
+      state.selectedCandidate = state.candidates.length > 0 ? 0 : null;
+      App.rerender();
+      UI.toast(`已添加「${drinkName}」到知识库，匹配到 ${state.candidates.length} 个候选`, 'success');
+    } else {
+      UI.toast(result.error || '查询失败，请手动选择', 'error');
+    }
+  }
+
+  return { render, loadDemo, goStep2, goStep, selectCandidate, manualSelect, goStep3, setBrand, setSku, setCupSize, setSugar, setIce, toggleTopping, clearToppings, setCupState, setConsumedRatio, goStep4, calculate, saveRecord, reset, bindEvents, recognizeImage, clearImage, queryAndAddBeverage };
 })();
