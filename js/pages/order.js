@@ -8,7 +8,9 @@ const PageOrder = (() => {
     candidates: [],
     previewImage: null,
     compressedBase64: null,
-    error: null
+    error: null,
+    nutritionCache: {}, // { name: { calorie, protein_g, fat_g, carbs_g, ... } }
+    isQueryingNutrition: false
   };
 
   const CAT_CN = { staple:'主食', meat:'肉类', vegetable:'蔬菜', soup:'汤品', drink:'饮品', snack:'小吃', fruit:'水果', other:'其他' };
@@ -118,7 +120,9 @@ const PageOrder = (() => {
               </div>
             ` : ''}
             <div class="candidate-list">
-              ${state.candidates.map((c, i) => `
+              ${state.candidates.map((c, i) => {
+                const nut = state.nutritionCache[c.name];
+                return `
                 <div class="candidate-item" style="cursor:default;">
                   <div class="candidate-info">
                     <div class="candidate-name">${c.name || '未命名'}</div>
@@ -126,18 +130,26 @@ const PageOrder = (() => {
                       ${c.specification ? `${c.specification} · ` : ''}
                       ${c.quantity ? `×${c.quantity} ` : ''}
                       ${c.price ? `¥${c.price}` : ''}
+                      ${nut && nut.calorie ? ` · <span style="color:var(--color-primary);font-weight:600;">${nut.calorie}kcal/100g</span>` : ''}
                     </div>
+                    ${nut ? `<div class="candidate-meta" style="margin-top:2px;">蛋白${nut.protein_g||0}g · 脂肪${nut.fat_g||0}g · 碳水${nut.carbs_g||0}g</div>` : ''}
                   </div>
                   <span class="tag ${getCategoryTag(c.category)}">${catCn(c.category)}</span>
-                  <div style="display:flex;gap:6px;margin-left:auto;">
+                  <div style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;">
+                    ${!nut ? `<button class="btn btn-secondary btn-sm" onclick="PageOrder.queryItemNutrition(${i})"><i data-lucide="flame"></i>查热量</button>` : ''}
                     <button class="btn btn-primary btn-sm" onclick="PageOrder.confirmItem(${i})"><i data-lucide="check"></i>确认</button>
                     <button class="btn btn-secondary btn-sm" onclick="PageOrder.editItem(${i})"><i data-lucide="edit-3"></i>修改</button>
                     <button class="btn btn-ghost btn-sm" style="color:var(--color-error);" onclick="PageOrder.removeItem(${i})"><i data-lucide="trash-2"></i></button>
                   </div>
                 </div>
-              `).join('')}
+              `}).join('')}
             </div>
             <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--color-border-light);">
+              <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="PageOrder.queryAllNutrition()" ${state.isQueryingNutrition?'disabled':''}>
+                  ${state.isQueryingNutrition ? '<span class="loading-spinner" style="width:14px;height:14px;border-width:2px;margin:0;"></span>查询中...' : '<i data-lucide="flame"></i>一键查询全部热量'}
+                </button>
+              </div>
               <button class="btn btn-primary btn-block" onclick="PageOrder.confirmAll()"><i data-lucide="check-circle"></i>全部确认并保存记录</button>
               <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:8px;">解析结果仅供参考，请逐项确认后保存</p>
             </div>
@@ -359,9 +371,46 @@ const PageOrder = (() => {
     records.push(record);
     AppState.setRecords(records);
     UI.toast(`已保存 ${state.candidates.length} 项记录`, 'success');
-    state = { step:'input', orderText:'', parsedText:'', extractedData:null, candidates:[], previewImage:null, compressedBase64:null, error:null };
+    state = { step:'input', orderText:'', parsedText:'', extractedData:null, candidates:[], previewImage:null, compressedBase64:null, error:null, nutritionCache:{}, isQueryingNutrition:false };
     App.navigate('#/history');
   }
 
-  return { render, handleImage, clearImage, startParseImage, startParseText, pasteAndParse, useManualInput, useLocalMatch, confirmItem, editItem, removeItem, confirmAll };
+  async function queryItemNutrition(index) {
+    const c = state.candidates[index];
+    if (!c || !c.name) return;
+    if (state.nutritionCache[c.name]) { UI.toast('该食物已查询过', 'info'); return; }
+    UI.toast(`正在查询「${c.name}」的营养信息...`, 'info');
+    const result = await Recognize.nutrition(c.name);
+    if (result.success && result.data) {
+      state.nutritionCache[c.name] = result.data;
+      App.rerender();
+      UI.toast(`查询成功：${c.name} ${result.data.calorie || result.data.protein_g*4+result.data.fat_g*9+result.data.carbs_g*4}kcal/100g`, 'success');
+    } else {
+      UI.toast(result.error || '查询失败', 'error');
+    }
+  }
+
+  async function queryAllNutrition() {
+    const toQuery = state.candidates.filter(c => c.name && !state.nutritionCache[c.name]);
+    if (toQuery.length === 0) { UI.toast('所有食物都已查询过', 'info'); return; }
+    state.isQueryingNutrition = true;
+    App.rerender();
+    let success = 0, fail = 0;
+    for (const c of toQuery) {
+      try {
+        const result = await Recognize.nutrition(c.name);
+        if (result.success && result.data) {
+          state.nutritionCache[c.name] = result.data;
+          success++;
+        } else {
+          fail++;
+        }
+      } catch(e) { fail++; }
+    }
+    state.isQueryingNutrition = false;
+    App.rerender();
+    UI.toast(`查询完成：成功${success}项，失败${fail}项`, success > 0 ? 'success' : 'error');
+  }
+
+  return { render, handleImage, clearImage, startParseImage, startParseText, pasteAndParse, useManualInput, useLocalMatch, confirmItem, editItem, removeItem, confirmAll, queryItemNutrition, queryAllNutrition };
 })();
