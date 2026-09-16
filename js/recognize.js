@@ -48,10 +48,14 @@ const Recognize = (() => {
       if (auth) headers.Authorization = auth;
       const resp = await fetch(url, { method: 'POST', signal: ctrl.signal, headers, body: JSON.stringify(payload) });
       clearTimeout(timer);
-      if (!resp.ok) return { ok: false, error: 'status ' + resp.status };
+      if (!resp.ok) {
+        let errDetail = '';
+        try { errDetail = await resp.text(); } catch(e) {}
+        return { ok: false, error: 'HTTP ' + resp.status + (errDetail ? ': ' + errDetail.substring(0, 100) : '') };
+      }
       const data = await resp.json();
       const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-      if (!text) return { ok: false, error: 'empty' };
+      if (!text) return { ok: false, error: 'empty response', raw: data };
       return { ok: true, text };
     } catch (err) {
       clearTimeout(timer);
@@ -62,12 +66,12 @@ const Recognize = (() => {
   async function _chat(messages, needJson, maxTokens) {
     const payload = {
       model: _engine(),
-      reasoning_effort: 'low',
       temperature: 0.15,
       messages,
       ...(needJson ? { response_format: { type: 'json_object' } } : {}),
       ...(maxTokens ? { max_tokens: maxTokens } : {})
     };
+    console.log('[Recognize] 请求参数:', { model: payload.model, max_tokens: payload.max_tokens, needJson });
     // 1. 本地/同源后端（凭据保存在服务端，最稳）
     for (const base of _backendBases()) {
       const r = await _post(base + '/api/recognize/chat', payload, null, 130000);
@@ -447,12 +451,26 @@ const Recognize = (() => {
         { type: 'text', text: _appUserPrompt() },
         { type: 'image_url', image_url: { url: dataUri } }
       ] }
-    ], true, 800);
-    if (!r.success) return { success: false, error: r.error || '识别服务暂不可用' };
+    ], true, 1500);
+    if (!r.success) {
+      console.error('[recognizeMeal] API 调用失败:', r.error);
+      return { success: false, error: r.error || '识别服务暂不可用' };
+    }
+    console.log('[recognizeMeal] 原始响应:', r.text.substring(0, 500));
     const raw = _extractJson(r.text);
-    if (!raw || !Array.isArray(raw.results)) return { success: false, error: '识别结果解析失败' };
+    if (!raw) {
+      console.error('[recognizeMeal] JSON 解析失败');
+      return { success: false, error: '识别结果解析失败，请重试' };
+    }
+    if (!Array.isArray(raw.results)) {
+      console.error('[recognizeMeal] results 不是数组, keys:', Object.keys(raw));
+      return { success: false, error: '识别结果格式错误，请重试' };
+    }
     const items = raw.results.filter(x => x && x.name).slice(0, 5).map(_rebuildAppItem);
-    if (items.length === 0) return { success: false, error: '未识别到食物' };
+    if (items.length === 0) {
+      console.error('[recognizeMeal] 没有识别到食物, raw.results:', raw.results);
+      return { success: false, error: '未识别到食物，请重新拍摄或手动输入' };
+    }
     const total_mass_g = items.reduce((a, b) => a + b.mass_g, 0);
     const total_kcal = items.reduce((a, b) => a + b.kcal, 0);
     const ref_object = items[0].ref_object || '';
